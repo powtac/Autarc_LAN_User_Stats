@@ -11,6 +11,8 @@
 #include <Ethernet.h>
 #include <utility/w5100.h>
 
+
+// Laut Bastian hier die Parameter anpassen für schnellere Ausführung des Pings!
 #define REQ_DATASIZE 32
 #define ICMP_ECHOREPLY 0
 #define ICMP_ECHOREQ 8
