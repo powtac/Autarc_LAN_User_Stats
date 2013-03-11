@@ -6,11 +6,24 @@
 #include "IPHelper.h"
 
 
+// See http://playground.arduino.cc/Main/Printf
+#include <stdarg.h>
+void p(char *fmt, ... ){
+        char tmp[128]; // resulting string limited to 128 chars
+        va_list args;
+        va_start (args, fmt );
+        vsnprintf(tmp, 128, fmt, args);
+        va_end (args);
+        Serial.print(tmp);
+}
+
 void printReadableIPAddress();
 
 SOCKET pingSocket = 0;
 char buffer [256];
 String str;  
+
+boolean firstrun = false;
 
 // please modify the following two lines. mac and ip have to be unique
 // in your local area network. You can not have the same numbers in
@@ -45,17 +58,19 @@ unsigned char buf[BUFFER_SIZE+1];
 
 uint16_t plen;
 
-// EtherShield es=EtherShield();
+  //ICMPPing ping(pingSocket);
 
-
-
-void readable_ip(int ip, const char* message) {
-  // const char readable_ip = ;
-  Serial.println(printf(message, int_to_readable_ip_string(ip)));
+void readable_ip(int ip, char* message) {
+  p(message, int_to_readable_ip_string(ip));
 }
 
-void readable_ip(byte* ip, const char* message) {
-  Serial.println(printf(message, byte_to_readable_ip_string(ip)));
+void readable_ip(byte* ip, char* message) {
+  String readable_ip_string = byte_to_readable_ip_string(ip);
+  char readable_ip[15]; 
+  
+  readable_ip_string.toCharArray(readable_ip, sizeof(readable_ip));
+  
+  p(message, readable_ip);
 }
 
 const char int_to_readable_ip_string(int ip) {
@@ -64,16 +79,17 @@ const char int_to_readable_ip_string(int ip) {
   bytes[1] = (ip >> 8) & 0xFF;
   bytes[2] = (ip >> 16) & 0xFF;
   bytes[3] = (ip >> 24) & 0xFF;
-  
+
   const char readable_ip = printf("%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
+  
+  Serial.println("HIER");
+  Serial.println(readable_ip);
+  delay(5000);
+  
   return readable_ip;
 }
 
-const char byte_to_readable_ip_string(byte* ip) {
-  
-  const char readable_ip = printf("%d.%d.%d.%d", ip[3], ip[2], ip[1], ip[0]);
-  return readable_ip;
-  /*
+String byte_to_readable_ip_string(byte* ip) {
   String ip_readable;
   for (byte thisByte = 0; thisByte < 4; thisByte++) {
     ip_readable.concat((ip[thisByte]));
@@ -81,15 +97,14 @@ const char byte_to_readable_ip_string(byte* ip) {
       ip_readable.concat(".");
     }
   }
-  return ip_readable;*/
+  
+  return ip_readable;
 }
 
 void setup() {
-
   Serial.begin(9600);
-
   Serial.println("Try to get IP address...");
-  
+
   Ethernet.begin(mac, ip_shield, gateway, subnet);
   
   /*
@@ -108,39 +123,32 @@ void setup() {
 
 
   readable_ip(addr, "The start address: %s");
-  /*
-  for (byte thisByte = 0; thisByte < 4; thisByte++) {
-    Serial.print(addr[thisByte], DEC);
-    Serial.print(".");
-  }*/
-  Serial.println();
+  Serial.println("\n");
 
   ICMPPing ping(pingSocket);
-  ping(4, known_client_ip, buffer);
+  ping(1, known_client_ip, buffer);
   Serial.print("Reference ping: ");
   Serial.println(buffer);
   delay(500);
   
-  /*
-  Serial.print("Testing known address");*/
   readable_ip(known_client_ip, "Testing known address %s"); 
 
-  // ICMPPing ping(pingSocket);
-  ping(4, addr, buffer);
-  str = (String) buffer;
-  Serial.println(buffer);  
-
-  Serial.print("Starting loop trough IP range");
+  ping(1, addr, buffer);
+  Serial.println((String) buffer);  
+  
+  Serial.println("\n");
+  Serial.println("\n");
+  Serial.println("Starting loop trough IP range");
+  Serial.println("\n");
+  
+  //
 }
 
-
+ICMPPing ping(pingSocket);
 void loop() {
 
-  i++;
-  ICMPPing ping(pingSocket);
-  // Serial.println(i);
+  i++;  
   if (i < 255) {
-    
     addr[3] = (byte)(addr[3] + 1);
     if (addr[3] == 0) {
       addr[2] = (byte)(addr[2] + 1);
@@ -153,43 +161,28 @@ void loop() {
     }
 
 
-    /*
-    Serial.print("End IP: ");
-    for (byte thisByte = 0; thisByte < 4; thisByte++) {
-      // print the value of each byte of the IP address:
-      Serial.print(scan_end_ip[thisByte], DEC);
-      Serial.print(".");
-    }
-    */
-    
-    
-    ping(4, addr, buffer);
-    
+    Serial.println("\n");
 
-    
-    str = (String) buffer;
-    
-    Serial.println(buffer);
-    
-    if (str.indexOf("Timed Out:") == 0) {
-      Serial.println(buffer);
-    } else {
-      
-      /*
-      Serial.print("No (pingable) device on IP: ");*/
-      readable_ip(addr, "No (pingable) device on IP: %s");
-      /*
-      for (byte thisByte = 0; thisByte < 4; thisByte++) {
-        // print the value of each byte of the IP address:
-        Serial.print(addr[thisByte], DEC);
-        Serial.print(".");
-      }*/
-      Serial.println();
+    // Todo check for more known IPs (gateway, ...)
+    if (byte_to_readable_ip_string(addr) == byte_to_readable_ip_string(ip_shield)) {
+      readable_ip(addr, "Ignoring %s, it's my own IP.");
+      return; // "continue" for the main loop()
     }
     
-    // delay(500);
-  } else {
+    ping(1, addr, buffer);
     
+    String ping_result = buffer;
+    Serial.println(ping_result);
+    
+    if (ping_result.indexOf("Timed Out") == -1) {
+      readable_ip(addr, "Device found on: %s");
+    } else {
+      readable_ip(addr, "No (pingable) device on IP: %s");
+    }
+    
+  } else {
+    Serial.println("Restart from .0");
+    i = 0;
   }
 }
 
