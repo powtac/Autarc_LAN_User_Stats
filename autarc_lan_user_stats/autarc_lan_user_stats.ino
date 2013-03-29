@@ -29,10 +29,8 @@ int i                         = 0;
 SOCKET pingSocket             = 0;
 char buffer [256];
 
-// #define BUFFER_SIZE 250
-// unsigned char buf[BUFFER_SIZE+1];
-
-
+// Global namespace to use it in setup() and loop()
+ICMPPing ping(pingSocket);
 
 void setup() {
   Serial.begin(9600);
@@ -62,11 +60,9 @@ void setup() {
   
   
   // Testing known address
-  ICMPPing ping(pingSocket);
   ping(1, ip_known_client, buffer);
   Serial.println(buffer);
   readable_ip(ip_known_client, "Testing known address %s"); 
-
 
 
   // Pinging first address of address range
@@ -81,7 +77,8 @@ void setup() {
   Serial.println("\n");
 }
 
-ICMPPing ping(pingSocket);
+
+
 void loop() {
   
   i++;  
