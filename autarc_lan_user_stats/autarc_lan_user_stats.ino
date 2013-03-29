@@ -150,6 +150,7 @@ void loop() {
   i++;  
   if (i < 255) {
     addr[3] = (byte)(addr[3] + 1);
+    /*
     if (addr[3] == 0) {
       addr[2] = (byte)(addr[2] + 1);
       if (addr[2] == 0) {
@@ -158,7 +159,7 @@ void loop() {
           addr[0] = (byte)(addr[0] + 1);
         }
       }
-    }
+    }*/
 
 
     Serial.println("\n");
@@ -181,7 +182,7 @@ void loop() {
     }
     
   } else {
-    Serial.println("Restart from .0");
+    Serial.println("\nRestart from .0");
     i = 0;
   }
 }
