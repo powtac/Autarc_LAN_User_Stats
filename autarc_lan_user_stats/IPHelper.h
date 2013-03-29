@@ -56,7 +56,8 @@ void readable_ip(byte* ip, char* message) {
   p(message, readable_ip);
 }
 
-
+// Required?
+/*
 void printReadableIPAddress() {
   Serial.begin(9600);
   Serial.print("IP address: ");
@@ -65,4 +66,15 @@ void printReadableIPAddress() {
     Serial.print(Ethernet.localIP()[thisByte], DEC);
     Serial.print("."); 
   }
+}
+*/
+
+void readable_mac(byte* mac, char* message) {
+  char mac_string[18];
+  snprintf(mac_string, 18, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]); 
+  p(message, mac_string);
+}
+
+void send_info_to_server(String info) {
+  
 }
