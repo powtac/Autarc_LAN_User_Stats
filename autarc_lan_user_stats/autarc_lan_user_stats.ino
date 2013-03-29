@@ -18,8 +18,9 @@ byte subnet[]                 = { 255, 255, 0, 0 };
 byte ip_known_client[4]       = { 10, 0, 1, 3 };
 byte ip_scan_start[4]         = { 10, 0, 1, 0 };
 byte ip_scan_end[4]           = { 10, 0, 1, 255 };
-byte * ip_to_scan             = { ip_scan_start };
+byte ip_to_scan[4]            = { ip_scan_start[0], ip_scan_start[1], ip_scan_start[2], ip_scan_start[3] };
 
+byte ip_found_clients[255][4];
 
 // Counter for the loop
 int i                         = 0;
@@ -38,7 +39,7 @@ void setup() {
   
   // Setup Start
   Serial.println("Try to get IP address from network...");
-
+  readable_mac(mac_shield, "MAC address of shield: %s\n");
   Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
   
   /*
@@ -80,8 +81,9 @@ void setup() {
 
 
 void loop() {
-  
-  i++;  
+  Serial.println("\n");
+  readable_ip(ip_to_scan, "IP before upcounting: %s\n");
+  i++;
   if (i < 255) {
     ip_to_scan[3] = (byte)(ip_to_scan[3] + 1);
     /*
@@ -94,6 +96,7 @@ void loop() {
         }
       }
     }*/
+    readable_ip(ip_to_scan, "IP after upcounting: %s\n");
 
 
     Serial.println("\n");
@@ -110,6 +113,15 @@ void loop() {
     Serial.println(ping_result);
     
     if (ping_result.indexOf("Timed Out") == -1) {
+      // We found a device!
+      
+      // readable_ip(ip_found_clients[0], "%s");
+      // ip_found_clients[1][4] = 10, 0, 1, 3;
+      // readable_ip(ip_found_clients[0], "%s"); 
+      
+      // ip_found_clients[+1] = { 10, 0, 1, 3 };
+      
+      
       readable_ip(ip_to_scan, "Device found on: %s");
     } else {
       readable_ip(ip_to_scan, "No (pingable) device on IP: %s");
