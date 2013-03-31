@@ -40,16 +40,16 @@ void setup() {
   readable_mac(mac_shield, " MAC address of shield: %s\n");
   Ethernet.begin(mac_shield, ip_shield.ipadress, gateway.ipadress, subnet.ipadress);
   
-  /*
+  
   // Setup when no IP is known
-  if (Ethernet.begin(mac_shield, ip_shield, gateway, subnet) == 0) {
+  if (Ethernet.begin(mac_shield) == 0) {
     Serial.println("DHCP failed, no automatic IP address assigned!");
     Serial.println("Time for waiting for IP address: "+millis());
     Serial.println("Trying to set manual IP address: 10.0.1.10...");
     static uint8_t ip[4]    = { 10, 0, 1, 13 };
     Ethernet.begin(mac_shield, ip);
   }
-  */
+  
 
   Serial.println(" Address assigned?");
   Serial.print(" ");
