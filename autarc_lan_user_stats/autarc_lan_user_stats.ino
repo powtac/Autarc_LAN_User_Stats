@@ -3,28 +3,27 @@
 #include <Ethernet.h> 
 #include "ICMPPing.h"
 #include "IPHelper.h"
-
+#include "Array.h"
 
 
 // Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
 static uint8_t mac_shield[6]  = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-byte ip_shield[]              = { 10, 0, 1, 13 };    
-byte gateway[]                = { 10, 0, 0, 1 };
-byte subnet[]                 = { 255, 255, 0, 0 };
-
+IPAdress ip_shield              = {{ 192, 168, 1, 30 }};    
+IPAdress gateway                = {{ 192, 168, 1, 1 }};
+IPAdress subnet                 = {{ 255, 255, 0, 0 }};
 
 // IP configuration of known IPs
-byte ip_known_client[4]       = { 10, 0, 1, 3 };
-byte ip_scan_start[4]         = { 10, 0, 1, 0 };
-byte ip_scan_end[4]           = { 10, 0, 1, 255 };
-byte ip_to_scan[4]            = { ip_scan_start[0], ip_scan_start[1], ip_scan_start[2], ip_scan_start[3] };
+IPAdress ip_known_client       = {{ 192, 168, 1, 2  }};
+IPAdress ip_scan_start         = {{ 192, 168, 1, 0 }};
+IPAdress ip_scan_end           = {{ 192, 168, 1, 255 }};
+IPAdress ip_to_scan            = ip_scan_start;
 
-byte ip_found_clients[255][4];
+// IPAdresses ip_found_clients;
+IPAdresses ip_found_clients;
 
 // Counter for the loop
 int i                         = 0;
-
 
 // Ping library configuration
 SOCKET pingSocket             = 0;
@@ -36,11 +35,10 @@ ICMPPing ping(pingSocket);
 void setup() {
   Serial.begin(9600);
   
-  
   // Setup Start
   Serial.println("Try to get IP address from network...");
-  readable_mac(mac_shield, "MAC address of shield: %s\n");
-  Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
+  readable_mac(mac_shield, " MAC address of shield: %s\n");
+  Ethernet.begin(mac_shield, ip_shield.ipadress, gateway.ipadress, subnet.ipadress);
   
   /*
   // Setup when no IP is known
@@ -53,39 +51,41 @@ void setup() {
   }
   */
 
-  Serial.println("Address assigned?");
+  Serial.println(" Address assigned?");
+  Serial.print(" ");
   Serial.println(Ethernet.localIP());
-  Serial.println("Setup complete\n");
+  Serial.println(" Setup complete\n");
   // Setup End
   
   
   
   // Testing known address
-  ping(1, ip_known_client, buffer);
+  ping(1, ip_known_client.ipadress, buffer);
   Serial.println(buffer);
-  readable_ip(ip_known_client, "Testing known address %s"); 
+  readable_ip(ip_known_client.ipadress, "Testing known address %s"); 
 
 
   // Pinging first address of address range
-  ping(1, ip_scan_start, buffer);
+  ping(1, ip_scan_start.ipadress, buffer);
   Serial.println((String) buffer);
-  readable_ip(ip_known_client, "Testing first address %s of address range"); 
+  readable_ip(ip_known_client.ipadress, "Testing first address %s of address range"); 
   
   
-  Serial.println("\n");
   Serial.println("\n");
   Serial.println("Starting loop trough IP range");
-  Serial.println("\n");
+  
+  // Adding Known Ip to known IPs
+  insertArray(&ip_found_clients, ip_known_client);  
+  
 }
 
 
 
 void loop() {
-  Serial.println("\n");
-  readable_ip(ip_to_scan, "IP before upcounting: %s\n");
+  // readable_ip(ip_to_scan, "IP before upcounting: %s\n");
   i++;
   if (i < 255) {
-    ip_to_scan[3] = (byte)(ip_to_scan[3] + 1);
+    ip_to_scan.ipadress[3] = (byte)(ip_to_scan.ipadress[3] + 1);
     /*
     if (ip_to_scan[3] == 0) {
       ip_to_scan[2] = (byte)(ip_to_scan[2] + 1);
@@ -96,35 +96,33 @@ void loop() {
         }
       }
     }*/
-    readable_ip(ip_to_scan, "IP after upcounting: %s\n");
+    //readable_ip(ip_to_scan, "IP after upcounting: %s\n");
 
 
     Serial.println("\n");
 
     // Todo check for more known IPs (gateway, ...)
-    if (byte_to_readable_ip_string(ip_to_scan) == byte_to_readable_ip_string(ip_shield)) {
-      readable_ip(ip_to_scan, "Ignoring %s, it's my own IP.");
+    if (byte_to_readable_ip_string(ip_to_scan.ipadress) == byte_to_readable_ip_string(ip_shield.ipadress)) {
+      readable_ip(ip_to_scan.ipadress, "Ignoring %s, it's my own IP.");
       return; // "continue" for the main loop()
     }
     
-    ping(1, ip_to_scan, buffer);
+    ping(1, ip_to_scan.ipadress, buffer);
     
     String ping_result = buffer;
-    Serial.println(ping_result);
+    //Serial.println(ping_result);
     
     if (ping_result.indexOf("Timed Out") == -1) {
       // We found a device!
-      
-      // readable_ip(ip_found_clients[0], "%s");
-      // ip_found_clients[1][4] = 10, 0, 1, 3;
-      // readable_ip(ip_found_clients[0], "%s"); 
-      
-      // ip_found_clients[+1] = { 10, 0, 1, 3 };
+      insertArray(&ip_found_clients, ip_to_scan);  
+      readable_ip(ip_found_clients.array[ip_found_clients.used-1].ipadress, "Device found on: %s");
+      remove_element(&ip_found_clients, 0);
       
       
-      readable_ip(ip_to_scan, "Device found on: %s");
+      
     } else {
-      readable_ip(ip_to_scan, "No (pingable) device on IP: %s");
+      // It's not responding, next one
+      readable_ip(ip_to_scan.ipadress, "No (pingable) device on IP: %s");
     }
     
   } else {
@@ -132,7 +130,6 @@ void loop() {
     i = 0;
   }
 }
-
 
 
 

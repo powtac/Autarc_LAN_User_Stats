@@ -16,7 +16,7 @@
 #define REQ_DATASIZE 32
 #define ICMP_ECHOREPLY 0
 #define ICMP_ECHOREQ 8
-#define PING_TIMEOUT 150
+#define PING_TIMEOUT 1
 
 typedef unsigned long time_t;
 
