@@ -1,4 +1,3 @@
-
 #include <SPI.h>
 #include <Ethernet.h> 
 #include "ICMPPing.h"
@@ -38,7 +37,8 @@ void setup() {
   // Setup Start
   Serial.println("Try to get IP address from network...");
   readable_mac(mac_shield, " MAC address of shield: %s\n");
-  Ethernet.begin(mac_shield, ip_shield.ipadress, gateway.ipadress, subnet.ipadress);
+  // Ohne DHCP:
+  //Ethernet.begin(mac_shield, ip_shield.ipadress, gateway.ipadress, subnet.ipadress);
   
   
   // Setup when no IP is known
