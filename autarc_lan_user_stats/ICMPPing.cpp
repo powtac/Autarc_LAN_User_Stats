@@ -111,6 +111,19 @@ uint8_t ICMPPing::receiveEchoReply(byte * addr, uint8_t& TTL, time_t& time)
 	uint8_t header [6];
 	uint8_t buffer = W5100.readSnRX_RD(socket);
 	W5100.read_data(socket, (uint8_t *)buffer, header, sizeof(header));
+	
+	// Prints Mac of replaying device
+	// Found on http://mbed.org/users/va009039/code/WIZ820ioNetIf/diff/22b9052d864d/MyNetUdpSocket.cpp #103
+        uint8_t mac[6];
+        W5100.readSnDHAR(socket, mac);
+        Serial.println(mac[0], HEX);
+        Serial.println(mac[1], HEX);
+        Serial.println(mac[2], HEX);
+        Serial.println(mac[3], HEX);
+        Serial.println(mac[4], HEX);
+        Serial.println(mac[5], HEX);
+        // Prints Mac of replaying device
+	
 	buffer += sizeof(header);
 	for (int i=0; i<4; ++i) addr[i] = header[i];
 	uint8_t dataLen = header[4];
