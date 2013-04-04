@@ -1,6 +1,7 @@
 // Struktur bildet eine IP-Adresse, wird für den Array der Known IPs gebraucht
 typedef struct {
-  byte ipadress[4]; 
+  byte ipadress[4];
+  String mac;
 } IPAdress;
 
 IPAdress convertByteToIp(byte iparray[4]) {
@@ -9,6 +10,7 @@ IPAdress convertByteToIp(byte iparray[4]) {
    IP.ipadress[1] = iparray[1];
    IP.ipadress[2] = iparray[2];
    IP.ipadress[3] = iparray[3];
+   IP.mac = "";
    return IP;
 }  
 
@@ -40,15 +42,28 @@ void freeArray(IPAdresses *a) {
 }
 
 void remove_element(IPAdresses *a, int indexToRemove) {
-    
-    IPAdresses temp; // allocate an array with a size 1 less than the current one
-    initArray(&temp, a->used);
-    for (int i = 0; i < a->used; ++i) {
-      if (i != indexToRemove)
-        insertArray(&temp, a->array[i]);
+    if (a->used == 1 && indexToRemove == 0) {
+      a->array = NULL;
+      a->used = a->size = 0;
+    } else {
+      IPAdresses temp; // allocate an array with a size 1 less than the current one
+      initArray(&temp, a->used);
+      for (int i = 0; i < a->used; ++i) {
+        if (i != indexToRemove)
+          insertArray(&temp, a->array[i]);
+      }
+      freeArray(a);
+      memcpy(a, &temp, sizeof(temp));
     }
-    freeArray(a);
-    memcpy(a, &temp, sizeof(temp));
 }
 
+/*
+int indexOf(IPAdresses *a, IPAdress element) {
+  for (int i = 0; i < a->used; ++i) {
+    if (memcmp(element.ipadress, a->array[i].ipadress, sizeof(element.ipadress)) == 0) 
+      return i; // found on position i
+  }
+  return -1; // not found
+}
+*/
 

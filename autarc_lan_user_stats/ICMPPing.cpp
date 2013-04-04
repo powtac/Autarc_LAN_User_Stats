@@ -56,10 +56,11 @@ bool ICMPPing::operator()(int nRetries, byte * addr, char * result)
 		{
 			uint8_t TTL;
 			byte replyAddr [4];
+                        uint8_t mac [6];
 			time_t timeSent;
-			receiveEchoReply(replyAddr, TTL, timeSent);
+			receiveEchoReply(replyAddr, mac, TTL, timeSent);
 			time_t time = millis() - timeSent;
-			sprintf(result, "Reply[%d] from: %d.%d.%d.%d: bytes=%d time=%ldms TTL=%d", i + 1, replyAddr[0], replyAddr[1], replyAddr[2], replyAddr[3], REQ_DATASIZE, time, TTL);
+			sprintf(result, "%02x:%02x:%02x:%02x:%02x:%02xReply[%d] from: %d.%d.%d.%d: bytes=%d time=%ldms TTL=%d", mac[0], mac[1], mac[2], mac[3],mac[4], mac[5], i + 1,replyAddr[0], replyAddr[1], replyAddr[2], replyAddr[3], REQ_DATASIZE, time, TTL);
 			rval = true;
 			break;
 		}
@@ -104,13 +105,21 @@ size_t ICMPPing::sendEchoRequest(byte * addr)
 	return sizeof(EchoRequest);
 }
 
-uint8_t ICMPPing::receiveEchoReply(byte * addr, uint8_t& TTL, time_t& time)
+uint8_t ICMPPing::receiveEchoReply(byte * addr, uint8_t * macaddr, uint8_t& TTL, time_t& time)
 {
 	EchoReply echoReply;
 	uint16_t port = 0;
 	uint8_t header [6];
 	uint8_t buffer = W5100.readSnRX_RD(socket);
 	W5100.read_data(socket, (uint8_t *)buffer, header, sizeof(header));
+	
+	// Prints Mac of replaying device
+	// Found on http://mbed.org/users/va009039/code/WIZ820ioNetIf/diff/22b9052d864d/MyNetUdpSocket.cpp #103
+        uint8_t mac[6];
+        W5100.readSnDHAR(socket, mac);
+        for (int i=0; i<6; ++i) macaddr[i] = mac[i];
+        // Prints Mac of replaying device
+	
 	buffer += sizeof(header);
 	for (int i=0; i<4; ++i) addr[i] = header[i];
 	uint8_t dataLen = header[4];
@@ -145,3 +154,4 @@ template <int dataSize>
 ICMPMessage<dataSize>::ICMPMessage()
 : icmpHeader()
 {}
+

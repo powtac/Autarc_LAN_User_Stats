@@ -33,7 +33,7 @@ public:
 private:
 	bool waitForEchoReply(); // wait for a response
 	size_t sendEchoRequest(byte * addr); // send an ICMP echo request
-	uint8_t receiveEchoReply(byte * addr, uint8_t& TTL, time_t& time); // read a respone
+	uint8_t receiveEchoReply(byte * addr, uint8_t * macaddr, uint8_t& TTL, time_t& time); // read a respone
 	SOCKET socket; // socket number to send ping
 };
 
@@ -85,3 +85,5 @@ typedef ICMPMessage<REQ_DATASIZE> EchoRequest;
 typedef ICMPMessage<REQ_DATASIZE> EchoReply;
 
 #pragma pack(1)
+
+

@@ -1,4 +1,3 @@
-
 // Some helpers for TCP/IP stuff
 
 // See http://playground.arduino.cc/Main/Printf
@@ -78,3 +77,4 @@ void readable_mac(byte* mac, char* message) {
 void send_info_to_server(String info) {
   
 }
+
