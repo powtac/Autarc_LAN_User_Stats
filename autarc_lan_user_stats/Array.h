@@ -12,7 +12,7 @@ IPAdress convertByteToIp(byte iparray[4]) {
    IP.ipadress[3] = iparray[3];
    IP.mac = "";
    return IP;
-}  
+}
 
 // Struktur ist ein Dynamisches Array mit IPAdressen
 typedef struct {
