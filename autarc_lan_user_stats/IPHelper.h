@@ -74,6 +74,10 @@ void readable_mac(byte* mac, char* message) {
   p(message, mac_string);
 }
 
+void readable_mac(String mac, char* message) {
+  p(message, mac);
+}
+
 void send_info_to_server(String info) {
   
 }
