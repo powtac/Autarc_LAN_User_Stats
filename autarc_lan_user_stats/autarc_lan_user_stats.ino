@@ -119,8 +119,8 @@ void loop() {
       // We found a device!
       //ip_possible_devices.array[k].mac = ping_result.substring(0, 18);
       insertArray(&ip_found_devices, ip_possible_devices.array[i]);  
-      // remove_element(&ip_possible_devices, i);
-      
+      remove_element(&ip_possible_devices, i);
+      i--;
       readable_ip(currIp, "Device found on: %s\n");
       //readable_mac(ip_possible_devices.array[k].mac, "The MAC address of the found device %s\n");
     } else {
@@ -142,6 +142,7 @@ void loop() {
           // We couldn't find IP Anymore, add it to possible ips and remove it from found ips
           insertArray(&ip_possible_devices, ip_found_devices.array[k]);
           remove_element(&ip_found_devices, k);
+          k--;
           readable_ip(currIp, "Device lost on: %s");
         } else {
           readable_ip(currIp, "Device still online: %s");

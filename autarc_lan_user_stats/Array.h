@@ -66,4 +66,3 @@ int indexOf(IPAdresses *a, IPAdress element) {
   return -1; // not found
 }
 */
-
