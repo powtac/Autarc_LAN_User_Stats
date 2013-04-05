@@ -11,14 +11,14 @@ boolean useDhcp                    = false; // Using DHCP? If no please set ip_s
 
 // Heidelberg
 /*static uint8_t mac_shield[6]  = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-IPAdress ip_shield            = {{ 10, 0, 1, 13 }, ""};    
-IPAdress gateway              = {{ 10, 0, 1, 1 }, ""};
-byte subnet               = {{ 255, 255, 0, 0 }, ""};
+byte ip_shield[4]            = { 10, 0, 1, 13 };    
+byte gateway[4]              = { 10, 0, 1, 1 };
+byte subnet[4]               = { 255, 255, 0, 0 };
 
 // IP configuration of known IPs
-byte ip_known_device      = {{ 10, 0, 1, 2  }, ""};
-byte ip_scan_start        = {{ 10, 0, 1, 0 }, ""};
-byte ip_scan_end          = {{ 10, 0, 1, 255 }, ""};*/
+byte ip_known_device[4]      = { 10, 0, 1, 2  };
+byte ip_scan_start[4]        = { 10, 0, 1, 0 };
+byte ip_scan_end[4]          = { 10, 0, 1, 255 };*/
 
 
 // Esslingen
