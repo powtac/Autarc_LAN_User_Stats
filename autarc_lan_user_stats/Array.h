@@ -1,18 +1,18 @@
 // Struktur bildet eine IP-Adresse, wird für den Array der Known IPs gebraucht
 typedef struct {
-  byte ipadress[4];
-  String mac;
+  byte ipadress;
+  //String mac;
 } IPAdress;
 
-IPAdress convertByteToIp(byte iparray[4]) {
+/*IPAdress convertByteToIp(byte iparray[4]) {
    IPAdress IP;
    IP.ipadress[0] = iparray[0];
    IP.ipadress[1] = iparray[1];
    IP.ipadress[2] = iparray[2];
    IP.ipadress[3] = iparray[3];
-   IP.mac = "";
+   //IP.mac = "";
    return IP;
-}
+}*/
 
 // Struktur ist ein Dynamisches Array mit IPAdressen
 typedef struct {
