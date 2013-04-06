@@ -7,44 +7,43 @@
 
 // Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
-boolean useDhcp                    = false; // Using DHCP? If no please set ip_shield, gateway and subnet below
+boolean useDhcp                = false; // Using DHCP? If no please set ip_shield, gateway and subnet below
 
 // Heidelberg
-/*static uint8_t mac_shield[6]  = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-byte ip_shield[4]            = { 10, 0, 1, 13 };    
-byte gateway[4]              = { 10, 0, 1, 1 };
-byte subnet[4]               = { 255, 255, 0, 0 };
+static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+byte ip_shield[4]              = { 10, 0, 1, 13 };    
+byte gateway[4]                = { 10, 0, 1, 1 };
+byte subnet[4]                 = { 255, 255, 0, 0 };
 
 // IP configuration of known IPs
-byte ip_known_device[4]      = { 10, 0, 1, 2  };
-byte ip_scan_start[4]        = { 10, 0, 1, 0 };
-byte ip_scan_end[4]          = { 10, 0, 1, 255 };*/
-
+byte ip_known_device[4]        = { 10, 0, 1, 2  };
+byte ip_scan_start[4]          = { 10, 0, 1, 0 };
+byte ip_scan_end[4]            = { 10, 0, 1, 255 };
 
 // Esslingen
-static uint8_t mac_shield[6]  = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
 byte ip_shield[4]              = { 192, 168, 1, 30 };    
 byte gateway[4]                = { 192, 168, 1, 1 };
 byte subnet[4]                 = { 255, 255, 0, 0 };
     
 // IP configuration of known IPs
-byte ip_known_device[4]      = { 192, 168, 1, 2  };
-byte ip_scan_start[4]        = { 192, 168, 1, 0 };
-byte ip_scan_end[4]         = { 192, 168, 1, 255 };
+byte ip_known_device[4]        = { 192, 168, 1, 2  };
+byte ip_scan_start[4]          = { 192, 168, 1, 0 };
+byte ip_scan_end[4]            = { 192, 168, 1, 255 };
 
 
-byte ip_to_scan[4]           = { 192, 168, 1, 0 }; 
+byte ip_to_scan[4]             = { 192, 168, 1, 0 }; 
 
 // Arrays for found and possible devices
 IPAdresses ip_found_devices;
 IPAdresses ip_possible_devices;
 
 // Counter for the loop
-int i                           = 0;
-int k                           = 0;
+int i                          = 0;
+int k                          = 0;
 
 // Ping library configuration
-SOCKET pingSocket               = 0;
+SOCKET pingSocket              = 0;
 char buffer [256];
 
 // Global namespace to use it in setup() and loop()
@@ -88,7 +87,7 @@ void setup() {
   initArray(&ip_possible_devices, 0);
   
   
-// TODO get actual IP range from DHCP
+  // TODO get actual IP range from DHCP
   // TODO fix bug here somewhere
   for (int c = 0; c < 255; ++c) {
     ip_scan_start[3] = (byte)ip_scan_start[3] + 1;
