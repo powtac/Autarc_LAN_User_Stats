@@ -36,9 +36,9 @@ void readable_ip(int ip, char* message) {
 
 String byte_to_readable_ip_string(byte* ip) {
   String ip_readable;
-  for (byte thisByte = 0; thisByte < 4; thisByte++) {
-    ip_readable.concat((ip[thisByte]));
-    if (thisByte != 3) {
+  for (byte i = 0; i < 4; i++) {
+    ip_readable.concat(ip[i]);
+    if (i != 3) {
       ip_readable.concat(".");
     }
   }
@@ -79,7 +79,49 @@ void readable_mac(String mac, char* message) {
 }
 
 void send_info_to_server(String info) {
-  
+  /*
+      EthernetClient client;
+      IPAddress server(85, 10, 211, 16); // kolchose.org 
+      
+      int ret = client.connect("kolchose.org", 80);
+      if (ret == 1) {
+        Serial.println("Connected to HTTP Server");
+
+        // Make a HTTP request:
+        client.print("GET /autarc_lan_user_stats/");
+        client.print("?found_ips=");  
+        
+        int j = 0;
+        if (j < ip_found_devices.used) {
+          String ip_readable;
+          for (byte i = 0; i < 4; i++) {
+            ip_readable.concat(ip_found_devices.array[j].ipadress);
+            if (i != 3) {
+              ip_readable.concat(".");
+            }
+          }
+          Serial.println(ip_readable);
+        
+          client.print(ip_readable);
+          client.print("&");
+          j++;
+        }
+        
+        
+        client.println(" HTTP/1.0");
+        
+        client.println("Host: kolchose.org");           // Important! TODO check if this is required and dynamically asignable
+        client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!
+        client.println();                               // Important!
+        
+      
+      Serial.println(client.status());
+      client.stop();
+
+
+      } 
+      
+      */
 }
 
 
