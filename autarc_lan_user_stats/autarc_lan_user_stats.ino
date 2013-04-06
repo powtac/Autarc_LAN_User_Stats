@@ -20,6 +20,7 @@ byte ip_known_device[4]        = { 10, 0, 1, 2  };
 byte ip_scan_start[4]          = { 10, 0, 1, 0 };
 byte ip_scan_end[4]            = { 10, 0, 1, 255 };
 
+/*
 // Esslingen
 static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
 byte ip_shield[4]              = { 192, 168, 1, 30 };    
@@ -30,9 +31,9 @@ byte subnet[4]                 = { 255, 255, 0, 0 };
 byte ip_known_device[4]        = { 192, 168, 1, 2  };
 byte ip_scan_start[4]          = { 192, 168, 1, 0 };
 byte ip_scan_end[4]            = { 192, 168, 1, 255 };
+*/
 
-
-byte ip_to_scan[4]             = { 192, 168, 1, 0 }; 
+byte* ip_to_scan               = ip_scan_start; 
 
 // Arrays for found and possible devices
 IPAdresses ip_found_devices;
@@ -92,10 +93,10 @@ void setup() {
   for (int c = 0; c < 255; ++c) {
     ip_scan_start[3] = (byte)ip_scan_start[3] + 1;
     // Code um IPs auszulassen wird später wieder eingeführt
-    //if (memcmp(ip_scan_start, ip_shield,       sizeof(ip_scan_start)) != 0 || // Ip
-     //  memcmp(ip_scan_start, ip_known_device, sizeof(ip_scan_start)) != 0) {
-        IPAdress xy = {ip_scan_start[3]};
-        insertArray(&ip_possible_devices, xy);
+    // if (memcmp(ip_scan_start, ip_shield,       sizeof(ip_scan_start)) != 0 || // Ip
+    //  memcmp(ip_scan_start, ip_known_device, sizeof(ip_scan_start)) != 0) {
+    IPAdress xy = {ip_scan_start[3]};
+    insertArray(&ip_possible_devices, xy);
     //}
   }
   
@@ -116,12 +117,12 @@ void loop() {
     
     if (ping_result.indexOf("Timed Out") == -1) {
       // We found a device!
-      //ip_possible_devices.array[k].mac = ping_result.substring(0, 18);
+      // ip_possible_devices.array[k].mac = ping_result.substring(0, 18);
       insertArray(&ip_found_devices, ip_possible_devices.array[i]);  
       remove_element(&ip_possible_devices, i);
       i--;
       readable_ip(currIp, "Device found on: %s\n");
-      //readable_mac(ip_possible_devices.array[k].mac, "The MAC address of the found device %s\n");
+      // readable_mac(ip_possible_devices.array[k].mac, "The MAC address of the found device %s\n");
     } else {
       // It's not responding, next one
       readable_ip(currIp, "No (pingable) device on IP: %s\n");
