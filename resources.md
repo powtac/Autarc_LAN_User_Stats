@@ -10,6 +10,8 @@ Multi Threading in Arduino
 Ethernet Library Problems
  - http://arduino.cc/forum/index.php/topic,28084.0.html
  - https://github.com/arduino/Arduino/issues/569
+ - http://electronics.stackexchange.com/q/67212/3130
+ - http://electronics.stackexchange.com/q/67045/3130
 
 Ethernet & ARP
  - http://arduino.cc/forum/index.php?topic=74547.0
