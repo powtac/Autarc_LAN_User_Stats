@@ -1,4 +1,4 @@
-Etherenet Shield Tutorials and Tipps
+Ethernet Shield Tutorials and Tipps
  - http://www.ladyada.net/wiki/tutorials/learn/arduino/ethfiles.html
   
 Auto setup Ethernet Shield
