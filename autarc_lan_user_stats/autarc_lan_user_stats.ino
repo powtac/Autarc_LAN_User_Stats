@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Ethernet.h> 
+// See https://github.com/BlakeFoster/Arduino-Ping/
 #include "ICMPPing.h"
 #include "IPHelper.h"
 #include "Array.h"
@@ -52,7 +53,8 @@ char ping_buffer [256];
 // IPAddress server(85,10,211,16); // kolchose.org
 
 // Global namespace to use it in setup() and loop()
-ICMPPing ping(pingSocket);
+// ICMPPing ping(pingSocket);
+ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
 
 
@@ -86,8 +88,10 @@ void setup() {
 
 
   // Testing known address
-  ping(1, ip_known_device, ping_buffer);
-  Serial.println(ping_buffer);
+  ICMPEchoReply echoReply = ping(ip_known_device, 4);  
+  // ping(1, ip_known_device, ping_buffer);
+  
+  // Serial.println(ping_buffer);
   readable_ip(ip_known_device, "Testing known address %s\n"); 
   
     
@@ -131,7 +135,7 @@ void setup() {
   client.stop();
   */
 
-  Serial.println("\nStarting loop trough IP range\n");
+  Serial.println("\nStarting loop trough IP range...\n");
 }
 
 
@@ -142,10 +146,14 @@ void loop() {
   if (i < ip_possible_devices.used) {
     
     currIp[3] = ip_possible_devices.array[i].ipadress; 
-    ping(1, currIp, ping_buffer);
-    String ping_result = ping_buffer;
     
-    if (ping_result.indexOf("Timed Out") == -1) {
+    ICMPEchoReply echoReply = ping(currIp, 4);
+    
+    // ping(1, currIp, ping_buffer);
+    // String ping_result = ping_buffer;
+    
+    // if (ping_result.indexOf("Timed Out") == -1) {
+    if (echoReply.status == SUCCESS) {
       // We found a device!
       // ip_possible_devices.array[k].mac = ping_result.substring(0, 18);
       insertArray(&ip_found_devices, ip_possible_devices.array[i]);  
@@ -157,18 +165,23 @@ void loop() {
       // It's not responding, next one
       readable_ip(currIp, "No (pingable) device on IP: %s\n");
     }
-    i++;  // Der läuft einmal zu viel durch oben..
+    i++;  // Der läuft einmal zu viel durch oben.
   } else {
     
-    if (k == 0) Serial.println("Check found IPs");
+    if (k == 0) Serial.println("\nCheck found IPs...");
     if (k < ip_found_devices.used) {
       
         // Todo check for more known IPs (gateway, ...)
         currIp[3] = ip_found_devices.array[k].ipadress; 
-        ping(1, currIp, ping_buffer);
-        String ping_result = ping_buffer;
         
-        if (ping_result.indexOf("Timed Out") != -1) {
+        // ping(1, currIp, ping_buffer);
+        
+        ICMPEchoReply echoReply = ping(currIp, 4);
+        
+        // String ping_result = ping_buffer;
+        
+        // if (ping_result.indexOf("Timed Out") != -1) {
+        if (echoReply.status == SUCCESS) {
           // We couldn't find IP Anymore, add it to possible ips and remove it from found ips
           insertArray(&ip_possible_devices, ip_found_devices.array[k]);
           remove_element(&ip_found_devices, k);
@@ -183,7 +196,7 @@ void loop() {
       
       // send_info_to_server("IPs gefunden");
       
-      Serial.println("\nRestart from .0");
+      Serial.println("\nRestart loop from .0");
       i = 0;
       k = 0;
     }
