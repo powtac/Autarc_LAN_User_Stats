@@ -8,6 +8,8 @@
 // Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
 boolean useDhcp                = true; // Using DHCP? If no please set ip_shield, gateway and subnet below
+boolean scanKnownIPOnStart     = false;
+
 
 // Heidelberg
 static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
@@ -45,7 +47,6 @@ int k                          = 0;
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
-char ping_buffer [256];
 
 // HTTP server in the internet
 // EthernetClient client;
@@ -53,7 +54,6 @@ char ping_buffer [256];
 // IPAddress server(85,10,211,16); // kolchose.org
 
 // Global namespace to use it in setup() and loop()
-// ICMPPing ping(pingSocket);
 ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
 
@@ -88,12 +88,10 @@ void setup() {
 
 
   // Testing known address
-  ICMPEchoReply echoReply = ping(ip_known_device, 4);  
-  // ping(1, ip_known_device, ping_buffer);
-  
-  // Serial.println(ping_buffer);
-  readable_ip(ip_known_device, "Testing known address %s\n"); 
-  
+  if (scanKnownIPOnStart) {
+    ICMPEchoReply echoReply = ping(ip_known_device, 4);
+    readable_ip(ip_known_device, "Testing known address %s\n");
+  }
     
   // Array stuff
   initArray(&ip_found_devices, 0);
@@ -134,11 +132,26 @@ void setup() {
   Serial.println(client.status());
   client.stop();
   */
-
-  Serial.println("\nStarting loop trough IP range...\n");
+  
+  int   nr_of_ips_to_scan = ip_scan_end[3] - ip_scan_start[3];
+  byte* ips_to_scan[nr_of_ips_to_scan];
+ 
+  for (int i = 0; i < nr_of_ips_to_scan; i++) {
+    byte tmp[4] = { ip_scan_start[0], ip_scan_start[1], ip_scan_start[2], ip_scan_start[3] + i};
+    ips_to_scan[i] = tmp;
+    
+    // Debug
+    // Serial.println(byte_to_readable_ip_string(tmp));  
+  }
+  
+  
+  // TODO into one line
+  Serial.print("\nStarting loop trough IP range ");
+  Serial.print(byte_to_readable_ip_string(ip_scan_start));
+  Serial.print(" - ");
+  Serial.print(byte_to_readable_ip_string(ip_scan_end));
+  Serial.print("...\n");
 }
-
-
 
 void loop() {
   byte currIp[4];
@@ -149,10 +162,6 @@ void loop() {
     
     ICMPEchoReply echoReply = ping(currIp, 4);
     
-    // ping(1, currIp, ping_buffer);
-    // String ping_result = ping_buffer;
-    
-    // if (ping_result.indexOf("Timed Out") == -1) {
     if (echoReply.status == SUCCESS) {
       // We found a device!
       // ip_possible_devices.array[k].mac = ping_result.substring(0, 18);
@@ -173,14 +182,9 @@ void loop() {
       
         // Todo check for more known IPs (gateway, ...)
         currIp[3] = ip_found_devices.array[k].ipadress; 
-        
-        // ping(1, currIp, ping_buffer);
-        
+
         ICMPEchoReply echoReply = ping(currIp, 4);
-        
-        // String ping_result = ping_buffer;
-        
-        // if (ping_result.indexOf("Timed Out") != -1) {
+
         if (echoReply.status == SUCCESS) {
           // We couldn't find IP Anymore, add it to possible ips and remove it from found ips
           insertArray(&ip_possible_devices, ip_found_devices.array[k]);
