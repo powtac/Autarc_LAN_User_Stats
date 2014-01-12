@@ -24,3 +24,6 @@ Helpful tools
 
 C
  - http://blog.justinlintz.com/2011/09/useful-c-debug-macro/
+
+UPD Library for Arduino and W5100
+ - http://tkkrlab.nl/w/images/c/c6/EthernetMulti.tar.gz
