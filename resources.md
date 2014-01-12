@@ -12,6 +12,7 @@ Ethernet Library Problems
  - https://github.com/arduino/Arduino/issues/569
  - http://electronics.stackexchange.com/q/67212/3130
  - http://electronics.stackexchange.com/q/67045/3130
+ - http://forums.parallax.com/showthread.php/129515-W5100-Sn_SR-undocumented-misfeature-bug?s=641a866bfec09b9c27904d1ce190c7c8&p=977444&viewfull=1#post977444
 
 Ethernet & ARP
  - http://arduino.cc/forum/index.php?topic=74547.0
