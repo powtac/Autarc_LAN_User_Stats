@@ -100,7 +100,7 @@ while (1) {
     ICMPEchoReply echoReply = ping(currIP, pingrequest);    
     if (echoReply.status == SUCCESS) {
       // We found a device!
-      Serial.print("Speicher (Gerät gefunden): ");
+      Serial.print("Speicher (Geraet gefunden): ");
       Serial.println(get_mem_unused());
       for(int mac = 0; mac < 6; mac++) {
         found[currIP[3]][mac] = echoReply.MACAddressSocket[mac];
