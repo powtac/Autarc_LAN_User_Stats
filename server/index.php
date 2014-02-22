@@ -105,4 +105,4 @@ $fp = fopen("req.txt","w");
 fwrite($fp, serialize($_GET));
 fclose($fp);
 
-?>
+
