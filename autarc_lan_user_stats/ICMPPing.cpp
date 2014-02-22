@@ -9,8 +9,6 @@
 
 #include "ICMPPing.h"
 #include <util.h>
-// #include "IPHelper.h"
-
 
 inline uint16_t _makeUint16(const uint8_t& highOrder, const uint8_t& lowOrder)
 {
@@ -120,6 +118,8 @@ void ICMPPing::operator()(const IPAddress& addr, int nRetries, ICMPEchoReply& re
         {
             byte replyAddr [4];
             receiveEchoReply(echoReq, addr, result);
+            
+            W5100.readSnDHAR(_socket, result.MACAddressSocket);  //Tim
         }
         if (result.status == SUCCESS)
         {
@@ -155,11 +155,6 @@ Status ICMPPing::sendEchoRequest(const IPAddress& addr, const ICMPEcho& echoReq)
 
     W5100.send_data_processing(_socket, serialized, sizeof(ICMPEcho));
     W5100.execCmdSn(_socket, Sock_SEND);
-    
-
-    
-    
-    
     while ((W5100.readSnIR(_socket) & SnIR::SEND_OK) != SnIR::SEND_OK) 
     {
         if (W5100.readSnIR(_socket) & SnIR::TIMEOUT)
@@ -168,39 +163,6 @@ Status ICMPPing::sendEchoRequest(const IPAddress& addr, const ICMPEcho& echoReq)
             return SEND_TIMEOUT;
         }
     }
-    
-    
-    
-    // Is this the MAC address?
-    
-    /*
-    uint8_t mac[6];
-    W5100.readSnDHAR(_socket, mac);
-    Serial.println(printf("Sn_DHAR: %02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]));
-    */
-    
-    if (_socket != -1) {
-      
-      /*
-      uint8_t buffer = W5100.readSnRX_RD(_socket);
-      uint16_t mac2 = W5100.readSnDHAR(_socket, (uint8_t *)buffer);
-      Serial.println(mac2);
-      */
-  
-      uint8_t ip[4];
-      W5100.readSnDIPR(_socket, ip);
-      Serial.println(printf("Sn_DIPR: %d.%d.%d.%d Sn_DPORT: %d\n", ip[0], ip[1], ip[2], ip[3], W5100.readSnDPORT(_socket)));
-      uint8_t mac[6];
-      W5100.readSnDHAR(_socket, mac);
-      Serial.println(mac[0]);
-      Serial.println(printf("Sn_DHAR: %02x:%02x:%02x:%02x:%02x:%02x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]));
-      Serial.println(printf("Sn_RX_RSR:%5d, Sn_RX_RD:%5d, Sn_RX_WR:%5d\n",
-              W5100.readSnRX_RSR(_socket), W5100.readSnRX_RD(_socket), W5100.readSnRX_WR(_socket)));
-      Serial.println(printf("Sn_TX_FSR:%5d, Sn_TX_RD:%5d, Sn_TX_WR:%5d\n",
-              W5100.readSnTX_FSR(_socket), W5100.readSnTX_RD(_socket), W5100.readSnTX_WR(_socket)));
-    }
-    
-    
     W5100.writeSnIR(_socket, SnIR::SEND_OK);
     return SUCCESS;
 }
@@ -214,7 +176,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
         {
             uint8_t ipHeader [6];
             uint8_t buffer = W5100.readSnRX_RD(_socket);
-            W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader));
+            W5100.read_data(_socket, (uint8_t *)buffer, ipHeader, sizeof(ipHeader));
             buffer += sizeof(ipHeader);
             for (int i=0; i<4; ++i) echoReply.addr[i] = ipHeader[i];
             uint8_t dataLen = ipHeader[4];
@@ -222,7 +184,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
 
             uint8_t serialized [sizeof(ICMPEcho)];
             if (dataLen > sizeof(ICMPEcho)) dataLen = sizeof(ICMPEcho);
-            W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen);
+            W5100.read_data(_socket, (uint8_t *)buffer, serialized, dataLen);
             echoReply.data.deserialize(serialized);
 
             buffer += dataLen;
