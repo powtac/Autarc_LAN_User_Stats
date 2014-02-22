@@ -1,5 +1,7 @@
 <?php
-include_once("mysql.htm");
+
+require_once dirname(__FILE__).'/basics.php';
+require_once dirname(__FILE__).'/mysql.htm';
 
 header('content-type: text/html;charset=utf-8');
 
@@ -23,8 +25,8 @@ echo '<?xml version="1.0" encoding="utf-8" ?>
 
 	<body>';
 
-if (isset($_GET["AVR_ID"])) {
-	$AVR_ID = mysql_real_escape_string($_GET["AVR_ID"]);
+if (isset($_GET['AVR_ID'])) {
+	$AVR_ID = mysql_real_escape_string($_GET['AVR_ID']);
 	$date = time();
 
 	if (isset($_GET["MAC"])) {
@@ -83,7 +85,7 @@ if (isset($_GET["AVR_ID"])) {
 }
 else {
 	echo 'Bitte w&auml;hlen Sie eine AVR-ID aus:<br /><br />';
-	echo '<form action="" method="GET" accept-charset="UTF-8"><select name="AVR_ID">';
+	echo '<form action="" method="GET" accept-charset="UTF-8"><select name='AVR_ID'>';
 		$AVR_list = mysql_query("SELECT AVR_ID FROM Online_DB GROUP BY AVR_ID");
 		while ($row = mysql_fetch_assoc($AVR_list))
 		{
