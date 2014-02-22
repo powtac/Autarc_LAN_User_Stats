@@ -1,7 +1,7 @@
 <?php
 
 require_once dirname(__FILE__).'/basics.php';
-require_once dirname(__FILE__).'/mysql.htm';
+require_once dirname(__FILE__).'/mysql.php';
 
 header('content-type: text/html;charset=utf-8');
 
