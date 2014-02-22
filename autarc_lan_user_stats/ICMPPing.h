@@ -11,12 +11,13 @@
 #include <Ethernet.h>
 #include <utility/w5100.h>
 
-#define REQ_DATASIZE 64
+// #define REQ_DATASIZE 32 faster?
+#define REQ_DATASIZE 32
 #define ICMP_ECHOREPLY 0
 #define ICMP_ECHOREQ 8
 #define ICMP_ECHOREP 0
 #define TIME_EXCEEDED 11
-#define PING_TIMEOUT 1000
+#define PING_TIMEOUT 100
 
 typedef unsigned long time_t;
 
@@ -106,6 +107,7 @@ struct ICMPEchoReply
     uint8_t ttl;
     Status status;
     IPAddress addr;
+    uint8_t MACAddressSocket[6];  //Tim
 };
 
 

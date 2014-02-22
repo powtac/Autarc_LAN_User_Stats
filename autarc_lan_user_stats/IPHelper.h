@@ -2,127 +2,100 @@
 
 // See http://playground.arduino.cc/Main/Printf
 #include <stdarg.h>
-void p(char *fmt, ... ){
-        char tmp[128]; // resulting string limited to 128 chars
-        va_list args;
-        va_start (args, fmt );
-        vsnprintf(tmp, 128, fmt, args);
-        va_end (args);
-        Serial.print(tmp);
+#include "memcheck.h"
+  //Serial.println(get_mem_unused());
+
+void print_ip(byte* ip) {
+  Serial.print(ip[0]);
+  Serial.print(".");
+  Serial.print(ip[1]);
+  Serial.print(".");
+  Serial.print(ip[2]);
+  Serial.print(".");
+  Serial.println(ip[3]);
 }
 
 
-const char int_to_readable_ip_string(int ip) {
-  unsigned char bytes[4];
-  bytes[0] = ip & 0xFF;
-  bytes[1] = (ip >> 8) & 0xFF;
-  bytes[2] = (ip >> 16) & 0xFF;
-  bytes[3] = (ip >> 24) & 0xFF;
-
-  const char readable_ip = printf("%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
-  
-  Serial.println("HIER");
-  Serial.println(readable_ip);
-  delay(5000);
-  
-  return readable_ip;
+void print_mac(byte* mac) {
+  Serial.print(mac[0], HEX);
+  Serial.print(":");
+  Serial.print(mac[1], HEX);
+  Serial.print(":");
+  Serial.print(mac[2], HEX);
+  Serial.print(":");
+  Serial.print(mac[3], HEX);
+  Serial.print(":");
+  Serial.print(mac[4], HEX);
+  Serial.print(":");
+  Serial.println(mac[5], HEX);
 }
 
 
-void readable_ip(int ip, char* message) {
-  p(message, int_to_readable_ip_string(ip));
-}
+typedef byte (*PtrArray)[6];
 
-
-String byte_to_readable_ip_string(byte* ip) {
-  String ip_readable;
-  for (byte i = 0; i < 4; i++) {
-    ip_readable.concat(ip[i]);
-    if (i != 3) {
-      ip_readable.concat(".");
-    }
-  }
-  return ip_readable;
-}
-
-
-void readable_ip(byte* ip, char* message) {
-  String readable_ip_string = byte_to_readable_ip_string(ip);
-  char readable_ip[15]; 
-  
-  readable_ip_string.toCharArray(readable_ip, sizeof(readable_ip));
-  
-  p(message, readable_ip);
-}
-
-// Required?
-/*
-void printReadableIPAddress() {
-  Serial.begin(9600);
-  Serial.print("IP address: ");
-  for (byte thisByte = 0; thisByte < 4; thisByte++) {
-    // print the value of each byte of the IP address:
-    Serial.print(Ethernet.localIP()[thisByte], DEC);
-    Serial.print("."); 
-  }
-}
-*/
-
-void readable_mac(byte* mac, char* message) {
-  char mac_string[18];
-  snprintf(mac_string, 18, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]); 
-  p(message, mac_string);
-}
-
-void readable_mac(String mac, char* message) {
-  p(message, mac);
-}
-
-void send_info_to_server(String info) {
-  /*
-      EthernetClient client;
-      IPAddress server(85, 10, 211, 16); // kolchose.org 
+void send_info_to_server(byte* startip, PtrArray maclist, char* AVRID) {
+  //int result = Ethernet.maintain(); // renew DHCP
+  //Serial.print(" DHCP renew:");
+  //Serial.println(result); 
+  //delay(1000);
+  Serial.print("Speicher (send_info): ");
+  Serial.println(get_mem_unused());
+    EthernetClient client;
+      //IPAddress server(85, 10, 211, 16); // kolchose.org 
+       IPAddress server(85, 214, 144, 114); //lan-user.danit.de
       
-      int ret = client.connect("kolchose.org", 80);
+      //int ret = client.connect("kolchose.org", 80);
+       int ret = client.connect("lan-user.danit.de", 80);
       if (ret == 1) {
         Serial.println("Connected to HTTP Server");
 
         // Make a HTTP request:
-        client.print("GET /autarc_lan_user_stats/");
-        client.print("?found_ips=");  
-        
-        int j = 0;
-        if (j < ip_found_devices.used) {
-          String ip_readable;
-          for (byte i = 0; i < 4; i++) {
-            ip_readable.concat(ip_found_devices.array[j].ipadress);
-            if (i != 3) {
-              ip_readable.concat(".");
-            }
-          }
-          Serial.println(ip_readable);
-        
-          client.print(ip_readable);
-          client.print("&");
-          j++;
+        //client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
+         client.print("GET /"); // lan-user.danit.de
+        client.print("?AVR_ID=");
+        client.print(AVRID);
+      Serial.println(AVRID);
+      //HTTP String:  AVR_ID=AVR_ID&IP[]=Ip1&MAC[]=Mac2&IP[]=IP2&MAC[]=Mac2
+        for(int z = 0; z < 35; z++) {  //Todo: Set to 255
+          //if (maclist[z] [5] > 0) {    //Todo: Richtig filtern!
+            client.print("&IP[]=");
+            client.print(startip[0]);
+            client.print(".");
+            client.print(startip[1]);
+            client.print(".");
+            client.print(startip[2]);
+            client.print(".");
+            client.print(z);
+            client.print("&MAC[]=");
+            client.print(maclist[z][0]);
+            client.print(".");
+            client.print(maclist[z][1], HEX);
+            client.print(".");
+            client.print(maclist[z][2], HEX);
+            client.print(".");
+            client.print(maclist[z][3], HEX);
+            client.print(".");
+            client.print(maclist[z][4], HEX);
+            client.print(".");
+            client.print(maclist[z][5], HEX);
+          //}
         }
-        
-        
+
         client.println(" HTTP/1.0");
-        
-        client.println("Host: kolchose.org");           // Important! TODO check if this is required and dynamically asignable
+        //client.println("Host: kolchose.org");           // Important! TODO check if this is required and dynamically asignable
+        client.println("Host: lan-user.danit.de");
         client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!
-        client.println();                               // Important!
+        client.println();        // Important!
         
-      
       Serial.println(client.status());
       client.stop();
 
-
-      } 
-      
-      */
+      }
+      else {
+      Serial.println("NOT connected to HTTP Server");
+      Serial.println(ret);
+      Serial.println("\n");
+      Serial.println(client.status());
+      client.stop();
+  } 
 }
-
-
-
