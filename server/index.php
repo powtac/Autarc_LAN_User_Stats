@@ -29,7 +29,7 @@ if (isset($_GET['AVR_ID'])) {
 	$AVR_ID = mysql_real_escape_string($_GET['AVR_ID']);
 	$date = time();
 
-	if (isset($_GET["MAC"])) {
+	if (isset($_GET['MAC'])) {
 	/* New online data */
 		for ($i = 0; $i < count($_GET['MAC']); $i++)
 		{
@@ -78,7 +78,7 @@ if (isset($_GET['AVR_ID'])) {
 		while ($row = mysql_fetch_assoc($online_list))
 		{
 			$timediff = $date - $row['time_offline'];
-			echo "<tr><td>".$row['IP']."</td><td>".$row['MAC']."</td><td>".(date("j" , $timediff) - 1)." Tage ".(date("G" , $timediff) - 1)." h ".date("i" , $timediff)." min ".date("s" , $timediff)." sec</td><td>".date("Y-m-d - G:i" , $row['last_scan'])." Uhr</td></tr>";
+			echo "<tr><td>".$row['IP']."</td><td><a href=\"http://www.coffer.com/mac_find/?string=".urlencode(mac_format($row['MAC'])).""\" target=\"_blank\">".mac_format($row['MAC'])."</a></td><td>".(date("j" , $timediff) - 1)." Tage ".(date("G" , $timediff) - 1)." h ".date("i" , $timediff)." min ".date("s" , $timediff)." sec</td><td>".date("Y-m-d - G:i" , $row['last_scan'])." Uhr</td></tr>";
 		}
 		echo '</table>';
 	}
