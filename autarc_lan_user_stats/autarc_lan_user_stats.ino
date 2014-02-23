@@ -12,20 +12,20 @@
 boolean useDhcp                = true; // Using DHCP? If no please set ip_shield, gateway and subnet below
 char pingrequest               = 2;
 
-// Tim
-static char AVRID[6]           = "Tim1";
-static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
-byte ip_shield[4]              = { 192, 168, 178, 98 };
-byte gateway[4]                = { 192, 168, 178, 1 };
-byte subnet[4]                 = { 255, 255, 255, 0 };
+//// Tim
+//static char AVRID[6]           = "Tim1";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
+//byte ip_shield[4]              = { 192, 168, 178, 98 };
+//byte gateway[4]                = { 192, 168, 178, 1 };
+//byte subnet[4]                 = { 255, 255, 255, 0 };
 
-//// Simon
-//static char AVRID[6]           = "Simon";
-//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-//byte ip_shield[4]              = { 10, 0, 1, 13 };
-//byte gateway[4]                = { 10, 0, 1, 1 };
-//byte subnet[4]                 = { 255, 255, 0, 0 };
-//
+// Simon
+static char AVRID[6]           = "Simon";
+static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+byte ip_shield[4]              = { 10, 0, 1, 13 };
+byte gateway[4]                = { 10, 0, 1, 1 };
+byte subnet[4]                 = { 255, 255, 0, 0 };
+
 //// Jonas
 //static char AVRID[6]           = "Jonas";
 //static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
@@ -57,7 +57,7 @@ ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
 void setup() {
   delay(1000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
   
