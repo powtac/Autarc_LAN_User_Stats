@@ -4,15 +4,15 @@
 #include "ICMPPing.h"
 #include "IPHelper.h"
 #include "memcheck.h"
-  //init_mem();  //hier???
-  //Serial.println(get_mem_unused());
+// init_mem();  //hier???
+// Serial.println(get_mem_unused());
 
 // Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
 boolean useDhcp                = true; // Using DHCP? If no please set ip_shield, gateway and subnet below
-char pingrequest = 2;
+char pingrequest               = 2;
 
-static char AVRID[6] = "Tim1";
+static char AVRID[6]           = "Tim1";
 static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
 byte ip_shield[4]              = { 192, 168, 178, 98 };    
 byte gateway[4]                = { 192, 168, 178, 1 };
@@ -74,83 +74,84 @@ void setup() {
   // Setup End
   
 
-for (byte thisByte = 0; thisByte < 4; thisByte++) {
-     readSubnet[thisByte] = Ethernet.subnetMask()[thisByte], DEC;
-   }
-for (byte thisBytez = 0; thisBytez < 4; thisBytez++) {
-     readIP[thisBytez] = Ethernet.localIP()[thisBytez], DEC;
-   }
-for(int is = 0; is < 4; is++) {
-   start_ip[is] = readIP[is] & readSubnet[is];
- }
+  for (byte thisByte = 0; thisByte < 4; thisByte++) {
+    readSubnet[thisByte] = Ethernet.subnetMask()[thisByte], DEC;
+  }
+  for (byte thisBytez = 0; thisBytez < 4; thisBytez++) {
+    readIP[thisBytez] = Ethernet.localIP()[thisBytez], DEC;
+  }
+  for(int is = 0; is < 4; is++) {
+    start_ip[is] = readIP[is] & readSubnet[is];
+  }
   // TODO into one line
   Serial.print("\nStarting loop trough IP range ");
   print_ip(start_ip);
   Serial.print(" - ");
-  //Serial.print(byte_to_readable_ip_string(ip_scan_end));
+  // Serial.print(byte_to_readable_ip_string(ip_scan_end));
   Serial.print("...\n");
 }
 
 void loop() {
   Serial.print("Speicher (Loop-Start): ");
   Serial.println(get_mem_unused());
-  for(int b = 0; b < 4; b++) { currIP[b]  = start_ip[b]; }
-while (1) {  
-  if (currIP[3] < 35) { //Todo: An mögliche über SubnetMask anpassen  //255
-    ICMPEchoReply echoReply = ping(currIP, pingrequest);    
-    if (echoReply.status == SUCCESS) {
-      // We found a device!
-      Serial.print("Speicher (Geraet gefunden): ");
-      Serial.println(get_mem_unused());
-      for(int mac = 0; mac < 6; mac++) {
-        found[currIP[3]][mac] = echoReply.MACAddressSocket[mac];
+  for(int b = 0; b < 4; b++) { 
+    urrIP[b]  = start_ip[b]; 
+  }
+  while (1) {
+    if (currIP[3] < 35) { // TODO: An mögliche über SubnetMask anpassen  //255
+      ICMPEchoReply echoReply = ping(currIP, pingrequest);    
+      if (echoReply.status == SUCCESS) {
+        // We found a device!
+        Serial.print("Speicher (Geraet gefunden): ");
+        Serial.println(get_mem_unused());
+        for(int mac = 0; mac < 6; mac++) {
+          found[currIP[3]][mac] = echoReply.MACAddressSocket[mac];
+        }
+        
+        Serial.print("Device found on: ");
+        print_ip(currIP);
+        Serial.print(" MAC: ");
+        print_mac(echoReply.MACAddressSocket);
+        
+      } else {
+        // It's not responding, next one
+        for(int mac = 0; mac < 6; mac++) {
+          found[currIP[3]][mac] = 0;
+        }
+        Serial.print("No (pingable) device on IP ");
+        print_ip(currIP);
       }
-      
-      Serial.print("Device found on: ");
-      print_ip(currIP);
-      Serial.print(" MAC: ");
-      print_mac(echoReply.MACAddressSocket);
-      
+      currIP[3]++;  
     } else {
-      // It's not responding, next one
-      for(int mac = 0; mac < 6; mac++) {
-        found[currIP[3]][mac] = 0;
-      }
-      Serial.print("No (pingable) device on IP ");
-      print_ip(currIP);
+      // next IP-Block?!
+      break; // Exit Loop 
     }
-    currIP[3]++;  
+  } 
+  Serial.print("Speicher (Ende Suchvorgang): ");
+  Serial.println(get_mem_unused());
+  Serial.println("Fertig");
+  
+  for(int z = 0; z < 35; z++) {  // TODO: Set to 255
+    if (found[z] [5] > 0) {    // TODO: Richtig filtern!
+      Serial.print("Found: IP: ");
+      Serial.print(start_ip[0]);
+      Serial.print(".");
+      Serial.print(start_ip[1]);
+      Serial.print(".");
+      Serial.print(start_ip[2]);
+      Serial.print(".");
+      Serial.print(z);
+      Serial.print(" - MAC: ");
+      print_mac(found[z]);
+    }
   }
-  else {
-   //next IP-Block?!
-  break;  //Exit Loop 
-  }
-} 
-      Serial.print("Speicher (Ende Suchvorgang): ");
-      Serial.println(get_mem_unused());
-      Serial.println("Fertig");
-      
-      for(int z = 0; z < 35; z++) {  //Todo: Set to 255
-        if (found[z] [5] > 0) {    //Todo: Richtig filtern!
-          Serial.print("Found: IP: ");
-          Serial.print(start_ip[0]);
-          Serial.print(".");
-          Serial.print(start_ip[1]);
-          Serial.print(".");
-          Serial.print(start_ip[2]);
-          Serial.print(".");
-          Serial.print(z);
-          Serial.print(" - MAC: ");
-          print_mac(found[z]);
-      }
-    }
-       Serial.print("Speicher (Ende Loop): ");
-       Serial.println(get_mem_unused());
-      
-      send_info_to_server(start_ip, found, AVRID);
-      
-      Serial.print("Speicher (Ende ServerSend): ");
-      Serial.println(get_mem_unused());
-       
-      Serial.println("Restart loop");
-    }
+  Serial.print("Speicher (Ende Loop): ");
+  Serial.println(get_mem_unused());
+  
+  send_info_to_server(start_ip, found, AVRID);
+  
+  Serial.print("Speicher (Ende ServerSend): ");
+  Serial.println(get_mem_unused());
+   
+  Serial.println("Restart loop");
+}
