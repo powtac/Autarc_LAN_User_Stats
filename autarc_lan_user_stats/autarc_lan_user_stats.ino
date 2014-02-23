@@ -12,16 +12,32 @@
 boolean useDhcp                = true; // Using DHCP? If no please set ip_shield, gateway and subnet below
 char pingrequest               = 2;
 
+// Tim
 static char AVRID[6]           = "Tim1";
 static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
-byte ip_shield[4]              = { 192, 168, 178, 98 };    
+byte ip_shield[4]              = { 192, 168, 178, 98 };
 byte gateway[4]                = { 192, 168, 178, 1 };
 byte subnet[4]                 = { 255, 255, 255, 0 };
+
+//// Simon
+//static char AVRID[6]           = "Simon";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//byte ip_shield[4]              = { 10, 0, 1, 13 };
+//byte gateway[4]                = { 10, 0, 1, 1 };
+//byte subnet[4]                 = { 255, 255, 0, 0 };
+//
+//// Jonas
+//static char AVRID[6]           = "Jonas";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//byte ip_shield[4]              = { 192, 168, 1, 30 };
+//byte gateway[4]                = { 192, 168, 1, 1 };
+//byte subnet[4]                 = { 255, 255, 0, 0 };
+
 
 byte start_ip[4];
 byte currIP[4];
 // Array for found devices
-byte found[35] [6];  //Todo: Auf 256 setzen -> found[ip] [MAC-Blöcke]
+byte found[35] [6]; // TODO: Auf 256 setzen -> found[ip] [MAC-Blöcke]
 
 byte readSubnet[4];
 byte readIP[4];
