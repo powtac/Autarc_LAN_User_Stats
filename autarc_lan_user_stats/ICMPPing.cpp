@@ -68,6 +68,23 @@ void ICMPEcho::serialize(uint8_t * binData) const
     *(binData++) = icmpHeader.type;
     *(binData++) = icmpHeader.code;
 
+// See https://github.com/arduino/Arduino/blob/master/libraries/Ethernet/util.h
+#ifndef UTIL_H
+#define UTIL_H
+
+#define htons(x) ( ((x)<<8) | (((x)>>8)&0xFF) )
+#define ntohs(x) htons(x)
+
+#define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
+((x)<< 8 & 0x00FF0000UL) | \
+((x)>> 8 & 0x0000FF00UL) | \
+((x)>>24 & 0x000000FFUL) )
+#define ntohl(x) htonl(x)
+
+#endif
+
+
+
     *(uint16_t *)binData = htons(icmpHeader.checksum); binData += 2;
     *(uint16_t *)binData = htons(id);                  binData += 2;
     *(uint16_t *)binData = htons(seq);                 binData += 2;
@@ -176,7 +193,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
         {
             uint8_t ipHeader [6];
             uint8_t buffer = W5100.readSnRX_RD(_socket);
-            W5100.read_data(_socket, (uint8_t *)buffer, ipHeader, sizeof(ipHeader));
+            W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader));
             buffer += sizeof(ipHeader);
             for (int i=0; i<4; ++i) echoReply.addr[i] = ipHeader[i];
             uint8_t dataLen = ipHeader[4];
@@ -184,7 +201,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
 
             uint8_t serialized [sizeof(ICMPEcho)];
             if (dataLen > sizeof(ICMPEcho)) dataLen = sizeof(ICMPEcho);
-            W5100.read_data(_socket, (uint8_t *)buffer, serialized, dataLen);
+            W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen);
             echoReply.data.deserialize(serialized);
 
             buffer += dataLen;
