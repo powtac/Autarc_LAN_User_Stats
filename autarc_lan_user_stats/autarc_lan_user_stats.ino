@@ -74,15 +74,12 @@ void setup() {
   // Setup End
   
 
-  for (byte thisByte = 0; thisByte < 4; thisByte++) {
-    readSubnet[thisByte] = Ethernet.subnetMask()[thisByte], DEC;
+  for (byte i = 0; i < 4; i++) {
+    readSubnet[i] = Ethernet.subnetMask()[i], DEC;
+    readIP[i]     = Ethernet.localIP()[i], DEC;
+    start_ip[i]   = readIP[i] & readSubnet[i];
   }
-  for (byte thisBytez = 0; thisBytez < 4; thisBytez++) {
-    readIP[thisBytez] = Ethernet.localIP()[thisBytez], DEC;
-  }
-  for(int is = 0; is < 4; is++) {
-    start_ip[is] = readIP[is] & readSubnet[is];
-  }
+  
   // TODO into one line
   Serial.print("\nStarting loop trough IP range ");
   print_ip(start_ip);
