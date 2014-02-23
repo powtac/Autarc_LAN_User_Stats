@@ -92,7 +92,7 @@ void loop() {
   Serial.print("Speicher (Loop-Start): ");
   Serial.println(get_mem_unused());
   for(int b = 0; b < 4; b++) { 
-    urrIP[b]  = start_ip[b]; 
+    currIP[b]  = start_ip[b]; 
   }
   while (1) {
     if (currIP[3] < 35) { // TODO: An mögliche über SubnetMask anpassen  //255
