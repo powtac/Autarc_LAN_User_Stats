@@ -13,18 +13,18 @@ boolean useDhcp                = true; // Using DHCP? If no please set ip_shield
 char pingrequest               = 2;
 
 //// Tim
-//static char AVRID[6]           = "Tim1";
-//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
-//byte ip_shield[4]              = { 192, 168, 178, 98 };
-//byte gateway[4]                = { 192, 168, 178, 1 };
-//byte subnet[4]                 = { 255, 255, 255, 0 };
+static char AVRID[6]           = "Tim1";
+static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
+byte ip_shield[4]              = { 192, 168, 178, 98 };
+byte gateway[4]                = { 192, 168, 178, 1 };
+byte subnet[4]                 = { 255, 255, 255, 0 };
 
 // Simon
-static char AVRID[6]           = "Simon";
-static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-byte ip_shield[4]              = { 10, 0, 1, 13 };
-byte gateway[4]                = { 10, 0, 1, 1 };
-byte subnet[4]                 = { 255, 255, 0, 0 };
+//static char AVRID[6]           = "Simon";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//byte ip_shield[4]              = { 10, 0, 1, 13 };
+//byte gateway[4]                = { 10, 0, 1, 1 };
+//byte subnet[4]                 = { 255, 255, 0, 0 };
 
 //// Jonas
 //static char AVRID[6]           = "Jonas";
@@ -41,6 +41,8 @@ byte found[35] [6]; // TODO: Auf 256 setzen -> found[ip] [MAC-Blöcke]
 
 byte readSubnet[4];
 byte readIP[4];
+
+int configurate;
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
@@ -60,6 +62,18 @@ void setup() {
   Serial.begin(115200);
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
+  Serial.print("Press any key to configurate");
+  for (char i = 0; i < 3 and Serial.available() <= 0; i++) {
+    delay(1000);
+    Serial.print(".");
+  }
+  configurate = Serial.read();
+  if (configurate >= 0) {
+    Serial.println("Starting configuration");
+      //TODO: Ask for Ip, Gateway, Netmask to configurate
+  } else {
+    Serial.println("no configuration");
+  }
   
   // Setup Start
   Serial.println("Try to get IP address from network...");
