@@ -30,9 +30,7 @@ void print_mac(byte* mac) {
 }
 
 
-typedef byte (*PtrArray)[6];
-
-void send_info_to_server(byte* startip, PtrArray maclist, char* AVRID) {
+void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
   // int result = Ethernet.maintain(); // renew DHCP
   // Serial.print(" DHCP renew:");
   // Serial.println(result); 
@@ -55,30 +53,26 @@ void send_info_to_server(byte* startip, PtrArray maclist, char* AVRID) {
     client.print(AVRID);
     Serial.println(AVRID);
     // HTTP String:  AVR_ID=AVR_ID&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
-    for(int z = 0; z < 35; z++) { //TODO: Set to 255
-      // if (maclist[z] [5] > 0) { //TODO: Richtig filtern!
         client.print("&IP[]=");
-        client.print(startip[0]);
+        client.print(IP[0]);
         client.print(".");
-        client.print(startip[1]);
+        client.print(IP[1]);
         client.print(".");
-        client.print(startip[2]);
+        client.print(IP[2]);
         client.print(".");
-        client.print(z);
+        client.print(IP[3]);
         client.print("&MAC[]=");
-        client.print(maclist[z][0], HEX);
+        client.print(MAC[0], HEX);
         client.print(":");
-        client.print(maclist[z][1], HEX);
+        client.print(MAC[1], HEX);
         client.print(":");
-        client.print(maclist[z][2], HEX);
+        client.print(MAC[2], HEX);
         client.print(":");
-        client.print(maclist[z][3], HEX);
+        client.print(MAC[3], HEX);
         client.print(":");
-        client.print(maclist[z][4], HEX);
+        client.print(MAC[4], HEX);
         client.print(":");
-        client.print(maclist[z][5], HEX);
-      // }
-    }
+        client.print(MAC[5], HEX);
 
     client.println(" HTTP/1.0");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
@@ -96,5 +90,5 @@ void send_info_to_server(byte* startip, PtrArray maclist, char* AVRID) {
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();
-  } 
+  }
 }

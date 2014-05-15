@@ -13,7 +13,7 @@ boolean useDhcp                = true; // Using DHCP? If no please set ip_shield
 char pingrequest               = 2;
 
 //// Tim
-static char AVRID[6]           = "Tim1";
+static char AVRID[6]           = "Tim2";
 static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
 byte ip_shield[4]              = { 192, 168, 178, 98 };
 byte gateway[4]                = { 192, 168, 178, 1 };
@@ -36,8 +36,7 @@ byte subnet[4]                 = { 255, 255, 255, 0 };
 
 byte start_ip[4];
 byte currIP[4];
-// Array for found devices
-byte found[35] [6]; // TODO: Auf 256 setzen -> found[ip] [MAC-Blöcke]
+byte currMAC[6];
 
 byte readSubnet[4];
 byte readIP[4];
@@ -132,7 +131,7 @@ void loop() {
         Serial.print("Speicher (Geraet gefunden): ");
         Serial.println(get_mem_unused());
         for(int mac = 0; mac < 6; mac++) {
-          found[currIP[3]][mac] = echoReply.MACAddressSocket[mac];
+          currMAC[mac] = echoReply.MACAddressSocket[mac];
         }
         
         Serial.print("Device found on: ");
@@ -143,42 +142,20 @@ void loop() {
       } else {
         // It's not responding, next one
         for(int mac = 0; mac < 6; mac++) {
-          found[currIP[3]][mac] = 0;
+          currMAC[mac] = 0;
         }
         Serial.print("No (pingable) device on IP ");
         print_ip(currIP);
       }
+      send_info_to_server(currIP, currMAC, AVRID);
+      
       currIP[3]++;  
     } else {
       // next IP-Block?!
       break; // Exit Loop 
     }
-  } 
-  Serial.print("Speicher (Ende Suchvorgang): ");
-  Serial.println(get_mem_unused());
-  Serial.println("Fertig");
-  
-  for(int z = 0; z < 35; z++) {  // TODO: Set to 255
-    if (found[z] [5] > 0) {    // TODO: Richtig filtern!
-      Serial.print("Found: IP: ");
-      Serial.print(start_ip[0]);
-      Serial.print(".");
-      Serial.print(start_ip[1]);
-      Serial.print(".");
-      Serial.print(start_ip[2]);
-      Serial.print(".");
-      Serial.print(z);
-      Serial.print(" - MAC: ");
-      print_mac(found[z]);
-    }
   }
-  Serial.print("Speicher (Ende Loop): ");
-  Serial.println(get_mem_unused());
-  
-  send_info_to_server(start_ip, found, AVRID);
-  
   Serial.print("Speicher (Ende ServerSend): ");
   Serial.println(get_mem_unused());
-   
   Serial.println("Restart loop");
 }
