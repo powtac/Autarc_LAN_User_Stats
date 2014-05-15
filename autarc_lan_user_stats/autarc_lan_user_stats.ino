@@ -70,8 +70,14 @@ void setup() {
   configurate = Serial.read();
   if (configurate >= 0) {
     Serial.println("Starting configuration");
-      //TODO: Ask for MAC to configurate
-      Serial.println("Board IP: ");
+      Serial.println("MAC Board: ");
+      GetMAC(mac_shield);
+      //TODO: Save in EEPROM
+      print_mac(mac_shield);
+      Serial.println("Stored");
+      Serial.println("\n");
+      
+      Serial.println("IP Board: ");
       GetIP(ip_shield);
       //TODO: Save in EEPROM
       print_ip(ip_shield);

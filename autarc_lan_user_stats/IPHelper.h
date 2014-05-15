@@ -31,6 +31,7 @@ void print_mac(byte* mac) {
 
 void GetString(char *buf, int bufsize)
 {
+  //TODO: Correction not possible yet
   int i;
   char ch;
   for (i=0; i<bufsize - 1; ++i)
@@ -60,6 +61,21 @@ void GetIP(byte *IP)
   IP[1] = atoi(strtok_r(NULL,".",&i));
   IP[2] = atoi(strtok_r(NULL,".",&i));
   IP[3] = atoi(strtok_r(NULL,".",&i));
+}
+
+
+void GetMAC(byte *MAC)
+{
+  char input[18];
+  GetString(input, sizeof(input));
+ 
+  char *i;
+  MAC[0] = strtol(strtok_r(input,":",&i), NULL, 16);
+  MAC[1] = strtol(strtok_r(NULL,":",&i), NULL, 16);
+  MAC[2] = strtol(strtok_r(NULL,":",&i), NULL, 16);
+  MAC[3] = strtol(strtok_r(NULL,":",&i), NULL, 16);
+  MAC[4] = strtol(strtok_r(NULL,":",&i), NULL, 16);
+  MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
 
 
