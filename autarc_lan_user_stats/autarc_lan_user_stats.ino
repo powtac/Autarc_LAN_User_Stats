@@ -161,7 +161,7 @@ void loop() {
     currIP[b]  = start_ip[b]; 
   }
   while (1) {
-    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche über SubnetMask anpassen  //255
+    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche über SubnetMask anpassen; mehrere Blöcke
       ICMPEchoReply echoReply = ping(currIP, pingrequest);    
       if (echoReply.status == SUCCESS) {
         // We found a device!
@@ -188,7 +188,7 @@ void loop() {
       
       currIP[3]++;  
     } else {
-      // next IP-Block?!
+      //TODO: next IP-Block?!
       break; // Exit Loop 
     }
   }
