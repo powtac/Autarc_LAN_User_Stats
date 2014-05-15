@@ -13,8 +13,9 @@ byte useDhcp                   = 1; // Using DHCP? If no please set ip_shield, g
 byte pingrequest               = 2;
 
 //// Tim
+//TODO: Get free AVR-ID from Server?
 static char AVRID[6]           = "Tim2";
-static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
+byte mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x9F };
 byte ip_shield[4]              = { 192, 168, 178, 98 };
 byte gateway[4]                = { 192, 168, 178, 1 };
 byte subnet[4]                 = { 255, 255, 255, 0 };
@@ -33,9 +34,10 @@ byte subnet[4]                 = { 255, 255, 255, 0 };
 //byte gateway[4]                = { 192, 168, 1, 1 };
 //byte subnet[4]                 = { 255, 255, 0, 0 };
 
-
+byte useSubnetting = 1;
 byte start_ip[4];
 byte end_ip[4];
+
 byte currIP[4];
 byte currMAC[6];
 
@@ -91,6 +93,7 @@ void setup() {
       Serial.println("Stored");
       Serial.println("\n");
       
+      //TODO: Check if it works fine!
       Serial.println("Subnetmask: ");
       GetIP(subnet);
       //TODO: Save in EEPROM
@@ -116,6 +119,34 @@ void setup() {
       Serial.println(pingrequest);
       Serial.println("Stored");
       Serial.println("\n");
+      
+      Serial.println("Use Subnetting (0 = no): ");
+      useSubnetting = GetNumber();
+      //TODO: Save in EEPROM
+      if (useSubnetting == 0) {
+       Serial.println("Don't use Subnetting");
+       Serial.println("Stored");
+       Serial.println("\n");
+       
+          Serial.println("Start IP for Scan: ");
+          GetIP(start_ip);
+          //TODO: Save in EEPROM
+          print_ip(start_ip);
+          Serial.println("Stored");
+          Serial.println("\n");
+       
+          Serial.println("End IP for Scan: ");
+          GetIP(end_ip);
+          //TODO: Save in EEPROM
+          print_ip(end_ip);
+          Serial.println("Stored");
+          Serial.println("\n");
+       
+      } else {
+        Serial.println("Use Subnetting");
+        Serial.println("Stored");
+        Serial.println("\n");
+      }
       
       Serial.println("\n");
       Serial.println("Setup finished");
@@ -152,20 +183,22 @@ void setup() {
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
   // Setup End
-  
-//TODO: Check for Subnetting!
-  for (byte i = 0; i < 4; i++) {
-    readSubnet[i] = Ethernet.subnetMask()[i], DEC;
-    readIP[i]     = Ethernet.localIP()[i], DEC;
-    start_ip[i]   = readIP[i] & readSubnet[i];
-    if (start_ip[i] == 0) {
-     start_ip[i] = 1;   //TODO: Set to 2, because of Gateway
-    }
-    end_ip[i]     = readIP[i] | ~readSubnet[i];
-    if (end_ip[i] == 255) {
-     end_ip[i] = 254; 
-    }
-   }
+
+//TODO: Test with Subnetmask for Subnetting!
+if (useSubnetting != 0) {
+    for (byte i = 0; i < 4; i++) {
+      readSubnet[i] = Ethernet.subnetMask()[i], DEC;
+      readIP[i]     = Ethernet.localIP()[i], DEC;
+      start_ip[i]   = readIP[i] & readSubnet[i];
+      if (start_ip[i] == 0) {
+       start_ip[i] = 1;   //TODO: Set to 2, because of Gateway
+      }
+      end_ip[i]     = readIP[i] | ~readSubnet[i];
+      if (end_ip[i] == 255) {
+       end_ip[i] = 254; 
+      }
+     }
+}
   
   Serial.print("\nStarting loop trough IP range ");
   print_ip(start_ip);
@@ -180,7 +213,7 @@ void loop() {
     currIP[b]  = start_ip[b]; 
   }
   while (1) {
-    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche über SubnetMask anpassen; mehrere Blöcke
+    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche anpassen; mehrere Blöcke
       ICMPEchoReply echoReply = ping(currIP, pingrequest);    
       if (echoReply.status == SUCCESS) {
         // We found a device!
