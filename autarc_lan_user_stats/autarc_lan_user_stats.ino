@@ -35,6 +35,7 @@ byte subnet[4]                 = { 255, 255, 255, 0 };
 
 
 byte start_ip[4];
+byte end_ip[4];
 byte currIP[4];
 byte currMAC[6];
 
@@ -102,19 +103,24 @@ void setup() {
   Serial.println(get_mem_unused());
   // Setup End
   
-
+//TODO: Check for Subnetting!
   for (byte i = 0; i < 4; i++) {
     readSubnet[i] = Ethernet.subnetMask()[i], DEC;
     readIP[i]     = Ethernet.localIP()[i], DEC;
     start_ip[i]   = readIP[i] & readSubnet[i];
-  }
+    if (start_ip[i] == 0) {
+     start_ip[i] = 1;   //TODO: Set to 2, because of Gateway
+    }
+    end_ip[i]     = readIP[i] | ~readSubnet[i];
+    if (end_ip[i] == 255) {
+     end_ip[i] = 254; 
+    }
+   }
   
-  // TODO into one line
   Serial.print("\nStarting loop trough IP range ");
   print_ip(start_ip);
   Serial.print(" - ");
-  // Serial.print(byte_to_readable_ip_string(ip_scan_end));
-  Serial.print("...\n");
+  print_ip(end_ip);
 }
 
 void loop() {
@@ -124,7 +130,7 @@ void loop() {
     currIP[b]  = start_ip[b]; 
   }
   while (1) {
-    if (currIP[3] < 35) { // TODO: An mögliche über SubnetMask anpassen  //255
+    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche über SubnetMask anpassen  //255
       ICMPEchoReply echoReply = ping(currIP, pingrequest);    
       if (echoReply.status == SUCCESS) {
         // We found a device!
@@ -137,7 +143,7 @@ void loop() {
         Serial.print("Device found on: ");
         print_ip(currIP);
         Serial.print(" MAC: ");
-        print_mac(echoReply.MACAddressSocket);
+        print_mac(currMAC);
         
       } else {
         // It's not responding, next one
