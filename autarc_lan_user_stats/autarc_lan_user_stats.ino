@@ -9,8 +9,8 @@
 
 // Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
-boolean useDhcp                = true; // Using DHCP? If no please set ip_shield, gateway and subnet below
-char pingrequest               = 2;
+byte useDhcp                   = 1; // Using DHCP? If no please set ip_shield, gateway and subnet below
+byte pingrequest               = 2;
 
 //// Tim
 static char AVRID[6]           = "Tim2";
@@ -98,6 +98,25 @@ void setup() {
       Serial.println("Stored");
       Serial.println("\n");
       
+      Serial.println("Use DHCP (0 = no): ");
+      useDhcp = GetNumber();
+      //TODO: Save in EEPROM
+      if (useDhcp == 0) {
+       Serial.println("Don't use DHCP");
+      } else {
+        Serial.println("Use DHCP");
+      }
+      Serial.println("Stored");
+      Serial.println("\n");
+      
+      Serial.println("Number of ping-requests: ");
+      pingrequest = GetNumber();
+      //TODO: Save in EEPROM
+      Serial.print("Number of ping-requests: ");
+      Serial.println(pingrequest);
+      Serial.println("Stored");
+      Serial.println("\n");
+      
       Serial.println("\n");
       Serial.println("Setup finished");
       Serial.println("\n");
@@ -111,7 +130,7 @@ void setup() {
   Serial.print(" MAC address of shield: ");
   print_mac(mac_shield);
   // Setup when no IP is known
-  if (useDhcp == false) {
+  if (useDhcp == 0) {
     Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
   } else {
     if (Ethernet.begin(mac_shield) == 0) {

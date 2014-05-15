@@ -29,6 +29,7 @@ void print_mac(byte* mac) {
   Serial.println(mac[5], HEX);
 }
 
+
 void GetString(char *buf, int bufsize)
 {
   //TODO: Correction not possible yet
@@ -48,6 +49,14 @@ void GetString(char *buf, int bufsize)
       buf[i] = ch;
     }
   }
+}
+
+
+byte GetNumber(void)
+{
+  char input[2];
+  GetString(input, sizeof(input));
+  return atoi(input);
 }
 
 
