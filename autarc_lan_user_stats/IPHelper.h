@@ -29,6 +29,39 @@ void print_mac(byte* mac) {
   Serial.println(mac[5], HEX);
 }
 
+void GetString(char *buf, int bufsize)
+{
+  int i;
+  char ch;
+  for (i=0; i<bufsize - 1; ++i)
+  {
+    while (Serial.available() == 0); // wait for character to arrive
+    ch = Serial.read();
+    Serial.print(ch);
+    if (ch == '\r') {
+     buf[i] = 0; // 0 string terminator just in case
+     Serial.println("\n");
+     break;
+    }
+    else {
+      buf[i] = ch;
+    }
+  }
+}
+
+
+void GetIP(byte *IP)
+{
+  char input[16];
+  GetString(input, sizeof(input));
+ 
+  char *i;
+  IP[0] = atoi(strtok_r(input,".",&i));
+  IP[1] = atoi(strtok_r(NULL,".",&i));
+  IP[2] = atoi(strtok_r(NULL,".",&i));
+  IP[3] = atoi(strtok_r(NULL,".",&i));
+}
+
 
 void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
   // int result = Ethernet.maintain(); // renew DHCP

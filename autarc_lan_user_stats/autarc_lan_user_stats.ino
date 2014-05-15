@@ -70,8 +70,33 @@ void setup() {
   configurate = Serial.read();
   if (configurate >= 0) {
     Serial.println("Starting configuration");
-      //TODO: Ask for Ip, Gateway, Netmask to configurate
-  } else {
+      //TODO: Ask for MAC to configurate
+      Serial.println("Board IP: ");
+      GetIP(ip_shield);
+      //TODO: Save in EEPROM
+      print_ip(ip_shield);
+      Serial.println("Stored");
+      Serial.println("\n");
+      
+      Serial.println("IP Gateway: ");
+      GetIP(gateway);
+      //TODO: Save in EEPROM
+      print_ip(gateway);
+      Serial.println("Stored");
+      Serial.println("\n");
+      
+      Serial.println("Subnetmask: ");
+      GetIP(subnet);
+      //TODO: Save in EEPROM
+      print_ip(subnet);
+      Serial.println("Stored");
+      Serial.println("\n");
+      
+      Serial.println("\n");
+      Serial.println("Setup finished");
+      Serial.println("\n");
+      
+    } else {
     Serial.println("no configuration");
   }
   
