@@ -37,7 +37,7 @@ if (isset($_GET['AVR_ID'])) {
             $currIP = mysql_real_escape_string(htmlspecialchars($_GET['IP'][$i], ENT_QUOTES));
             $currMAC = mysql_real_escape_string(htmlspecialchars($_GET['MAC'][$i], ENT_QUOTES));
 
-            if ($currMAC == "0.0.0.0.0.0") {
+            if ($currMAC == "0:0:0:0:0:0") {
                 /* Device is offline -> Update last_scan time */
                 $mysql_updateScanTime = mysql_query("UPDATE Online_DB SET last_scan = '".$date."' WHERE AVR_ID='".$AVR_ID."' AND IP = '".$currIP."'");
             }
