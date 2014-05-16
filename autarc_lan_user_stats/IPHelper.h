@@ -30,6 +30,46 @@ void print_mac(byte* mac) {
 }
 
 
+void write_EEPROM(int startstorage, byte *value, int valuesize)
+{
+   for (int i = 0; i < valuesize; i++) {
+     EEPROM.write(i + startstorage, value[i]);
+   }
+}
+
+void write_EEPROM(int startstorage, char *value, int valuesize)
+{
+   for (int i = 0; i < valuesize; i++) {
+     EEPROM.write(i + startstorage, value[i]);
+   }
+}
+
+void write_EEPROM(int startstorage, byte value)
+{
+    EEPROM.write(startstorage, value);
+}
+
+
+void read_EEPROM(int startstorage, byte *value, int valuesize)
+{
+   for (int i = 0; i < valuesize; i++) {
+     value[i] = EEPROM.read(i + startstorage);
+   }
+}
+
+void read_EEPROM(int startstorage, char *value, int valuesize)
+{
+   for (int i = 0; i < valuesize; i++) {
+     value[i] = EEPROM.read(i + startstorage);
+   }
+}
+
+void read_EEPROM(int startstorage, byte value)
+{
+   value = EEPROM.read(startstorage);
+}
+
+
 void GetString(char *buf, int bufsize)
 {
   //TODO: Correction not possible yet
