@@ -64,9 +64,9 @@ void read_EEPROM(int startstorage, char *value, int valuesize)
    }
 }
 
-void read_EEPROM(int startstorage, byte value)
+byte read_EEPROM(int startstorage)
 {
-   value = EEPROM.read(startstorage);
+   return EEPROM.read(startstorage);
 }
 
 

@@ -31,7 +31,7 @@ byte pingrequest;
 // 30 - 35     | AVRID         | 6
 
 
-char *AVRID;  //AVRID[6]
+char AVRID[6];  //AVRID[6]
 byte mac_shield[6];
 byte ip_shield[4];
 byte gateway[4];
@@ -61,7 +61,6 @@ byte currMAC[6];
 byte readSubnet[4];
 byte readIP[4];
 
-byte configured;
 int configurate;
 
 // Ping library configuration
@@ -90,7 +89,6 @@ void setup() {
   configurate = Serial.read();
   if (configurate >= 0) {
     Serial.println("Starting configuration");
-      //TODO: Test storage in EEPROM
       Serial.println("MAC Board: ");
       GetMAC(mac_shield);
       write_EEPROM(1, mac_shield , sizeof(mac_shield));
@@ -168,13 +166,13 @@ void setup() {
       }
       
       //TODO: Get free AVR-ID from Server?
-      //Serial.println("AVR-ID: ");
-      //GetString(AVRID, sizeof(AVRID));
-      AVRID = "Tim01";
+      Serial.println("AVR-ID: ");
+      GetString(AVRID, sizeof(AVRID));
+      //AVRID = "Tim01";
       write_EEPROM(30, AVRID , sizeof(AVRID));
-      //Serial.println(AVRID);
-      //Serial.println("Stored");
-      //Serial.println("\n");
+      Serial.println(AVRID);
+      Serial.println("Stored");
+      Serial.println("\n");
 
       
       //Confirm settings and set configured = 1 in EEPROM
@@ -191,9 +189,7 @@ void setup() {
   
   
   //Check if board is configurated
-  read_EEPROM(0 ,configured);
-  Serial.println(configured);
-  if (configured != 1) {
+  if (read_EEPROM(0) != 1) {
    //use default values:
       Serial.println("No configuration stored yet. Using default values...");
       mac_shield[0] = 0x90;
@@ -225,7 +221,12 @@ void setup() {
       end_ip[1] = 168;
       end_ip[2] = 178;
       end_ip[3] = 254;
-      AVRID = "Tim00";
+      AVRID[0] = 'T';
+      AVRID[1] = 'i';
+      AVRID[2] = 'm';
+      AVRID[3] = '0';
+      AVRID[4] = '0';
+      AVRID[5] = '\0';
       
   } else {
    //Read values from EEPROM:
@@ -234,9 +235,9 @@ void setup() {
     read_EEPROM(7, ip_shield , sizeof(ip_shield));
     read_EEPROM(11, gateway , sizeof(gateway));
     read_EEPROM(15, subnet , sizeof(subnet));
-    read_EEPROM(19, useDhcp);
-    read_EEPROM(20, pingrequest);
-    read_EEPROM(21, useSubnetting);
+    useDhcp = read_EEPROM(19);
+    pingrequest = read_EEPROM(20);
+    useSubnetting = read_EEPROM(21);
     read_EEPROM(22, start_ip , sizeof(start_ip));
     read_EEPROM(26, end_ip , sizeof(end_ip));
     read_EEPROM(30, AVRID , sizeof(AVRID));
