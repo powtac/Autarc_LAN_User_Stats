@@ -8,10 +8,22 @@
 // init_mem();  //hier???
 // Serial.println(get_mem_unused());
 
-// Shield and network configuration
 // WireShark Filter: eth.addr[0:3]==90:A2:DA
-byte useDhcp;
-byte pingrequest;
+
+// Simon
+//static char AVRID[6]           = "Simon";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//byte ip_shield[4]              = { 10, 0, 1, 13 };
+//byte gateway[4]                = { 10, 0, 1, 1 };
+//byte subnet[4]                 = { 255, 255, 0, 0 };
+
+//// Jonas
+//static char AVRID[6]           = "Jonas";
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//byte ip_shield[4]              = { 192, 168, 1, 30 };
+//byte gateway[4]                = { 192, 168, 1, 1 };
+//byte subnet[4]                 = { 255, 255, 0, 0 };
+
 
 //// Tim
 
@@ -31,35 +43,24 @@ byte pingrequest;
 // 30 - 35     | AVRID         | 6
 
 
-char AVRID[6];  //AVRID[6]
+
 byte mac_shield[6];
 byte ip_shield[4];
 byte gateway[4];
 byte subnet[4];
-
-// Simon
-//static char AVRID[6]           = "Simon";
-//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-//byte ip_shield[4]              = { 10, 0, 1, 13 };
-//byte gateway[4]                = { 10, 0, 1, 1 };
-//byte subnet[4]                 = { 255, 255, 0, 0 };
-
-//// Jonas
-//static char AVRID[6]           = "Jonas";
-//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
-//byte ip_shield[4]              = { 192, 168, 1, 30 };
-//byte gateway[4]                = { 192, 168, 1, 1 };
-//byte subnet[4]                 = { 255, 255, 0, 0 };
-
+byte useDhcp;
+byte pingrequest;
 byte useSubnetting;
 byte start_ip[4];
 byte end_ip[4];
 
-byte currIP[4];
-byte currMAC[6];
+char AVRID[6];
 
 byte readSubnet[4];
 byte readIP[4];
+
+byte currIP[4];
+byte currMAC[6];
 
 int configurate;
 
@@ -81,6 +82,9 @@ void setup() {
   Serial.begin(115200);
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
+  
+//________________________Configuration of the board______________________________
+
   Serial.print("Press any key to configurate");
   for (char i = 0; i < 3 and Serial.available() <= 0; i++) {
     delay(1000);
@@ -168,7 +172,6 @@ void setup() {
       //TODO: Get free AVR-ID from Server?
       Serial.println("AVR-ID: ");
       GetString(AVRID, sizeof(AVRID));
-      //AVRID = "Tim01";
       write_EEPROM(30, AVRID , sizeof(AVRID));
       Serial.println(AVRID);
       Serial.println("Stored");
@@ -188,7 +191,7 @@ void setup() {
   }
   
   
-  //Check if board is configurated
+//_____________________Loading the values for the board__________________________
   if (read_EEPROM(0) != 1) {
    //use default values:
       Serial.println("No configuration stored yet. Using default values...");
@@ -243,8 +246,9 @@ void setup() {
     read_EEPROM(30, AVRID , sizeof(AVRID));
   }
 
-  
-  // Setup Start
+
+
+//________________________Initialising of the board______________________________
   Serial.println("Try to get IP address from network...");
   Serial.print(" MAC address of shield: ");
   print_mac(mac_shield);
@@ -270,9 +274,9 @@ void setup() {
   Serial.println(" Setup complete\n");
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
-  // Setup End
 
 //TODO: Test with Subnetmask for Subnetting!
+//Set start_ip and end_ip if subnetting is choosed
 if (useSubnetting != 0) {
     for (byte i = 0; i < 4; i++) {
       readSubnet[i] = Ethernet.subnetMask()[i], DEC;
@@ -287,13 +291,16 @@ if (useSubnetting != 0) {
       }
      }
 }
-  
+
   Serial.print("\nStarting loop trough IP range ");
   print_ip(start_ip);
   Serial.print(" - ");
   print_ip(end_ip);
 }
 
+
+
+//___________________________Scan the network_________________________________
 void loop() {
   Serial.print("Speicher (Loop-Start): ");
   Serial.println(get_mem_unused());

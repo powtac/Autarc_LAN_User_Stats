@@ -2,7 +2,6 @@
 
 #include <stdarg.h>
 #include "memcheck.h"
-// Serial.println(get_mem_unused());
 
 void print_ip(byte* ip) {
   Serial.print(ip[0]);
