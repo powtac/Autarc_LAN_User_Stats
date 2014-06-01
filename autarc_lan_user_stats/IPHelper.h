@@ -10,7 +10,7 @@ void print_ip(byte* ip) {
   Serial.print(".");
   Serial.print(ip[2]);
   Serial.print(".");
-  Serial.println(ip[3]);
+  Serial.print(ip[3]);
 }
 
 
@@ -25,7 +25,7 @@ void print_mac(byte* mac) {
   Serial.print(":");
   Serial.print(mac[4], HEX);
   Serial.print(":");
-  Serial.println(mac[5], HEX);
+  Serial.print(mac[5], HEX);
 }
 
 

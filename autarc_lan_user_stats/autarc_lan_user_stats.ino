@@ -12,7 +12,7 @@
 
 // Simon
 //static char AVRID[6]           = "Simon";
-//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
+//static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F }; // 90:a2:da:00:46:8f
 //byte ip_shield[4]              = { 10, 0, 1, 13 };
 //byte gateway[4]                = { 10, 0, 1, 1 };
 //byte subnet[4]                 = { 255, 255, 0, 0 };
@@ -94,33 +94,37 @@ void setup() {
   configuration = Serial.read();
   if (configuration >= 0) {
     Serial.println("Starting configuration");
-    Serial.println("MAC Board: ");
+    Serial.println("MAC Board, format \"00:00:00:00:00:00\": ");
     GetMAC(mac_shield);
     write_EEPROM(1, mac_shield , sizeof(mac_shield));
+    Serial.println();
     print_mac(mac_shield);
-    Serial.println("Stored");
+    Serial.println(" stored");
     Serial.println("\n");
     
-    Serial.println("IP Board: ");
+    Serial.println("IP Board, format \"000.111.222.333\": ");
     GetIP(ip_shield);
     write_EEPROM(7, ip_shield , sizeof(ip_shield));
+    Serial.println();
     print_ip(ip_shield);
-    Serial.println("Stored");
+    Serial.println(" stored");
     Serial.println("\n");
     
-    Serial.println("IP Gateway: ");
+    Serial.println("IP Gateway, format \"000.111.222.333\": ");
     GetIP(gateway);
     write_EEPROM(11, gateway , sizeof(gateway));
+    Serial.println();
     print_ip(gateway);
-    Serial.println("Stored");
+    Serial.println(" stored");
     Serial.println("\n");
     
     //TODO: Check if it works fine!
-    Serial.println("Subnetmask: ");
+    Serial.println("Subnetmask, format \"000.111.222.333\": ");
     GetIP(subnet);
     write_EEPROM(15, subnet , sizeof(subnet));
+    Serial.println();
     print_ip(subnet);
-    Serial.println("Stored");
+    Serial.println(" stored");
     Serial.println("\n");
     
     Serial.println("Use DHCP (0 = no): ");
@@ -138,8 +142,8 @@ void setup() {
     pingrequest = GetNumber();
     write_EEPROM(20, pingrequest);
     Serial.print("Number of ping-requests: ");
-    Serial.println(pingrequest);
-    Serial.println("Stored");
+    Serial.print(pingrequest);
+    Serial.println(" stored");
     Serial.println("\n");
     
     Serial.println("Use Subnetting (0 = no): ");
@@ -150,18 +154,20 @@ void setup() {
       Serial.println("Stored");
       Serial.println("\n");
        
-      Serial.println("Start IP for Scan: ");
+      Serial.println("Start IP for scan, format \"000.111.222.333\": ");
       GetIP(start_ip);
       write_EEPROM(22, start_ip , sizeof(start_ip));
+      Serial.println();
       print_ip(start_ip);
-      Serial.println("Stored");
+      Serial.println(" stored");
       Serial.println("\n");
    
-      Serial.println("End IP for Scan: ");
+      Serial.println("End IP for scan, format \"000.111.222.333\": ");
       GetIP(end_ip);
       write_EEPROM(26, end_ip , sizeof(end_ip));
+      Serial.println();
       print_ip(end_ip);
-      Serial.println("Stored");
+      Serial.println(" stored");
       Serial.println("\n");
     } else {
       Serial.println("Use Subnetting");
@@ -173,8 +179,8 @@ void setup() {
     Serial.println("AVR-ID: ");
     GetString(AVRID, sizeof(AVRID));
     write_EEPROM(30, AVRID , sizeof(AVRID));
-    Serial.println(AVRID);
-    Serial.println("Stored");
+    Serial.print(AVRID);
+    Serial.println(" stored");
     Serial.println("\n");
 
     
@@ -183,7 +189,7 @@ void setup() {
     
     
     Serial.println("\n");
-    Serial.println("Setup finished");
+    Serial.println("Configuration finished");
     Serial.println("\n");
   } else {
     Serial.println("no configuration");
@@ -250,6 +256,8 @@ void setup() {
   Serial.println("Try to get IP address from network...");
   Serial.print(" MAC address of shield: ");
   print_mac(mac_shield);
+  Serial.println();
+  
   // Setup when no IP is known
   if (useDhcp == 0) {
     Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
@@ -320,6 +328,7 @@ void loop() {
         print_ip(currIP);
         Serial.print(" MAC: ");
         print_mac(currMAC);
+        Serial.println();
         
       } else {
         // It's not responding, next one
