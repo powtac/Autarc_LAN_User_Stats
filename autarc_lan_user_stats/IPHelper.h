@@ -29,53 +29,44 @@ void print_mac(byte* mac) {
 }
 
 
-void write_EEPROM(int startstorage, byte *value, int valuesize)
-{
+void write_EEPROM(int startstorage, byte *value, int valuesize) {
    for (int i = 0; i < valuesize; i++) {
      EEPROM.write(i + startstorage, value[i]);
    }
 }
 
-void write_EEPROM(int startstorage, char *value, int valuesize)
-{
+void write_EEPROM(int startstorage, char *value, int valuesize) {
    for (int i = 0; i < valuesize; i++) {
      EEPROM.write(i + startstorage, value[i]);
    }
 }
 
-void write_EEPROM(int startstorage, byte value)
-{
+void write_EEPROM(int startstorage, byte value) {
     EEPROM.write(startstorage, value);
 }
 
 
-void read_EEPROM(int startstorage, byte *value, int valuesize)
-{
+void read_EEPROM(int startstorage, byte *value, int valuesize) {
    for (int i = 0; i < valuesize; i++) {
      value[i] = EEPROM.read(i + startstorage);
    }
 }
 
-void read_EEPROM(int startstorage, char *value, int valuesize)
-{
+void read_EEPROM(int startstorage, char *value, int valuesize) {
    for (int i = 0; i < valuesize; i++) {
      value[i] = EEPROM.read(i + startstorage);
    }
 }
 
-byte read_EEPROM(int startstorage)
-{
+byte read_EEPROM(int startstorage) {
    return EEPROM.read(startstorage);
 }
 
-
-void GetString(char *buf, int bufsize)
-{
+void GetString(char *buf, int bufsize) {
   //TODO: Correction not possible yet
   int i;
   char ch;
-  for (i=0; i<bufsize - 1; ++i)
-  {
+  for (i=0; i<bufsize - 1; ++i) {
     while (Serial.available() == 0); // wait for character to arrive
     ch = Serial.read();
     Serial.print(ch);
@@ -83,24 +74,19 @@ void GetString(char *buf, int bufsize)
      buf[i] = 0; // 0 string terminator just in case
      Serial.println("\n");
      break;
-    }
-    else {
+    } else {
       buf[i] = ch;
     }
   }
 }
 
-
-byte GetNumber(void)
-{
+byte GetNumber(void) {
   char input[2];
   GetString(input, sizeof(input));
   return atoi(input);
 }
 
-
-void GetIP(byte *IP)
-{
+void GetIP(byte *IP) {
   char input[16];
   GetString(input, sizeof(input));
  
@@ -111,9 +97,7 @@ void GetIP(byte *IP)
   IP[3] = atoi(strtok_r(NULL,".",&i));
 }
 
-
-void GetMAC(byte *MAC)
-{
+void GetMAC(byte *MAC) {
   char input[18];
   GetString(input, sizeof(input));
  
@@ -125,7 +109,6 @@ void GetMAC(byte *MAC)
   MAC[4] = strtol(strtok_r(NULL,":",&i), NULL, 16);
   MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
-
 
 void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
   // int result = Ethernet.maintain(); // renew DHCP
@@ -150,27 +133,28 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
     client.print("?AVR_ID=");
     client.print(AVRID);
     Serial.println(AVRID);
+    
     // HTTP String:  AVR_ID=AVR_ID&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
-        client.print("&IP[]=");
-        client.print(IP[0]);
-        client.print(".");
-        client.print(IP[1]);
-        client.print(".");
-        client.print(IP[2]);
-        client.print(".");
-        client.print(IP[3]);
-        client.print("&MAC[]=");
-        client.print(MAC[0], HEX);
-        client.print(":");
-        client.print(MAC[1], HEX);
-        client.print(":");
-        client.print(MAC[2], HEX);
-        client.print(":");
-        client.print(MAC[3], HEX);
-        client.print(":");
-        client.print(MAC[4], HEX);
-        client.print(":");
-        client.print(MAC[5], HEX);
+    client.print("&IP[]=");
+    client.print(IP[0]);
+    client.print(".");
+    client.print(IP[1]);
+    client.print(".");
+    client.print(IP[2]);
+    client.print(".");
+    client.print(IP[3]);
+    client.print("&MAC[]=");
+    client.print(MAC[0], HEX);
+    client.print(":");
+    client.print(MAC[1], HEX);
+    client.print(":");
+    client.print(MAC[2], HEX);
+    client.print(":");
+    client.print(MAC[3], HEX);
+    client.print(":");
+    client.print(MAC[4], HEX);
+    client.print(":");
+    client.print(MAC[5], HEX);
 
     client.println(" HTTP/1.0");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
@@ -180,9 +164,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
     
     Serial.println(client.status());
     client.stop();
-
-  }
-  else {
+  } else {
     Serial.println("NOT connected to HTTP Server");
     Serial.println(ret);
     Serial.println("\n");
