@@ -321,39 +321,48 @@ void loop() {
   Serial.print("Speicher (Loop-Start): ");
   Serial.println(get_mem_unused());
   for(int b = 0; b < 4; b++) { 
-    currIP[b]  = start_ip[b]; 
+    currIP[b] = start_ip[b]; 
   }
   while (1) {
-    if (currIP[3] <= end_ip[3]) { // TODO: An mögliche anpassen; mehrere Blöcke
-      ICMPEchoReply echoReply = ping(currIP, pingrequest);    
-      if (echoReply.status == SUCCESS) {
-        // We found a device!
-        Serial.print("Speicher (Device found): ");
-        Serial.println(get_mem_unused());
-        for(int mac = 0; mac < 6; mac++) {
-          currMAC[mac] = echoReply.MACAddressSocket[mac];
+    if (currIP[1] <= end_ip[1]) {
+      if (currIP[2] <= end_ip[2]) {
+        if (currIP[3] <= end_ip[3]) {
+          ICMPEchoReply echoReply = ping(currIP, pingrequest);    
+          if (echoReply.status == SUCCESS) {
+            // We found a device!
+            Serial.print("Speicher (Device found): ");
+            Serial.println(get_mem_unused());
+            for(int mac = 0; mac < 6; mac++) {
+              currMAC[mac] = echoReply.MACAddressSocket[mac];
+            }
+            
+            Serial.print("Device found on: ");
+            print_ip(currIP);
+            Serial.print(" MAC: ");
+            print_mac(currMAC);
+            Serial.println();
+            
+          } else {
+            // It's not responding, next one
+            for(int mac = 0; mac < 6; mac++) {
+              currMAC[mac] = 0;
+            }
+            Serial.print("No (pingable) device on IP ");
+            print_ip(currIP);
+          }
+          send_info_to_server(currIP, currMAC, AVRID);
+          
+          currIP[3]++;  
+        } else {
+          currIP[3] = start_ip[3];
+          currIP[2]++;
         }
-        
-        Serial.print("Device found on: ");
-        print_ip(currIP);
-        Serial.print(" MAC: ");
-        print_mac(currMAC);
-        Serial.println();
-        
       } else {
-        // It's not responding, next one
-        for(int mac = 0; mac < 6; mac++) {
-          currMAC[mac] = 0;
-        }
-        Serial.print("No (pingable) device on IP ");
-        print_ip(currIP);
+        currIP[2] = start_ip[2];
+        currIP[1]++;
       }
-      send_info_to_server(currIP, currMAC, AVRID);
-      
-      currIP[3]++;  
     } else {
-      //TODO: next IP-Block?!
-      break; // Exit Loop 
+      break; // Exit Loop
     }
   }
   Serial.print("Speicher (Ende ServerSend): ");
