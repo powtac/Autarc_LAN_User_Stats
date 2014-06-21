@@ -74,6 +74,11 @@ void GetString(char *buf, int bufsize) {
      buf[i] = 0; // 0 string terminator just in case
      Serial.println("\n");
      break;
+    } else if (ch == 8) {
+      //Backspace
+      if (i >= 1) {
+        i = i - 2;
+      }
     } else {
       buf[i] = ch;
     }
