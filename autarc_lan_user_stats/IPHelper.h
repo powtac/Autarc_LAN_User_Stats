@@ -66,21 +66,28 @@ void GetString(char *buf, int bufsize) {
   //TODO: Correction not possible yet
   int i;
   char ch;
-  for (i=0; i<bufsize - 1; ++i) {
+  for (i=0; ; ++i) {
     while (Serial.available() == 0); // wait for character to arrive
     ch = Serial.read();
     Serial.print(ch);
     if (ch == '\r') {
-     buf[i] = 0; // 0 string terminator just in case
      Serial.println("\n");
      break;
+    } else if (ch == '\n') {
+        //Ignore new-line
+        i--;
     } else if (ch == 8) {
       //Backspace
       if (i >= 1) {
         i = i - 2;
       }
     } else {
-      buf[i] = ch;
+      if (i < bufsize - 1) {
+        buf[i] = ch;
+        buf[i + 1] = 0; // 0 string terminator
+      } else {
+        //max chars recieved, don't save further chars
+      }
     }
   }
 }
