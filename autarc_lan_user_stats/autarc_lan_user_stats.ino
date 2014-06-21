@@ -94,103 +94,113 @@ void setup() {
   configuration = Serial.read();
   if (configuration >= 0) {
     Serial.println("Starting configuration");
-    Serial.println("MAC Board, format \"00:00:00:00:00:00\": ");
-    GetMAC(mac_shield);
-    write_EEPROM(1, mac_shield , sizeof(mac_shield));
-    Serial.println();
-    print_mac(mac_shield);
-    Serial.println(" stored");
-    Serial.println("\n");
     
-    Serial.println("IP Board, format \"000.111.222.333\": ");
-    GetIP(ip_shield);
-    write_EEPROM(7, ip_shield , sizeof(ip_shield));
-    Serial.println();
-    print_ip(ip_shield);
-    Serial.println(" stored");
-    Serial.println("\n");
-    
-    Serial.println("IP Gateway, format \"000.111.222.333\": ");
-    GetIP(gateway);
-    write_EEPROM(11, gateway , sizeof(gateway));
-    Serial.println();
-    print_ip(gateway);
-    Serial.println(" stored");
-    Serial.println("\n");
-    
-    //TODO: Check if it works fine!
-    Serial.println("Subnetmask, format \"000.111.222.333\": ");
-    GetIP(subnet);
-    write_EEPROM(15, subnet , sizeof(subnet));
-    Serial.println();
-    print_ip(subnet);
-    Serial.println(" stored");
-    Serial.println("\n");
-    
-    Serial.println("Use DHCP (0 = no): ");
-    useDhcp = GetNumber();
-    write_EEPROM(19, useDhcp);
-    if (useDhcp == 0) {
-      Serial.println("Don't use DHCP");
-    } else {
-      Serial.println("Use DHCP");
-    }
-    Serial.println("Stored");
-    Serial.println("\n");
-    
-    Serial.println("Number of ping-requests: ");
-    pingrequest = GetNumber();
-    write_EEPROM(20, pingrequest);
-    Serial.print("Number of ping-requests: ");
-    Serial.print(pingrequest);
-    Serial.println(" stored");
-    Serial.println("\n");
-    
-    Serial.println("Use Subnetting (0 = no): ");
-    useSubnetting = GetNumber();
-    write_EEPROM(21, useSubnetting);
-    if (useSubnetting == 0) {
-      Serial.println("Don't use Subnetting");
-      Serial.println("Stored");
-      Serial.println("\n");
-       
-      Serial.println("Start IP for scan, format \"000.111.222.333\": ");
-      GetIP(start_ip);
-      write_EEPROM(22, start_ip , sizeof(start_ip));
+    Serial.println("Load default configuration (0 = no): ");
+    if (GetNumber() == 0) {    
+      Serial.println("MAC Board, format \"00:00:00:00:00:00\": ");
+      GetMAC(mac_shield);
+      write_EEPROM(1, mac_shield , sizeof(mac_shield));
       Serial.println();
-      print_ip(start_ip);
+      print_mac(mac_shield);
       Serial.println(" stored");
       Serial.println("\n");
-   
-      Serial.println("End IP for scan, format \"000.111.222.333\": ");
-      GetIP(end_ip);
-      write_EEPROM(26, end_ip , sizeof(end_ip));
-      Serial.println();
-      print_ip(end_ip);
-      Serial.println(" stored");
-      Serial.println("\n");
-    } else {
-      Serial.println("Use Subnetting");
-      Serial.println("Stored");
-      Serial.println("\n");
-    }
       
-    //TODO: Get free AVR-ID from Server?
-    Serial.println("AVR-ID: ");
-    GetString(AVRID, sizeof(AVRID));
-    write_EEPROM(30, AVRID , sizeof(AVRID));
-    Serial.print(AVRID);
-    Serial.println(" stored");
-    Serial.println("\n");
-
+      Serial.println("IP Board, format \"000.111.222.333\": ");
+      GetIP(ip_shield);
+      write_EEPROM(7, ip_shield , sizeof(ip_shield));
+      Serial.println();
+      print_ip(ip_shield);
+      Serial.println(" stored");
+      Serial.println("\n");
+      
+      Serial.println("IP Gateway, format \"000.111.222.333\": ");
+      GetIP(gateway);
+      write_EEPROM(11, gateway , sizeof(gateway));
+      Serial.println();
+      print_ip(gateway);
+      Serial.println(" stored");
+      Serial.println("\n");
+      
+      //TODO: Check if it works fine!
+      Serial.println("Subnetmask, format \"000.111.222.333\": ");
+      GetIP(subnet);
+      write_EEPROM(15, subnet , sizeof(subnet));
+      Serial.println();
+      print_ip(subnet);
+      Serial.println(" stored");
+      Serial.println("\n");
+      
+      Serial.println("Use DHCP (0 = no): ");
+      useDhcp = GetNumber();
+      write_EEPROM(19, useDhcp);
+      if (useDhcp == 0) {
+        Serial.println("Don't use DHCP");
+      } else {
+        Serial.println("Use DHCP");
+      }
+      Serial.println("stored");
+      Serial.println("\n");
+      
+      Serial.println("Number of ping-requests: ");
+      pingrequest = GetNumber();
+      write_EEPROM(20, pingrequest);
+      Serial.print("Number of ping-requests: ");
+      Serial.print(pingrequest);
+      Serial.println(" stored");
+      Serial.println("\n");
+      
+      Serial.println("Use Subnetting (0 = no): ");
+      useSubnetting = GetNumber();
+      write_EEPROM(21, useSubnetting);
+      if (useSubnetting == 0) {
+        Serial.println("Don't use Subnetting");
+        Serial.println("stored");
+        Serial.println("\n");
+         
+        Serial.println("Start IP for scan, format \"000.111.222.333\": ");
+        GetIP(start_ip);
+        write_EEPROM(22, start_ip , sizeof(start_ip));
+        Serial.println();
+        print_ip(start_ip);
+        Serial.println(" stored");
+        Serial.println("\n");
+     
+        Serial.println("End IP for scan, format \"000.111.222.333\": ");
+        GetIP(end_ip);
+        write_EEPROM(26, end_ip , sizeof(end_ip));
+        Serial.println();
+        print_ip(end_ip);
+        Serial.println(" stored");
+        Serial.println("\n");
+      } else {
+        Serial.println("Use Subnetting");
+        Serial.println("stored");
+        Serial.println("\n");
+      }
+        
+      //TODO: Get free AVR-ID from Server?
+      Serial.println("AVR-ID: ");
+      GetString(AVRID, sizeof(AVRID));
+      write_EEPROM(30, AVRID , sizeof(AVRID));
+      Serial.print(AVRID);
+      Serial.println("stored");
+      Serial.println("\n");
+  
+      
+      //Confirm settings and set configured = 1 in EEPROM
+      write_EEPROM(0, 1);
+      
+      
+      Serial.println("\n");
+      Serial.println("Configuration finished");
     
-    //Confirm settings and set configured = 1 in EEPROM
-    write_EEPROM(0, 1);
-    
-    
+    } else {
+      //Delete settings and set configured = 0 in EEPROM
+      write_EEPROM(0, 0);
+      Serial.println("Default configuration loaded");
+    }
     Serial.println("\n");
-    Serial.println("Configuration finished");
-    Serial.println("\n");
+    
   } else {
     Serial.println("no configuration");
   }
