@@ -64,6 +64,9 @@ byte currMAC[6];
 
 int configuration;
 
+const char string_format_ip[] = ", format \"000.111.222.333\": ";
+const char string_stored[] = " stored";
+
 // Ping library configuration
 SOCKET pingSocket              = 0;
 
@@ -102,32 +105,35 @@ void setup() {
       write_EEPROM(1, mac_shield , sizeof(mac_shield));
       Serial.println();
       print_mac(mac_shield);
-      Serial.println(" stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.println("IP Board, format \"000.111.222.333\": ");
+      Serial.print("IP Board");
+      Serial.println(string_format_ip);
       GetIP(ip_shield);
       write_EEPROM(7, ip_shield , sizeof(ip_shield));
       Serial.println();
       print_ip(ip_shield);
-      Serial.println(" stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.println("IP Gateway, format \"000.111.222.333\": ");
+      Serial.print("IP Gateway");
+      Serial.println(string_format_ip);
       GetIP(gateway);
       write_EEPROM(11, gateway , sizeof(gateway));
       Serial.println();
       print_ip(gateway);
-      Serial.println(" stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
       //TODO: Check if it works fine!
-      Serial.println("Subnetmask, format \"000.111.222.333\": ");
+      Serial.print("Subnetmask");
+      Serial.println(string_format_ip);
       GetIP(subnet);
       write_EEPROM(15, subnet , sizeof(subnet));
       Serial.println();
       print_ip(subnet);
-      Serial.println(" stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
       Serial.println("Use DHCP (0 = no): ");
@@ -138,7 +144,7 @@ void setup() {
       } else {
         Serial.println("Use DHCP");
       }
-      Serial.println("stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
       Serial.println("Number of ping-requests: ");
@@ -146,7 +152,7 @@ void setup() {
       write_EEPROM(20, pingrequest);
       Serial.print("Number of ping-requests: ");
       Serial.print(pingrequest);
-      Serial.println(" stored");
+      Serial.println(string_stored);
       Serial.println("\n");
       
       Serial.println("Use Subnetting (0 = no): ");
@@ -154,27 +160,29 @@ void setup() {
       write_EEPROM(21, useSubnetting);
       if (useSubnetting == 0) {
         Serial.println("Don't use Subnetting");
-        Serial.println("stored");
+        Serial.println(string_stored);
         Serial.println("\n");
          
-        Serial.println("Start IP for scan, format \"000.111.222.333\": ");
+        Serial.print("Start IP for scan");
+        Serial.println(string_format_ip);
         GetIP(start_ip);
         write_EEPROM(22, start_ip , sizeof(start_ip));
         Serial.println();
         print_ip(start_ip);
-        Serial.println(" stored");
+        Serial.println(string_stored);
         Serial.println("\n");
      
-        Serial.println("End IP for scan, format \"000.111.222.333\": ");
+        Serial.print("End IP for scan");
+        Serial.println(string_format_ip);
         GetIP(end_ip);
         write_EEPROM(26, end_ip , sizeof(end_ip));
         Serial.println();
         print_ip(end_ip);
-        Serial.println(" stored");
+        Serial.println(string_stored);
         Serial.println("\n");
       } else {
         Serial.println("Use Subnetting");
-        Serial.println("stored");
+        Serial.println(string_stored);
         Serial.println("\n");
       }
         
@@ -183,7 +191,7 @@ void setup() {
       GetString(AVRID, sizeof(AVRID));
       write_EEPROM(30, AVRID , sizeof(AVRID));
       Serial.print(AVRID);
-      Serial.println("stored");
+      Serial.println(string_stored);
       Serial.println("\n");
   
       
@@ -327,7 +335,7 @@ void loop() {
     if (currIP[1] <= end_ip[1]) {
       if (currIP[2] <= end_ip[2]) {
         if (currIP[3] <= end_ip[3]) {
-          ICMPEchoReply echoReply = ping(currIP, pingrequest);    
+          ICMPEchoReply echoReply = ping(currIP, pingrequest); 
           if (echoReply.status == SUCCESS) {
             // We found a device!
             Serial.print("Speicher (Device found): ");
@@ -349,6 +357,7 @@ void loop() {
             }
             Serial.print("No (pingable) device on IP ");
             print_ip(currIP);
+            Serial.println();
           }
           send_info_to_server(currIP, currMAC, AVRID);
           
