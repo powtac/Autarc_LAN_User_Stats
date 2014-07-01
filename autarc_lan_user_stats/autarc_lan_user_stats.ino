@@ -310,14 +310,15 @@ void setup() {
       readSubnet[i] = Ethernet.subnetMask()[i], DEC;
       readIP[i]     = Ethernet.localIP()[i], DEC;
       start_ip[i]   = readIP[i] & readSubnet[i];
-      if (start_ip[i] == 0) {
-        start_ip[i] = 1;   //TODO: Set to 2, because of Gateway
-      }
+      
       end_ip[i]     = readIP[i] | ~readSubnet[i];
       if (end_ip[i] == 255) {
         end_ip[i] = 254; 
       }
     }
+    if (start_ip[3] == 0) {
+        start_ip[3] = 1;   //TODO: Set to 2, because of Gateway, or don't scan gateway.
+      }
   }
 
   Serial.print("\nStarting loop trough IP range ");
