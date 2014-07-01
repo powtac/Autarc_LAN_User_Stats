@@ -5,6 +5,7 @@
 #include "ICMPPing.h"
 #include "IPHelper.h"
 #include "memcheck.h"
+#include "default_config.h"
 // init_mem();  //hier???
 // Serial.println(get_mem_unused());
 
@@ -43,18 +44,6 @@
 // 30 - 35     | AVRID         | 6
 
 
-
-byte mac_shield[6];
-byte ip_shield[4];
-byte gateway[4];
-byte subnet[4];
-byte useDhcp;
-byte pingrequest;
-byte useSubnetting;
-byte start_ip[4];
-byte end_ip[4];
-
-char AVRID[6];
 
 byte readSubnet[4];
 byte readIP[4];
@@ -218,41 +207,7 @@ void setup() {
   if (read_EEPROM(0) != 1) {
     //use default values:
     Serial.println("No configuration stored yet. Using default values...");
-    mac_shield[0] = 0x90;
-    mac_shield[1] = 0xA2;
-    mac_shield[2] = 0xDA;
-    mac_shield[3] = 0x00;
-    mac_shield[4] = 0x46;
-    mac_shield[5] = 0x9F;
-    ip_shield[0] = 192;
-    ip_shield[1] = 168;
-    ip_shield[2] = 178;
-    ip_shield[3] = 98;
-    gateway[0] = 192;
-    gateway[1] = 168;
-    gateway[2] = 178;
-    gateway[3] = 1;
-    subnet[0] = 255;
-    subnet[1] = 255;
-    subnet[2] = 255;
-    subnet[3] = 0;
-    useDhcp = 1;
-    pingrequest = 2;
-    useSubnetting = 1;
-    start_ip[0] = 192;
-    start_ip[1] = 168;
-    start_ip[2] = 178;
-    start_ip[3] = 2;
-    end_ip[0] = 192;
-    end_ip[1] = 168;
-    end_ip[2] = 178;
-    end_ip[3] = 254;
-    AVRID[0] = 'T';
-    AVRID[1] = 'i';
-    AVRID[2] = 'm';
-    AVRID[3] = '0';
-    AVRID[4] = '0';
-    AVRID[5] = '\0';
+    Load_Default_Config();
   } else {
     //Read values from EEPROM:
     Serial.println("Using configuration from EEPROM.");
