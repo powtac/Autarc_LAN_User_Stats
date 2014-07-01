@@ -278,7 +278,8 @@ void setup() {
   
   // Setup when no IP is known
   if (useDhcp == 0) {
-    Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
+    //Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
+    Ethernet.begin(mac_shield, ip_shield);
   } else {
     if (Ethernet.begin(mac_shield) == 0) {
       Serial.println("DHCP failed, no automatic IP address assigned!");
@@ -286,7 +287,8 @@ void setup() {
       Serial.print(millis());
       Serial.println(" ms");
       Serial.println("Trying to set manual IP address.");
-      Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
+      //Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
+      Ethernet.begin(mac_shield, ip_shield);
     }
   }
 
@@ -295,6 +297,8 @@ void setup() {
   Serial.println(Ethernet.localIP());
   Serial.print(" ");
   Serial.println(Ethernet.subnetMask());
+  Serial.print(" ");
+  Serial.println(Ethernet.gatewayIP());
   Serial.println(" Setup complete\n");
   Serial.print("Speicher: ");
   Serial.println(get_mem_unused());
