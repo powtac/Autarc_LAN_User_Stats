@@ -245,7 +245,6 @@ void setup() {
   Serial.print(F("Speicher: "));
   Serial.println(get_mem_unused());
 
-  //TODO: Test with Subnetmask for Subnetting!
   //Set start_ip and end_ip if subnetting is choosed
   if (useSubnetting != 0) {
     for (byte i = 0; i < 4; i++) {
