@@ -56,7 +56,7 @@ ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 void setup() {
   delay(1000);
   Serial.begin(115200);
-  Serial.print("Memory: ");
+  Serial.print(F("Memory: "));
   Serial.println(get_mem_unused());
   
 //________________________Configuration of the board______________________________
@@ -69,11 +69,11 @@ void setup() {
   
   configuration = Serial.read();
   if (configuration >= 0) {
-    Serial.println("Starting configuration");
+    Serial.println(F("Starting configuration"));
     
-    Serial.println("Load default configuration (0 = no): ");
+    Serial.println(F("Load default configuration (0 = no): "));
     if (GetNumber() == 0) {    
-      Serial.println("MAC Board, format \"00:00:00:00:00:00\": ");
+      Serial.println(F("MAC Board, format \"00:00:00:00:00:00\": "));
       GetMAC(mac_shield);
       write_EEPROM(1, mac_shield , sizeof(mac_shield));
       Serial.println();
@@ -81,7 +81,7 @@ void setup() {
       Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.print("IP Board");
+      Serial.print(F("IP Board"));
       Serial.println(string_format_ip);
       GetIP(ip_shield);
       write_EEPROM(7, ip_shield , sizeof(ip_shield));
@@ -90,7 +90,7 @@ void setup() {
       Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.print("IP Gateway");
+      Serial.print(F("IP Gateway"));
       Serial.println(string_format_ip);
       GetIP(gateway);
       write_EEPROM(11, gateway , sizeof(gateway));
@@ -100,7 +100,7 @@ void setup() {
       Serial.println("\n");
       
       //TODO: Check if it works fine!
-      Serial.print("Subnetmask");
+      Serial.print(F("Subnetmask"));
       Serial.println(string_format_ip);
       GetIP(subnet);
       write_EEPROM(15, subnet , sizeof(subnet));
@@ -109,34 +109,34 @@ void setup() {
       Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.println("Use DHCP (0 = no): ");
+      Serial.println(F("Use DHCP (0 = no): "));
       useDhcp = GetNumber();
       write_EEPROM(19, useDhcp);
       if (useDhcp == 0) {
-        Serial.println("Don't use DHCP");
+        Serial.println(F("Don't use DHCP"));
       } else {
-        Serial.println("Use DHCP");
+        Serial.println(F("Use DHCP"));
       }
       Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.println("Number of ping-requests: ");
+      Serial.println(F("Number of ping-requests: "));
       pingrequest = GetNumber();
       write_EEPROM(20, pingrequest);
-      Serial.print("Number of ping-requests: ");
+      Serial.print(F("Number of ping-requests: "));
       Serial.print(pingrequest);
       Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.println("Use Subnetting (0 = no): ");
+      Serial.println(F("Use Subnetting (0 = no): "));
       useSubnetting = GetNumber();
       write_EEPROM(21, useSubnetting);
       if (useSubnetting == 0) {
-        Serial.println("Don't use Subnetting");
+        Serial.println(F("Don't use Subnetting"));
         Serial.println(string_stored);
         Serial.println("\n");
          
-        Serial.print("Start IP for scan");
+        Serial.print(F("Start IP for scan"));
         Serial.println(string_format_ip);
         GetIP(start_ip);
         write_EEPROM(22, start_ip , sizeof(start_ip));
@@ -145,7 +145,7 @@ void setup() {
         Serial.println(string_stored);
         Serial.println("\n");
      
-        Serial.print("End IP for scan");
+        Serial.print(F("End IP for scan"));
         Serial.println(string_format_ip);
         GetIP(end_ip);
         write_EEPROM(26, end_ip , sizeof(end_ip));
@@ -154,13 +154,13 @@ void setup() {
         Serial.println(string_stored);
         Serial.println("\n");
       } else {
-        Serial.println("Use Subnetting");
+        Serial.println(F("Use Subnetting"));
         Serial.println(string_stored);
         Serial.println("\n");
       }
         
       //TODO: Get free AVR-ID from Server?
-      Serial.println("AVR-ID: ");
+      Serial.println(F("AVR-ID: "));
       GetString(AVRID, sizeof(AVRID));
       write_EEPROM(30, AVRID , sizeof(AVRID));
       Serial.print(AVRID);
@@ -173,28 +173,28 @@ void setup() {
       
       
       Serial.println("\n");
-      Serial.println("Configuration finished");
+      Serial.println(F("Configuration finished"));
     
     } else {
       //Delete settings and set configured = 0 in EEPROM
       write_EEPROM(0, 0);
-      Serial.println("Default configuration loaded");
+      Serial.println(F("Default configuration loaded"));
     }
     Serial.println("\n");
     
   } else {
-    Serial.println("no configuration");
+    Serial.println(F("no configuration"));
   }
   
   
 //_____________________Loading the values for the board__________________________
   if (read_EEPROM(0) != 1) {
     //use default values:
-    Serial.println("No configuration stored yet. Using default values...");
+    Serial.println(F("No configuration stored yet. Using default values..."));
     Load_Default_Config();
   } else {
     //Read values from EEPROM:
-    Serial.println("Using configuration from EEPROM.");
+    Serial.println(F("Using configuration from EEPROM."));
     read_EEPROM(1, mac_shield , sizeof(mac_shield));
     read_EEPROM(7, ip_shield , sizeof(ip_shield));
     read_EEPROM(11, gateway , sizeof(gateway));
@@ -210,8 +210,8 @@ void setup() {
 
 
 //________________________Initialising of the board______________________________
-  Serial.println("Try to get IP address from network...");
-  Serial.print(" MAC address of shield: ");
+  Serial.println(F("Try to get IP address from network..."));
+  Serial.print(F(" MAC address of shield: "));
   print_mac(mac_shield);
   Serial.println();
   
@@ -221,25 +221,25 @@ void setup() {
     Ethernet.begin(mac_shield, ip_shield);
   } else {
     if (Ethernet.begin(mac_shield) == 0) {
-      Serial.println("DHCP failed, no automatic IP address assigned!");
-      Serial.print("Time for waiting for IP address: ");
+      Serial.println(F("DHCP failed, no automatic IP address assigned!"));
+      Serial.print(F("Time for waiting for IP address: "));
       Serial.print(millis());
-      Serial.println(" ms");
-      Serial.println("Trying to set manual IP address.");
+      Serial.println(F(" ms"));
+      Serial.println(F("Trying to set manual IP address."));
       //Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
       Ethernet.begin(mac_shield, ip_shield);
     }
   }
 
-  Serial.println(" Address assigned?");
+  Serial.println(F(" Address assigned?"));
   Serial.print(" ");
   Serial.println(Ethernet.localIP());
   Serial.print(" ");
   Serial.println(Ethernet.subnetMask());
   Serial.print(" ");
   Serial.println(Ethernet.gatewayIP());
-  Serial.println(" Setup complete\n");
-  Serial.print("Speicher: ");
+  Serial.println(F(" Setup complete\n"));
+  Serial.print(F("Speicher: "));
   Serial.println(get_mem_unused());
 
   //TODO: Test with Subnetmask for Subnetting!
@@ -260,9 +260,9 @@ void setup() {
       }
   }
 
-  Serial.print("\nStarting loop trough IP range ");
+  Serial.print(F("\nStarting loop trough IP range "));
   print_ip(start_ip);
-  Serial.print(" - ");
+  Serial.print(F(" - "));
   print_ip(end_ip);
 }
 
@@ -270,7 +270,7 @@ void setup() {
 
 //___________________________Scan the network_________________________________
 void loop() {
-  Serial.print("Speicher (Loop-Start): ");
+  Serial.print(F("Speicher (Loop-Start): "));
   Serial.println(get_mem_unused());
   for(int b = 0; b < 4; b++) { 
     currIP[b] = start_ip[b]; 
@@ -282,15 +282,15 @@ void loop() {
           ICMPEchoReply echoReply = ping(currIP, pingrequest); 
           if (echoReply.status == SUCCESS) {
             // We found a device!
-            Serial.print("Speicher (Device found): ");
+            Serial.print(F("Speicher (Device found): "));
             Serial.println(get_mem_unused());
             for(int mac = 0; mac < 6; mac++) {
               currMAC[mac] = echoReply.MACAddressSocket[mac];
             }
             
-            Serial.print("Device found on: ");
+            Serial.print(F("Device found on: "));
             print_ip(currIP);
-            Serial.print(" MAC: ");
+            Serial.print(F(" MAC: "));
             print_mac(currMAC);
             Serial.println();
             
@@ -299,7 +299,7 @@ void loop() {
             for(int mac = 0; mac < 6; mac++) {
               currMAC[mac] = 0;
             }
-            Serial.print("No (pingable) device on IP ");
+            Serial.print(F("No (pingable) device on IP "));
             print_ip(currIP);
             Serial.println();
           }
@@ -318,7 +318,7 @@ void loop() {
       break; // Exit Loop
     }
   }
-  Serial.print("Speicher (Ende ServerSend): ");
+  Serial.print(F("Speicher (Ende ServerSend): "));
   Serial.println(get_mem_unused());
-  Serial.println("Restart loop");
+  Serial.println(F("Restart loop"));
 }
