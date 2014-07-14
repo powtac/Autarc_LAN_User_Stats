@@ -29,6 +29,9 @@
 // 30 - 35     | AVRID         | 6
 
 
+//Todo: It's only temporarily. Add to configuration?!
+byte dnsSrv[4] = { 192, 168, 178, 1 };
+
 byte readSubnet[4];
 byte readIP[4];
 
@@ -217,8 +220,8 @@ void setup() {
   
   // Setup when no IP is known
   if (useDhcp == 0) {
-    //Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
-    Ethernet.begin(mac_shield, ip_shield);
+    Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+    //Ethernet.begin(mac_shield, ip_shield);
   } else {
     if (Ethernet.begin(mac_shield) == 0) {
       Serial.println(F("DHCP failed, no automatic IP address assigned!"));
@@ -226,8 +229,8 @@ void setup() {
       Serial.print(millis());
       Serial.println(F(" ms"));
       Serial.println(F("Trying to set manual IP address."));
-      //Ethernet.begin(mac_shield, ip_shield, gateway, subnet);
-      Ethernet.begin(mac_shield, ip_shield);
+      Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+      //Ethernet.begin(mac_shield, ip_shield);
     }
   }
 
@@ -249,7 +252,6 @@ void setup() {
       readSubnet[i] = Ethernet.subnetMask()[i], DEC;
       readIP[i]     = Ethernet.localIP()[i], DEC;
       start_ip[i]   = readIP[i] & readSubnet[i];
-      
       end_ip[i]     = readIP[i] | ~readSubnet[i];
       if (end_ip[i] == 255) {
         end_ip[i] = 254; 
