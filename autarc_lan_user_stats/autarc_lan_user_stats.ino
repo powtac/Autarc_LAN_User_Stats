@@ -338,30 +338,30 @@ void loop() {
 void ServerListen() {
   //Serial.println(F("Servers listening..."));
   // listen for incoming clients
-  EthernetClient user = server.available();
-  if (user) {
+  EthernetClient serverClient = server.available();
+  if (serverClient) {
     Serial.println("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
-    while (user.connected()) {
-      if (user.available()) {
-        char c = user.read();
+    while (serverClient.connected()) {
+      if (serverClient.available()) {
+        char c = serverClient.read();
         Serial.write(c);
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           // send a standard http response header
-          user.println("HTTP/1.1 200 OK");
-          user.println("Content-Type: text/html");
-          user.println("Connection: close");  // the connection will be closed after completion of the response
-      user.println("Refresh: 5");  // refresh the page automatically every 5 sec
-          user.println();
-          user.println("<!DOCTYPE HTML>");
-          user.println("<html>");
+          serverClient.println("HTTP/1.1 200 OK");
+          serverClient.println("Content-Type: text/html");
+          serverClient.println("Connection: close");  // the connection will be closed after completion of the response
+          serverClient.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          serverClient.println();
+          serverClient.println("<!DOCTYPE HTML>");
+          serverClient.println("<html>");
 
-          user.println("The server is running!<br />");       
-          user.println("</html>");
+          serverClient.println("The server is running!<br />");       
+          serverClient.println("</html>");
           break;
         }
         if (c == '\n') {
@@ -377,7 +377,7 @@ void ServerListen() {
     // give the web browser time to receive the data
     delay(1);
     // close the connection:
-    user.stop();
+    serverClient.stop();
     Serial.println("client disconnected");
   }
 }
