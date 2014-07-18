@@ -54,7 +54,7 @@ SOCKET pingSocket              = 0;
 // Global namespace to use it in setup() and loop()
 ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
-
+EthernetServer server(80);
 
 void setup() {
   delay(1000);
@@ -244,6 +244,10 @@ void setup() {
   Serial.println(F(" Setup complete\n"));
   Serial.print(F("Speicher: "));
   Serial.println(get_mem_unused());
+  
+  Serial.println(F("Starting server"));
+  server.begin();
+  
 
   //Set start_ip and end_ip if subnetting is choosed
   if (useSubnetting != 0) {
@@ -306,6 +310,12 @@ void loop() {
           }
           send_info_to_server(currIP, currMAC, AVRID);
           
+          //TODO: That isn't really good...
+          for(int x = 0; x < 500; x++) {
+            ServerListen();
+            delay(1);
+          }
+          
           currIP[3]++;  
         } else {
           currIP[3] = start_ip[3];
@@ -322,4 +332,52 @@ void loop() {
   Serial.print(F("Speicher (Ende ServerSend): "));
   Serial.println(get_mem_unused());
   Serial.println(F("Restart loop"));
+}
+
+
+void ServerListen() {
+  //Serial.println(F("Servers listening..."));
+  // listen for incoming clients
+  EthernetClient user = server.available();
+  if (user) {
+    Serial.println("new client");
+    // an http request ends with a blank line
+    boolean currentLineIsBlank = true;
+    while (user.connected()) {
+      if (user.available()) {
+        char c = user.read();
+        Serial.write(c);
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
+        if (c == '\n' && currentLineIsBlank) {
+          // send a standard http response header
+          user.println("HTTP/1.1 200 OK");
+          user.println("Content-Type: text/html");
+          user.println("Connection: close");  // the connection will be closed after completion of the response
+      user.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          user.println();
+          user.println("<!DOCTYPE HTML>");
+          user.println("<html>");
+
+          user.println("The server is running!<br />");       
+          user.println("</html>");
+          break;
+        }
+        if (c == '\n') {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        } 
+        else if (c != '\r') {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        }
+      }
+    }
+    // give the web browser time to receive the data
+    delay(1);
+    // close the connection:
+    user.stop();
+    Serial.println("client disconnected");
+  }
 }
