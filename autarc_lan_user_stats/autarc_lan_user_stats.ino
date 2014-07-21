@@ -311,7 +311,7 @@ void loop() {
           send_info_to_server(currIP, currMAC, AVRID);
           
           //TODO: That isn't really good...
-          for(int x = 0; x < 500; x++) {
+          for(int x = 0; x < 1000; x++) {
             ServerListen();
             delay(1);
           }
@@ -355,12 +355,42 @@ void ServerListen() {
           serverClient.println("HTTP/1.1 200 OK");
           serverClient.println("Content-Type: text/html");
           serverClient.println("Connection: close");  // the connection will be closed after completion of the response
-          serverClient.println("Refresh: 5");  // refresh the page automatically every 5 sec
           serverClient.println();
           serverClient.println("<!DOCTYPE HTML>");
           serverClient.println("<html>");
-
-          serverClient.println("The server is running!<br />");       
+          serverClient.println("<head>");
+          serverClient.println("	<title>Autarc-Lan-User-Stat - Enter Username</title>");
+          serverClient.println("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />");
+          serverClient.println("</head>");
+          serverClient.println("<body>");
+          serverClient.println("	Enter your name for this device:<br /><br />");
+          serverClient.println("	<form action='http://lan-user.danit.de/' method='GET' accept-charset='UTF-8'>");
+          serverClient.print("		<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
+          //TODO: Only send really inputed values!
+          serverClient.print(AVRID[0]);
+          serverClient.print(AVRID[1]);
+          serverClient.print(AVRID[2]);
+          serverClient.print(AVRID[3]);
+          serverClient.print(AVRID[4]);
+          serverClient.print(AVRID[5]);
+          serverClient.println("' readonly></p>");
+          serverClient.print("		<p>MAC of Device:<br><input name='mac' type='text' size='30' value='");
+          serverClient.print(mac_shield[0], HEX);
+          serverClient.print(":");
+          serverClient.print(mac_shield[1], HEX);
+          serverClient.print(":");
+          serverClient.print(mac_shield[2], HEX);
+          serverClient.print(":");
+          serverClient.print(mac_shield[3], HEX);
+          serverClient.print(":");
+          serverClient.print(mac_shield[4], HEX);
+          serverClient.print(":");
+          serverClient.print(mac_shield[5], HEX);
+          serverClient.println("' readonly></p>");
+          serverClient.println("		<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>");
+          serverClient.println("		<input type='submit' name='cmdStore' value='Store'/>");
+          serverClient.println("	</form>");
+          serverClient.println("</body>");     
           serverClient.println("</html>");
           break;
         }
