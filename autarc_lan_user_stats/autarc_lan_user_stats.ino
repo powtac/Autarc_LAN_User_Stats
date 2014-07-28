@@ -6,6 +6,7 @@
 #include "IPHelper.h"
 #include "memcheck.h"
 #include "default_config.h"
+#include "TimerOne.h"
 // init_mem();  //hier???
 // Serial.println(get_mem_unused());
 
@@ -269,9 +270,11 @@ void setup() {
   print_ip(start_ip);
   Serial.print(F(" - "));
   print_ip(end_ip);
+  
+  Timer1.initialize(200000);
+  Timer1.attachInterrupt(ServerListen);
+  Serial.println("bla");
 }
-
-
 
 //___________________________Scan the network_________________________________
 void loop() {
@@ -280,6 +283,7 @@ void loop() {
   for(int b = 0; b < 4; b++) { 
     currIP[b] = start_ip[b]; 
   }
+  
   while (1) {
     if (currIP[1] <= end_ip[1]) {
       if (currIP[2] <= end_ip[2]) {
@@ -311,10 +315,10 @@ void loop() {
           send_info_to_server(currIP, currMAC, AVRID);
           
           //TODO: That isn't really good...
-          for(int x = 0; x < 1000; x++) {
-            ServerListen();
-            delay(1);
-          }
+          //for(int x = 0; x < 1000; x++) {
+            //ServerListen();
+            //delay(1);
+          //}
           
           currIP[3]++;  
         } else {
@@ -329,18 +333,19 @@ void loop() {
       break; // Exit Loop
     }
   }
-  Serial.print(F("Speicher (Ende ServerSend): "));
+  Serial.print(F("Speicher (End ServerSend): "));
   Serial.println(get_mem_unused());
   Serial.println(F("Restart loop"));
 }
 
 
 void ServerListen() {
+//  Serial.println("a");
   //Serial.println(F("Servers listening..."));
   // listen for incoming clients
   EthernetClient serverClient = server.available();
   if (serverClient) {
-    Serial.println("new client");
+//    Serial.println("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (serverClient.connected()) {
@@ -405,9 +410,9 @@ void ServerListen() {
       }
     }
     // give the web browser time to receive the data
-    delay(1);
+//    delay(1);
     // close the connection:
     serverClient.stop();
-    Serial.println("client disconnected");
+//    Serial.println("client disconnected");
   }
 }
