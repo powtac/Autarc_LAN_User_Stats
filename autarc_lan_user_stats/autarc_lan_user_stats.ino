@@ -329,7 +329,7 @@ void loop() {
             print_ip(currIP);
             Serial.println();
           }
-          send_info_to_server(currIP, currMAC, AVRID);
+          send_info_to_server(currIP, currMAC, AVRID, retryHost);
           
           //TODO: That isn't really good...
           for(int x = 0; x < 1000; x++) {
