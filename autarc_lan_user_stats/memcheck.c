@@ -46,3 +46,4 @@ void init_mem (void)
          : "i" (0xaa), "i" (RAMEND+1)
    );
 }
+

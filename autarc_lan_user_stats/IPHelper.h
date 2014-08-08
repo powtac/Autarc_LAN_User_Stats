@@ -184,3 +184,4 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
     client.stop();
   }
 }
+

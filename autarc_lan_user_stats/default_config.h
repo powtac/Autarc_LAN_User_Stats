@@ -64,3 +64,4 @@ void Load_Default_Config(void) {
 //byte ip_shield[4]              = { 192, 168, 1, 30 };
 //byte gateway[4]                = { 192, 168, 1, 1 };
 //byte subnet[4]                 = { 255, 255, 0, 0 };
+
