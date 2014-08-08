@@ -385,7 +385,7 @@ void ServerListen() {
           serverClient.println("</head>");
           serverClient.println("<body>");
           serverClient.println("	<p>");
-          serverClient.println("	<a href='http://lan-user.danit.de/'>Go to the online-statistic</a><br /><br />");
+          serverClient.println("		<a href='http://lan-user.danit.de/'>Go to the online-statistic</a><br /><br />");
           serverClient.println("	</p>");
           serverClient.println("	<p>");
           serverClient.println("		Enter your name for this device:<br /><br />");
