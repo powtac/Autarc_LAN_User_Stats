@@ -7,6 +7,7 @@ byte pingrequest;
 byte useSubnetting;
 byte start_ip[4];
 byte end_ip[4];
+byte dnsSrv[4];
 
 char AVRID[6];
 
@@ -49,6 +50,10 @@ void Load_Default_Config(void) {
   AVRID[3] = '0';
   AVRID[4] = '1';
   AVRID[5] = '\0';
+  dnsSrv[0] = 192;
+  dnsSrv[1] = 168;
+  dnsSrv[2] = 178;
+  dnsSrv[3] = 1;
 }
 
 // Simon

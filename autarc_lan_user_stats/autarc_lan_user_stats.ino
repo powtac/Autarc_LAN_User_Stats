@@ -28,10 +28,8 @@
 // 22 - 25     | start_ip      | 4
 // 26 - 29     | end_ip        | 4
 // 30 - 35     | AVRID         | 6
+// 40 - 43     | dnsSrv        | 4
 
-
-//Todo: It's only temporarily. Add to configuration?!
-byte dnsSrv[4] = { 192, 168, 178, 1 };
 
 byte readSubnet[4];
 byte readIP[4];
@@ -100,6 +98,15 @@ void setup() {
       write_EEPROM(11, gateway , sizeof(gateway));
       Serial.println();
       print_ip(gateway);
+      Serial.println(string_stored);
+      Serial.println("\n");
+      
+       Serial.print(F("IP DNS-Server"));
+      Serial.println(string_format_ip);
+      GetIP(dnsSrv);
+      write_EEPROM(40, dnsSrv , sizeof(dnsSrv));
+      Serial.println();
+      print_ip(dnsSrv);
       Serial.println(string_stored);
       Serial.println("\n");
       
@@ -209,6 +216,7 @@ void setup() {
     read_EEPROM(22, start_ip , sizeof(start_ip));
     read_EEPROM(26, end_ip , sizeof(end_ip));
     read_EEPROM(30, AVRID , sizeof(AVRID));
+    read_EEPROM(40, dnsSrv , sizeof(dnsSrv));
   }
 
 
