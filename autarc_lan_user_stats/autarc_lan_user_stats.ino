@@ -37,10 +37,10 @@ byte readIP[4];
 byte currIP[4];
 byte currMAC[6];
 
+byte easyConfig;
 int configuration;
 
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
-const char string_stored[] = " stored";
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
@@ -74,124 +74,103 @@ void setup() {
     Serial.println(F("Starting configuration"));
     
     Serial.println(F("Load default configuration (0 = no): "));
-    if (GetNumber() == 0) {    
+    if (GetNumber() == 0) {
+      Serial.println(F("Easy configuration? (0 = no): "));
+      easyConfig = GetNumber();
+         
       Serial.println(F("MAC Board, format \"00:00:00:00:00:00\": "));
       GetMAC(mac_shield);
-      write_EEPROM(1, mac_shield , sizeof(mac_shield));
       Serial.println();
       print_mac(mac_shield);
-      Serial.println(string_stored);
       Serial.println("\n");
       
-      Serial.print(F("IP Board"));
-      Serial.println(string_format_ip);
-      GetIP(ip_shield);
-      write_EEPROM(7, ip_shield , sizeof(ip_shield));
-      Serial.println();
-      print_ip(ip_shield);
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-      Serial.print(F("IP Gateway"));
-      Serial.println(string_format_ip);
-      GetIP(gateway);
-      write_EEPROM(11, gateway , sizeof(gateway));
-      Serial.println();
-      print_ip(gateway);
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-       Serial.print(F("IP DNS-Server"));
-      Serial.println(string_format_ip);
-      GetIP(dnsSrv);
-      write_EEPROM(40, dnsSrv , sizeof(dnsSrv));
-      Serial.println();
-      print_ip(dnsSrv);
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-      //TODO: Check if it works fine!
-      Serial.print(F("Subnetmask"));
-      Serial.println(string_format_ip);
-      GetIP(subnet);
-      write_EEPROM(15, subnet , sizeof(subnet));
-      Serial.println();
-      print_ip(subnet);
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-      Serial.println(F("Number of server retries: "));
-      retryHost = GetNumber();
-      write_EEPROM(44, retryHost);
-      Serial.print(F("Number of server retries: "));
-      Serial.print(retryHost);
-      Serial.println(retryHost);
-      Serial.println("\n");
-      
-      Serial.println(F("Use DHCP (0 = no): "));
-      useDhcp = GetNumber();
-      write_EEPROM(19, useDhcp);
-      if (useDhcp == 0) {
-        Serial.println(F("Don't use DHCP"));
-      } else {
-        Serial.println(F("Use DHCP"));
-      }
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-      Serial.println(F("Number of ping-requests: "));
-      pingrequest = GetNumber();
-      write_EEPROM(20, pingrequest);
-      Serial.print(F("Number of ping-requests: "));
-      Serial.print(pingrequest);
-      Serial.println(string_stored);
-      Serial.println("\n");
-      
-      Serial.println(F("Use Subnetting (0 = no): "));
-      useSubnetting = GetNumber();
-      write_EEPROM(21, useSubnetting);
-      if (useSubnetting == 0) {
-        Serial.println(F("Don't use Subnetting"));
-        Serial.println(string_stored);
-        Serial.println("\n");
-         
-        Serial.print(F("Start IP for scan"));
-        Serial.println(string_format_ip);
-        GetIP(start_ip);
-        write_EEPROM(22, start_ip , sizeof(start_ip));
-        Serial.println();
-        print_ip(start_ip);
-        Serial.println(string_stored);
-        Serial.println("\n");
-     
-        Serial.print(F("End IP for scan"));
-        Serial.println(string_format_ip);
-        GetIP(end_ip);
-        write_EEPROM(26, end_ip , sizeof(end_ip));
-        Serial.println();
-        print_ip(end_ip);
-        Serial.println(string_stored);
-        Serial.println("\n");
-      } else {
-        Serial.println(F("Use Subnetting"));
-        Serial.println(string_stored);
-        Serial.println("\n");
-      }
-        
       //TODO: Get free AVR-ID from Server?
       Serial.println(F("AVR-ID: "));
       GetString(AVRID, sizeof(AVRID));
-      write_EEPROM(30, AVRID , sizeof(AVRID));
       Serial.print(AVRID);
-      Serial.println(string_stored);
       Serial.println("\n");
-  
       
-      //Confirm settings and set configured = 1 in EEPROM
+      if (easyConfig == 0) {
+        Serial.println(F("Use DHCP (0 = no): "));
+        useDhcp = GetNumber();
+        if (useDhcp == 0) {
+          Serial.println(F("Don't use DHCP"));
+          
+          manualIPConfig();
+          
+        } else {
+          Serial.println(F("Use DHCP"));
+          tryDHCP();
+        }
+        
+        Serial.println(F("Use Subnetting (0 = no): "));
+        useSubnetting = GetNumber();
+        if (useSubnetting == 0) {
+          Serial.println(F("Don't use Subnetting"));
+          Serial.println("\n");
+           
+          Serial.print(F("Start IP for scan"));
+          Serial.println(string_format_ip);
+          GetIP(start_ip);
+          Serial.println();
+          print_ip(start_ip);
+          Serial.println("\n");
+       
+          Serial.print(F("End IP for scan"));
+          Serial.println(string_format_ip);
+          GetIP(end_ip);
+          Serial.println();
+          print_ip(end_ip);
+          Serial.println("\n");
+        } else {
+          Serial.println(F("Use Subnetting"));
+          Serial.println("\n");
+        }
+        
+        Serial.println(F("Number of ping-requests: "));
+        pingrequest = GetNumber();
+        Serial.print(F("Number of ping-requests: "));
+        Serial.print(pingrequest);
+        Serial.println("\n");
+        
+        
+        //TODO: Add server URL to setup?
+     
+        
+        Serial.println(F("Number of server retries: "));
+        retryHost = GetNumber();
+        Serial.print(F("Number of server retries: "));
+        Serial.print(retryHost);
+        Serial.println(retryHost);
+        Serial.println("\n");
+   
+      } else {
+        tryDHCP();
+        useSubnetting = 1;
+        pingrequest = 4;
+        retryHost = 2;
+      }
+      
+      
+      //Store settings and set configured = 1 in EEPROM
+      write_EEPROM(7, ip_shield , sizeof(ip_shield));
+      write_EEPROM(11, gateway , sizeof(gateway));
+      write_EEPROM(15, subnet , sizeof(subnet)); 
+      write_EEPROM(40, dnsSrv , sizeof(dnsSrv));
+      write_EEPROM(1, mac_shield , sizeof(mac_shield));
+      write_EEPROM(30, AVRID , sizeof(AVRID));
+      write_EEPROM(19, useDhcp);
+      write_EEPROM(21, useSubnetting);
+      write_EEPROM(22, start_ip , sizeof(start_ip));
+      write_EEPROM(26, end_ip , sizeof(end_ip));
+      write_EEPROM(20, pingrequest);
+      write_EEPROM(44, retryHost);
+
       write_EEPROM(0, 1);
       
       
       Serial.println("\n");
+      Serial.println(F("All values have been stored!"));
       Serial.println(F("Configuration finished"));
     
     } else {
@@ -246,8 +225,11 @@ void setup() {
       Serial.print(F("Time for waiting for IP address: "));
       Serial.print(millis());
       Serial.println(F(" ms"));
-      Serial.println(F("Trying to set manual IP address."));
-      Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+      //Serial.println(F("Trying to set manual IP address."));
+      //Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+      //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
+      Serial.println(F("You have to restart the board!"));
+      while(1) {};
       //Ethernet.begin(mac_shield, ip_shield);
     }
   }
@@ -290,7 +272,6 @@ void setup() {
   
   //Timer1.initialize(200000);
   //Timer1.attachInterrupt(ServerListen);
-  Serial.println("bla");
 }
 
 //___________________________Scan the network_________________________________
@@ -355,6 +336,62 @@ void loop() {
   Serial.println(F("Restart loop"));
 }
 
+
+void manualIPConfig() {
+  Serial.print(F("IP Board"));
+  Serial.println(string_format_ip);
+  GetIP(ip_shield);
+  Serial.println();
+  print_ip(ip_shield);
+  Serial.println("\n");
+  
+  Serial.print(F("IP Gateway"));
+  Serial.println(string_format_ip);
+  GetIP(gateway);
+  Serial.println();
+  print_ip(gateway);
+  Serial.println("\n");
+  
+  //TODO: Check if it works fine!
+  Serial.print(F("Subnetmask"));
+  Serial.println(string_format_ip);
+  GetIP(subnet);
+  Serial.println();
+  print_ip(subnet);
+  Serial.println("\n");
+  
+  Serial.print(F("IP DNS-Server"));
+  Serial.println(string_format_ip);
+  GetIP(dnsSrv);
+  Serial.println();
+  print_ip(dnsSrv);
+  Serial.println("\n");
+}
+
+char tryDHCP() {
+  Serial.println(F("Testing DHCP..."));
+  if (Ethernet.begin(mac_shield) == 0) {
+    Serial.println(F("  DHCP failed, no automatic IP address assigned!"));
+    Serial.print(F("  Time for waiting for IP address: "));
+    Serial.print(millis());
+    Serial.println(F(" ms"));
+    Serial.println(F("You have to configurate the connection settings manual:"));
+    useDhcp = 0;
+    manualIPConfig();
+  } else {
+    //TODO: Close Ethernet DHCP test
+    //Ethernet.stop();
+    //DHCP possible
+    Serial.println(F("DHCP successful"));
+    useDhcp = 1;
+    for (byte i = 0; i < 4; i++) {
+      ip_shield[i] = Ethernet.localIP()[i], DEC;
+      gateway[i] = Ethernet.gatewayIP()[i], DEC;
+      subnet[i] = Ethernet.subnetMask()[i], DEC;
+      dnsSrv[i] = Ethernet.dnsServerIP()[i], DEC;
+    }
+  }
+}
 
 void ServerListen() {
   //Serial.println(F("Servers listening..."));

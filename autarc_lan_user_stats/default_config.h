@@ -35,7 +35,7 @@ void Load_Default_Config(void) {
   subnet[2] = 255;
   subnet[3] = 0;
   useDhcp = 1;
-  pingrequest = 2;
+  pingrequest = 4;
   useSubnetting = 1;
   start_ip[0] = 192;
   start_ip[1] = 168;
@@ -55,7 +55,7 @@ void Load_Default_Config(void) {
   dnsSrv[1] = 168;
   dnsSrv[2] = 178;
   dnsSrv[3] = 1;
-  retryHost = 1;
+  retryHost = 2;
 }
 
 // Simon
