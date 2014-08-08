@@ -130,9 +130,6 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
   Serial.print(F("Speicher (send_info): "));
   Serial.println(get_mem_unused());
   EthernetClient client;
-  // IPAddress server(85, 10, 211, 16); // kolchose.org
-  //TODO: Is the IP required?
-  IPAddress server(85, 214, 144, 114); //lan-user.danit.de
   
   // int ret = client.connect("kolchose.org", 80);
   int ret = client.connect("lan-user.danit.de", 80);
