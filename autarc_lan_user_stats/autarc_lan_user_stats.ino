@@ -371,12 +371,7 @@ void ServerListen() {
           serverClient.println("	<form action='http://lan-user.danit.de/' method='GET' accept-charset='UTF-8'>");
           serverClient.print("		<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
           //TODO: Only send really inputed values!
-          serverClient.print(AVRID[0]);
-          serverClient.print(AVRID[1]);
-          serverClient.print(AVRID[2]);
-          serverClient.print(AVRID[3]);
-          serverClient.print(AVRID[4]);
-          serverClient.print(AVRID[5]);
+          serverClient.print(AVRID);
           serverClient.println("' readonly></p>");
           serverClient.print("		<p>MAC of Device:<br><input name='mac' type='text' size='30' value='");
           serverClient.print(mac_shield[0], HEX);
