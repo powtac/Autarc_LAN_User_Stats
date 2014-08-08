@@ -384,13 +384,16 @@ void ServerListen() {
           serverClient.println("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />");
           serverClient.println("</head>");
           serverClient.println("<body>");
-          serverClient.println("	Enter your name for this device:<br /><br />");
-          serverClient.println("	<form action='http://lan-user.danit.de/' method='GET' accept-charset='UTF-8'>");
-          serverClient.print("		<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
-          //TODO: Only send really inputed values!
+          serverClient.println("	<p>");
+          serverClient.println("	<a href='http://lan-user.danit.de/'>Go to the online-statistic</a><br /><br />");
+          serverClient.println("	</p>");
+          serverClient.println("	<p>");
+          serverClient.println("		Enter your name for this device:<br /><br />");
+          serverClient.println("		<form action='http://lan-user.danit.de/' method='GET' accept-charset='UTF-8'>");
+          serverClient.print("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
           serverClient.print(AVRID);
           serverClient.println("' readonly></p>");
-          serverClient.print("		<p>MAC of Device:<br><input name='mac' type='text' size='30' value='");
+          serverClient.print("			<p>MAC of Device:<br><input name='mac' type='text' size='30' value='");
           serverClient.print(mac_shield[0], HEX);
           serverClient.print(":");
           serverClient.print(mac_shield[1], HEX);
@@ -403,9 +406,10 @@ void ServerListen() {
           serverClient.print(":");
           serverClient.print(mac_shield[5], HEX);
           serverClient.println("' readonly></p>");
-          serverClient.println("		<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>");
-          serverClient.println("		<input type='submit' name='cmdStore' value='Store'/>");
-          serverClient.println("	</form>");
+          serverClient.println("			<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>");
+          serverClient.println("			<input type='submit' name='cmdStore' value='Store'/>");
+          serverClient.println("		</form>");
+          serverClient.println("	</p>");
           serverClient.println("</body>");     
           serverClient.println("</html>");
           break;
