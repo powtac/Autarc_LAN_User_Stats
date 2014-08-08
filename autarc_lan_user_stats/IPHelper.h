@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include "memcheck.h"
 
+char tries = 0;
+
 void print_ip(byte* ip) {
   Serial.print(ip[0]);
   Serial.print(".");
@@ -134,6 +136,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
   // int ret = client.connect("kolchose.org", 80);
   int ret = client.connect("lan-user.danit.de", 80);
   if (ret == 1) {
+    tries = 0;
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
@@ -168,7 +171,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
     client.println(" HTTP/1.0");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
     client.println("Host: lan-user.danit.de");
-    client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!
+    client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
     client.println(); // Important!
     
     Serial.println(client.status());
@@ -179,6 +182,13 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID) {
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();
+    if (tries <= 1) {
+      tries++;
+      Serial.println(F("Retry to connect..."));
+      send_info_to_server(IP, MAC, AVRID);
+    } else {
+      tries = 0;
+    }
   }
 }
 

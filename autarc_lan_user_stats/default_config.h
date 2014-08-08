@@ -8,6 +8,7 @@ byte useSubnetting;
 byte start_ip[4];
 byte end_ip[4];
 byte dnsSrv[4];
+byte retryHost;
 
 char AVRID[6];
 
@@ -54,6 +55,7 @@ void Load_Default_Config(void) {
   dnsSrv[1] = 168;
   dnsSrv[2] = 178;
   dnsSrv[3] = 1;
+  retryHost = 1;
 }
 
 // Simon

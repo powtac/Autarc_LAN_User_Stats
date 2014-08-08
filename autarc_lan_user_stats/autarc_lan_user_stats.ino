@@ -29,7 +29,7 @@
 // 26 - 29     | end_ip        | 4
 // 30 - 35     | AVRID         | 6
 // 40 - 43     | dnsSrv        | 4
-
+// 44          | retryHost     | 1
 
 byte readSubnet[4];
 byte readIP[4];
@@ -118,6 +118,14 @@ void setup() {
       Serial.println();
       print_ip(subnet);
       Serial.println(string_stored);
+      Serial.println("\n");
+      
+      Serial.println(F("Number of server retries: "));
+      retryHost = GetNumber();
+      write_EEPROM(44, retryHost);
+      Serial.print(F("Number of server retries: "));
+      Serial.print(retryHost);
+      Serial.println(retryHost);
       Serial.println("\n");
       
       Serial.println(F("Use DHCP (0 = no): "));
@@ -217,6 +225,7 @@ void setup() {
     read_EEPROM(26, end_ip , sizeof(end_ip));
     read_EEPROM(30, AVRID , sizeof(AVRID));
     read_EEPROM(40, dnsSrv , sizeof(dnsSrv));
+    retryHost = read_EEPROM(44);
   }
 
 
