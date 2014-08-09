@@ -133,9 +133,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
   Serial.println(get_mem_unused());
   EthernetClient client;
   
-  // int ret = client.connect("kolchose.org", 80);
-  int ret = client.connect("lan-user.danit.de", 80);
-  if (ret == 1) {
+  if (client.connect("lan-user.danit.de", 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
 
@@ -180,7 +178,6 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.stop();
   } else {
     Serial.println(F("NOT connected to HTTP Server"));
-    Serial.println(ret);
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();

@@ -160,6 +160,8 @@ void setup() {
         Serial.println("\n");
       } else {
        //TODO: Get free AVR-ID from Server
+       //TODO: What if connection fails?
+       getAVRID();
       }
       
       
@@ -230,24 +232,7 @@ void setup() {
   print_mac(mac_shield);
   Serial.println();
   
-  // Setup when no IP is known
-  if (useDhcp == 0) {
-    Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
-    //Ethernet.begin(mac_shield, ip_shield);
-  } else {
-    if (Ethernet.begin(mac_shield) == 0) {
-      Serial.println(F("DHCP failed, no automatic IP address assigned!"));
-      Serial.print(F("Time for waiting for IP address: "));
-      Serial.print(millis());
-      Serial.println(F(" ms"));
-      //Serial.println(F("Trying to set manual IP address."));
-      //Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
-      //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
-      Serial.println(F("You have to restart the board!"));
-      while(1) {};
-      //Ethernet.begin(mac_shield, ip_shield);
-    }
-  }
+  startConnection();
 
   Serial.println(F(" Address assigned?"));
   Serial.print(" ");
@@ -408,6 +393,107 @@ char tryDHCP() {
   }
 }
 
+void getAVRID() {
+  startConnection();
+  EthernetClient client;
+  
+  if (client.connect("lan-user.danit.de", 80) == 1) {
+    Serial.println(F("Connected to HTTP Server"));
+
+    // Make a HTTP request:
+    // client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
+    client.print("GET /"); // lan-user.danit.de
+    client.print("?getAVR_ID=true");
+
+
+    client.println(" HTTP/1.0"); //TODO: Try 1.1
+    client.println("Host: lan-user.danit.de"); //TODO: www. necessary?
+    client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
+    //TODO: Check if necessaryS
+    client.println("Connection: close");
+    client.println(); // Important!
+    
+    Serial.println(client.status());
+    //client.stop();
+    
+  } else {
+    Serial.println(F("NOT connected to HTTP Server"));
+    Serial.println("\n");
+    Serial.println(client.status());
+    client.stop();
+  }
+  
+  
+  int i = 0;
+  int varCount = 0;
+  char tmpc;
+  char save = 0;
+    
+    // if there are incoming bytes available 
+    // from the server, read them and print them:
+    while (client.connected())
+    {
+      if (client.available()) {
+        tmpc = client.read();
+        
+        if (tmpc == -1) {
+          break; 
+        }
+        else if (tmpc == '<') {
+          save = 1;
+          i = 0;
+        }
+        else if (tmpc == '>') {
+          save = 0;
+          varCount++;
+        }
+        else if (save == 1) {
+          switch (varCount) {
+            case 0:
+              if (i < (sizeof(AVRID) - 1)) {
+                AVRID[i] = tmpc;
+                AVRID[i + 1] = '\0';
+              }
+              break;
+            case 1:
+              if (i < (sizeof(AVRpsw) - 1)) {
+                AVRpsw[i] = tmpc;
+                AVRpsw[i + 1] = '\0';
+              }
+              break;
+          }
+          i++;
+        }
+      }
+    }
+
+    // if the server's disconnected, stop the client:
+    if (!client.connected()) {
+      Serial.println("\n");
+      Serial.println(AVRID);
+      Serial.println(AVRpsw);
+      Serial.println(F("disconnecting."));
+      client.stop();
+    }
+}
+
+void startConnection() {
+  if (useDhcp == 0) {
+    //Ethernet.begin(mac_shield, ip_shield);
+    Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+  } else {
+    if (Ethernet.begin(mac_shield) == 0) {
+      Serial.println(F("DHCP failed, no automatic IP address assigned!"));
+      Serial.print(F("Time for waiting for IP address: "));
+      Serial.print(millis());
+      Serial.println(F(" ms"));
+      //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
+      Serial.println(F("You have to restart the board!"));
+      while(1) {};
+    }
+  }
+}
+
 void ServerListen() {
   //Serial.println(F("Servers listening..."));
   // listen for incoming clients
@@ -480,7 +566,7 @@ void ServerListen() {
     delay(10);
     // close the connection:
     serverClient.stop();
-    Serial.println("client disconnected");
+    Serial.println(F("client disconnected"));
   }
 }
 
