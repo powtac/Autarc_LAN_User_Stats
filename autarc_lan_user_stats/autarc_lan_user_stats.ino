@@ -406,7 +406,7 @@ void getAVRID() {
     client.print("?getAVR_ID=true");
 
 
-    client.println(" HTTP/1.0"); //TODO: Try 1.1
+    client.println(" HTTP/1.1");
     client.println("Host: lan-user.danit.de"); //TODO: www. necessary?
     client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
     //TODO: Check if necessaryS

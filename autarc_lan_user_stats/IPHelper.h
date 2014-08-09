@@ -168,7 +168,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.print(":");
     client.print(MAC[5], HEX);
 
-    client.println(" HTTP/1.0");
+    client.println(" HTTP/1.1");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
     client.println("Host: lan-user.danit.de");
     client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
@@ -181,7 +181,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();
-    if (tries <= retryHost) {
+    if (tries < retryHost) {
       tries++;
       Serial.println(F("Retry to connect..."));
       send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost);
