@@ -32,40 +32,39 @@ void print_mac(byte* mac) {
 
 
 void write_EEPROM(int startstorage, byte *value, int valuesize) {
-   for (int i = 0; i < valuesize; i++) {
-     EEPROM.write(i + startstorage, value[i]);
-   }
+  for (int i = 0; i < valuesize; i++) {
+    EEPROM.write(i + startstorage, value[i]);
+  }
 }
 
 void write_EEPROM(int startstorage, char *value, int valuesize) {
-   for (int i = 0; i < valuesize; i++) {
-     EEPROM.write(i + startstorage, value[i]);
-   }
+  for (int i = 0; i < valuesize; i++) {
+    EEPROM.write(i + startstorage, value[i]);
+  }
 }
 
 void write_EEPROM(int startstorage, byte value) {
-    EEPROM.write(startstorage, value);
+  EEPROM.write(startstorage, value);
 }
 
 
 void read_EEPROM(int startstorage, byte *value, int valuesize) {
-   for (int i = 0; i < valuesize; i++) {
-     value[i] = EEPROM.read(i + startstorage);
-   }
+  for (int i = 0; i < valuesize; i++) {
+    value[i] = EEPROM.read(i + startstorage);
+  }
 }
 
 void read_EEPROM(int startstorage, char *value, int valuesize) {
-   for (int i = 0; i < valuesize; i++) {
-     value[i] = EEPROM.read(i + startstorage);
-   }
+  for (int i = 0; i < valuesize; i++) {
+    value[i] = EEPROM.read(i + startstorage);
+  }
 }
 
 byte read_EEPROM(int startstorage) {
-   return EEPROM.read(startstorage);
+  return EEPROM.read(startstorage);
 }
 
 void GetString(char *buf, int bufsize) {
-  //TODO: Correction not possible yet
   int i;
   char ch;
   for (i=0; ; ++i) {
@@ -73,22 +72,23 @@ void GetString(char *buf, int bufsize) {
     ch = Serial.read();
     Serial.print(ch);
     if (ch == '\r') {
-     Serial.println("\n");
-     break;
-    } else if (ch == '\n') {
-        //Ignore new-line
-        i--;
-    } else if (ch == 8) {
+      Serial.println("\n");
+      break;
+    } 
+    else if (ch == '\n') {
+      //Ignore new-line
+      i--;
+    } 
+    else if (ch == 8) {
       //Backspace
       if (i >= 1) {
         i = i - 2;
       }
-    } else {
+    } 
+    else {
       if (i < bufsize - 1) {
         buf[i] = ch;
         buf[i + 1] = 0; // 0 string terminator
-      } else {
-        //max chars recieved, don't save further chars
       }
     }
   }
@@ -103,7 +103,7 @@ byte GetNumber(void) {
 void GetIP(byte *IP) {
   char input[16];
   GetString(input, sizeof(input));
- 
+
   char *i;
   IP[0] = atoi(strtok_r(input,".",&i));
   IP[1] = atoi(strtok_r(NULL,".",&i));
@@ -114,7 +114,7 @@ void GetIP(byte *IP) {
 void GetMAC(byte *MAC) {
   char input[18];
   GetString(input, sizeof(input));
- 
+
   char *i;
   MAC[0] = strtol(strtok_r(input,":",&i), NULL, 16);
   MAC[1] = strtol(strtok_r(NULL,":",&i), NULL, 16);
@@ -132,7 +132,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
   Serial.print(F("Speicher (send_info): "));
   Serial.println(get_mem_unused());
   EthernetClient client;
-  
+
   if (client.connect("lan-user.danit.de", 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
@@ -145,7 +145,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     Serial.println(AVRID);
     client.print("&AVR_PSW=");
     client.print(AVRpsw);
-    
+
     // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
     client.print("&IP[]=");
     client.print(IP[0]);
@@ -171,12 +171,13 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.println(" HTTP/1.1");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
     client.println("Host: lan-user.danit.de");
-    client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
+    client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
     client.println(); // Important!
-    
+
     Serial.println(client.status());
     client.stop();
-  } else {
+  } 
+  else {
     Serial.println(F("NOT connected to HTTP Server"));
     Serial.println("\n");
     Serial.println(client.status());
@@ -185,9 +186,11 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
       tries++;
       Serial.println(F("Retry to connect..."));
       send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost);
-    } else {
+    } 
+    else {
       tries = 0;
     }
   }
 }
+
 

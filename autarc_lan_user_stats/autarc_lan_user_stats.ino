@@ -62,110 +62,113 @@ void setup() {
   Serial.begin(115200);
   Serial.print(F("Memory: "));
   Serial.println(get_mem_unused());
-  
-//________________________Configuration of the board______________________________
+
+  //________________________Configuration of the board______________________________
 
   Serial.print("Press any key start configuration");
   for (char i = 0; i < 5 and Serial.available() <= 0; i++) {
     delay(1000);
     Serial.print(".");
   }
-  
+
   configuration = Serial.read();
   if (configuration >= 0) {
     Serial.println(F("Starting configuration"));
-    
+
     Serial.println(F("Load default configuration (0 = no): "));
     if (GetNumber() == 0) {
       Serial.println(F("Easy configuration? (0 = no): "));
       easyConfig = GetNumber();
-         
+
       Serial.println(F("MAC Board, format \"00:00:00:00:00:00\": "));
       GetMAC(mac_shield);
       Serial.println();
       print_mac(mac_shield);
       Serial.println("\n");
-            
+
       if (easyConfig == 0) {
         Serial.println(F("Use DHCP (0 = no): "));
         useDhcp = GetNumber();
         if (useDhcp == 0) {
           Serial.println(F("Don't use DHCP"));
-          
+
           manualIPConfig();
-          
-        } else {
+
+        } 
+        else {
           Serial.println(F("Use DHCP"));
           tryDHCP();
         }
-        
+
         Serial.println(F("Use Subnetting (0 = no): "));
         useSubnetting = GetNumber();
         if (useSubnetting == 0) {
           Serial.println(F("Don't use Subnetting"));
           Serial.println("\n");
-           
+
           Serial.print(F("Start IP for scan"));
           Serial.println(string_format_ip);
           GetIP(start_ip);
           Serial.println();
           print_ip(start_ip);
           Serial.println("\n");
-       
+
           Serial.print(F("End IP for scan"));
           Serial.println(string_format_ip);
           GetIP(end_ip);
           Serial.println();
           print_ip(end_ip);
           Serial.println("\n");
-        } else {
+        } 
+        else {
           Serial.println(F("Use Subnetting"));
           Serial.println("\n");
         }
-        
+
         Serial.println(F("Number of ping-requests: "));
         pingrequest = GetNumber();
         Serial.print(F("Number of ping-requests: "));
         Serial.print(pingrequest);
         Serial.println("\n");
-        
-        
+
+
         //TODO: Add server URL to setup?
-     
-        
+
+
         Serial.println(F("Number of server retries: "));
         retryHost = GetNumber();
         Serial.print(F("Number of server retries: "));
         Serial.print(retryHost);
         Serial.println(retryHost);
         Serial.println("\n");
-   
-      } else {
+
+      } 
+      else {
         tryDHCP();
         useSubnetting = 1;
         pingrequest = 4;
         retryHost = 2;
       }
-      
+
       Serial.println(F("Register AVR online? (0 = no): "));
       if (GetNumber() == 0) {
         Serial.println(F("AVR-ID (5 chars): "));
         GetString(AVRID, sizeof(AVRID));
         Serial.print(AVRID);
         Serial.println("\n");
-        
+
         Serial.println(F("AVR Password (6 chars): "));
         GetString(AVRpsw, sizeof(AVRpsw));
         Serial.print(AVRpsw);
         Serial.println("\n");
-      } else {
-       //TODO: Get free AVR-ID from Server
-       //TODO: What if connection fails?
-       getAVRID();
+      } 
+      else {
+        //TODO: What if connection fails?
+        getAVRID();
       }
-      
-      
-      
+
+
+
       //Store settings and set configured = 1 in EEPROM
       write_EEPROM(7, ip_shield , sizeof(ip_shield));
       write_EEPROM(11, gateway , sizeof(gateway));
@@ -179,34 +182,37 @@ void setup() {
       write_EEPROM(26, end_ip , sizeof(end_ip));
       write_EEPROM(20, pingrequest);
       write_EEPROM(44, retryHost);
-      
+
       write_EEPROM(45, AVRpsw , sizeof(AVRpsw));
 
       write_EEPROM(0, 1);
-      
-      
+
+
       Serial.println("\n");
       Serial.println(F("All values have been stored!"));
       Serial.println(F("Configuration finished"));
-    
-    } else {
+
+    } 
+    else {
       //Delete settings and set configured = 0 in EEPROM
       write_EEPROM(0, 0);
       Serial.println(F("Default configuration loaded"));
     }
     Serial.println("\n");
-    
-  } else {
+
+  } 
+  else {
     Serial.println(F("no configuration"));
   }
-  
-  
-//_____________________Loading the values for the board__________________________
+
+
+  //_____________________Loading the values for the board__________________________
   if (read_EEPROM(0) != 1) {
     //use default values:
     Serial.println(F("No configuration stored yet. Using default values..."));
     Load_Default_Config();
-  } else {
+  } 
+  else {
     //Read values from EEPROM:
     Serial.println(F("Using configuration from EEPROM."));
     read_EEPROM(1, mac_shield , sizeof(mac_shield));
@@ -226,12 +232,12 @@ void setup() {
 
 
 
-//________________________Initialising of the board______________________________
+  //________________________Initialising of the board______________________________
   Serial.println(F("Try to get IP address from network..."));
   Serial.print(F(" MAC address of shield: "));
   print_mac(mac_shield);
   Serial.println();
-  
+
   startConnection();
 
   Serial.println(F(" Address assigned?"));
@@ -244,10 +250,10 @@ void setup() {
   Serial.println(F(" Setup complete\n"));
   Serial.print(F("Speicher: "));
   Serial.println(get_mem_unused());
-  
+
   Serial.println(F("Starting server"));
   server.begin();
-  
+
 
   //Set start_ip and end_ip if subnetting is choosed
   if (useSubnetting != 0) {
@@ -261,15 +267,15 @@ void setup() {
       }
     }
     if (start_ip[3] == 0) {
-        start_ip[3] = 1;   //TODO: Set to 2, because of Gateway, or don't scan gateway.
-      }
+      start_ip[3] = 1;   //TODO: Set to 2, because of Gateway, or don't scan gateway.
+    }
   }
 
   Serial.print(F("\nStarting loop trough IP range "));
   print_ip(start_ip);
   Serial.print(F(" - "));
   print_ip(end_ip);
-  
+
   //Timer1.initialize(200000);
   //Timer1.attachInterrupt(ServerListen);
 }
@@ -281,7 +287,7 @@ void loop() {
   for(int b = 0; b < 4; b++) { 
     currIP[b] = start_ip[b]; 
   }
-  
+
   while (1) {
     if (currIP[1] <= end_ip[1]) {
       if (currIP[2] <= end_ip[2]) {
@@ -294,14 +300,15 @@ void loop() {
             for(int mac = 0; mac < 6; mac++) {
               currMAC[mac] = echoReply.MACAddressSocket[mac];
             }
-            
+
             Serial.print(F("Device found on: "));
             print_ip(currIP);
             Serial.print(F(" MAC: "));
             print_mac(currMAC);
             Serial.println();
-            
-          } else {
+
+          } 
+          else {
             // It's not responding, next one
             for(int mac = 0; mac < 6; mac++) {
               currMAC[mac] = 0;
@@ -311,23 +318,26 @@ void loop() {
             Serial.println();
           }
           send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost);
-          
+
           //TODO: That isn't really good...
           for(int x = 0; x < 1000; x++) {
             ServerListen();
             delay(1);
           }
-          
+
           currIP[3]++;  
-        } else {
+        } 
+        else {
           currIP[3] = start_ip[3];
           currIP[2]++;
         }
-      } else {
+      } 
+      else {
         currIP[2] = start_ip[2];
         currIP[1]++;
       }
-    } else {
+    } 
+    else {
       break; // Exit Loop
     }
   }
@@ -344,14 +354,14 @@ void manualIPConfig() {
   Serial.println();
   print_ip(ip_shield);
   Serial.println("\n");
-  
+
   Serial.print(F("IP Gateway"));
   Serial.println(string_format_ip);
   GetIP(gateway);
   Serial.println();
   print_ip(gateway);
   Serial.println("\n");
-  
+
   //TODO: Check if it works fine!
   Serial.print(F("Subnetmask"));
   Serial.println(string_format_ip);
@@ -359,7 +369,7 @@ void manualIPConfig() {
   Serial.println();
   print_ip(subnet);
   Serial.println("\n");
-  
+
   Serial.print(F("IP DNS-Server"));
   Serial.println(string_format_ip);
   GetIP(dnsSrv);
@@ -378,7 +388,8 @@ char tryDHCP() {
     Serial.println(F("You have to configurate the connection settings manual:"));
     useDhcp = 0;
     manualIPConfig();
-  } else {
+  } 
+  else {
     //TODO: Close Ethernet DHCP test
     //Ethernet.stop();
     //DHCP possible
@@ -396,7 +407,7 @@ char tryDHCP() {
 void getAVRID() {
   startConnection();
   EthernetClient client;
-  
+
   if (client.connect("lan-user.danit.de", 80) == 1) {
     Serial.println(F("Connected to HTTP Server"));
 
@@ -408,80 +419,82 @@ void getAVRID() {
 
     client.println(" HTTP/1.1");
     client.println("Host: lan-user.danit.de"); //TODO: www. necessary?
-    client.println("User-Agent: Autarc_LAN_User_Stats"); // Important!? Todo: Why?
+    client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
     //TODO: Check if necessaryS
     client.println("Connection: close");
     client.println(); // Important!
-    
+
     Serial.println(client.status());
     //client.stop();
-    
-  } else {
+
+  } 
+  else {
     Serial.println(F("NOT connected to HTTP Server"));
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();
   }
-  
-  
+
+
   int i = 0;
   int varCount = 0;
   char tmpc;
   char save = 0;
-    
-    // if there are incoming bytes available 
-    // from the server, read them and print them:
-    while (client.connected())
-    {
-      if (client.available()) {
-        tmpc = client.read();
-        
-        if (tmpc == -1) {
-          break; 
-        }
-        else if (tmpc == '<') {
-          save = 1;
-          i = 0;
-        }
-        else if (tmpc == '>') {
-          save = 0;
-          varCount++;
-        }
-        else if (save == 1) {
-          switch (varCount) {
-            case 0:
-              if (i < (sizeof(AVRID) - 1)) {
-                AVRID[i] = tmpc;
-                AVRID[i + 1] = '\0';
-              }
-              break;
-            case 1:
-              if (i < (sizeof(AVRpsw) - 1)) {
-                AVRpsw[i] = tmpc;
-                AVRpsw[i + 1] = '\0';
-              }
-              break;
+
+  // if there are incoming bytes available 
+  // from the server, read them and print them:
+  while (client.connected())
+  {
+    if (client.available()) {
+      tmpc = client.read();
+
+      if (tmpc == -1) {
+        break; 
+      }
+      else if (tmpc == '<') {
+        save = 1;
+        i = 0;
+      }
+      else if (tmpc == '>') {
+        save = 0;
+        varCount++;
+      }
+      else if (save == 1) {
+        switch (varCount) {
+        case 0:
+          if (i < (sizeof(AVRID) - 1)) {
+            AVRID[i] = tmpc;
+            AVRID[i + 1] = '\0';
           }
-          i++;
+          break;
+        case 1:
+          if (i < (sizeof(AVRpsw) - 1)) {
+            AVRpsw[i] = tmpc;
+            AVRpsw[i + 1] = '\0';
+          }
+          break;
         }
+        i++;
       }
     }
+  }
 
-    // if the server's disconnected, stop the client:
-    if (!client.connected()) {
-      Serial.println("\n");
-      Serial.println(AVRID);
-      Serial.println(AVRpsw);
-      Serial.println(F("disconnecting."));
-      client.stop();
-    }
+  // if the server's disconnected, stop the client:
+  if (!client.connected()) {
+    Serial.println("\n");
+    Serial.println(F("Your account data: "));
+    Serial.println(AVRID);
+    Serial.println(AVRpsw);
+    Serial.println(F("disconnecting."));
+    client.stop();
+  }
 }
 
 void startConnection() {
   if (useDhcp == 0) {
-    //Ethernet.begin(mac_shield, ip_shield);
     Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
-  } else {
+  } 
+  else {
     if (Ethernet.begin(mac_shield) == 0) {
       Serial.println(F("DHCP failed, no automatic IP address assigned!"));
       Serial.print(F("Time for waiting for IP address: "));
@@ -489,7 +502,8 @@ void startConnection() {
       Serial.println(F(" ms"));
       //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
       Serial.println(F("You have to restart the board!"));
-      while(1) {};
+      while(1) {
+      };
     }
   }
 }
@@ -569,4 +583,5 @@ void ServerListen() {
     Serial.println(F("client disconnected"));
   }
 }
+
 
