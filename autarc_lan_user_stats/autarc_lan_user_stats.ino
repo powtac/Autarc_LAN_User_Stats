@@ -30,6 +30,8 @@
 // 30 - 35     | AVRID         | 6
 // 40 - 43     | dnsSrv        | 4
 // 44          | retryHost     | 1
+// 45 - 51     | AVRpsw        | 7
+
 
 byte readSubnet[4];
 byte readIP[4];
@@ -83,13 +85,7 @@ void setup() {
       Serial.println();
       print_mac(mac_shield);
       Serial.println("\n");
-      
-      //TODO: Get free AVR-ID from Server?
-      Serial.println(F("AVR-ID: "));
-      GetString(AVRID, sizeof(AVRID));
-      Serial.print(AVRID);
-      Serial.println("\n");
-      
+            
       if (easyConfig == 0) {
         Serial.println(F("Use DHCP (0 = no): "));
         useDhcp = GetNumber();
@@ -151,6 +147,22 @@ void setup() {
         retryHost = 2;
       }
       
+      Serial.println(F("Register AVR online? (0 = no): "));
+      if (GetNumber() == 0) {
+        Serial.println(F("AVR-ID (5 chars): "));
+        GetString(AVRID, sizeof(AVRID));
+        Serial.print(AVRID);
+        Serial.println("\n");
+        
+        Serial.println(F("AVR Password (6 chars): "));
+        GetString(AVRpsw, sizeof(AVRpsw));
+        Serial.print(AVRpsw);
+        Serial.println("\n");
+      } else {
+       //TODO: Get free AVR-ID from Server
+      }
+      
+      
       
       //Store settings and set configured = 1 in EEPROM
       write_EEPROM(7, ip_shield , sizeof(ip_shield));
@@ -165,6 +177,8 @@ void setup() {
       write_EEPROM(26, end_ip , sizeof(end_ip));
       write_EEPROM(20, pingrequest);
       write_EEPROM(44, retryHost);
+      
+      write_EEPROM(45, AVRpsw , sizeof(AVRpsw));
 
       write_EEPROM(0, 1);
       
@@ -205,6 +219,7 @@ void setup() {
     read_EEPROM(30, AVRID , sizeof(AVRID));
     read_EEPROM(40, dnsSrv , sizeof(dnsSrv));
     retryHost = read_EEPROM(44);
+    read_EEPROM(45, AVRpsw , sizeof(AVRpsw));
   }
 
 
@@ -310,7 +325,7 @@ void loop() {
             print_ip(currIP);
             Serial.println();
           }
-          send_info_to_server(currIP, currMAC, AVRID, retryHost);
+          send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost);
           
           //TODO: That isn't really good...
           for(int x = 0; x < 1000; x++) {

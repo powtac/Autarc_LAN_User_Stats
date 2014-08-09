@@ -11,6 +11,7 @@ byte dnsSrv[4];
 byte retryHost;
 
 char AVRID[6];
+char AVRpsw[7];
 
 void Load_Default_Config(void);
 
@@ -56,6 +57,13 @@ void Load_Default_Config(void) {
   dnsSrv[2] = 178;
   dnsSrv[3] = 1;
   retryHost = 2;
+  AVRpsw[0] = '1';
+  AVRpsw[1] = '2';
+  AVRpsw[2] = '3';
+  AVRpsw[3] = '4';
+  AVRpsw[4] = '5';
+  AVRpsw[5] = '6';
+  AVRpsw[6] = '\0';
 }
 
 // Simon

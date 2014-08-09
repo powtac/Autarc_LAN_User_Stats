@@ -124,7 +124,7 @@ void GetMAC(byte *MAC) {
   MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
 
-void send_info_to_server(byte* IP, byte* MAC, char* AVRID, byte retryHost) {
+void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost) {
   // int result = Ethernet.maintain(); // renew DHCP
   // Serial.print(" DHCP renew:");
   // Serial.println(result); 
@@ -145,8 +145,10 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, byte retryHost) {
     client.print("?AVR_ID=");
     client.print(AVRID);
     Serial.println(AVRID);
+    client.print("&AVR_PSW=");
+    client.print(AVRpsw);
     
-    // HTTP String:  AVR_ID=AVR_ID&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
+    // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
     client.print("&IP[]=");
     client.print(IP[0]);
     client.print(".");
@@ -185,7 +187,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, byte retryHost) {
     if (tries <= retryHost) {
       tries++;
       Serial.println(F("Retry to connect..."));
-      send_info_to_server(IP, MAC, AVRID, retryHost);
+      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost);
     } else {
       tries = 0;
     }
