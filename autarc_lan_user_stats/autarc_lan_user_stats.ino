@@ -487,15 +487,16 @@ void startConnection() {
   } 
   else {
     if (Ethernet.begin(mac_shield) == 0) {
-      Serial.println(F("DHCP failed, no automatic IP address assigned!"));
-      Serial.print(F("Time for waiting for IP address: "));
-      Serial.print(millis());
-      Serial.println(F(" ms"));
-      //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
-      //TODO: Wait 30seconds and try again
-      Serial.println(F("You have to restart the board!"));
-      while(1) {
-      };
+      //TODO: Check if it works fine
+      int result = Ethernet.maintain();
+      if (result == 2 || result == 4) {
+        Serial.println(F("DHCP renewed")); 
+      } else {
+        Serial.println(F("DHCP failed, no automatic IP address assigned!"));
+        Serial.println(F("Trying to reconnect in 30 seconds..."));
+        delay(30000);
+        startConnection();
+      }
     }
   }
 }
@@ -521,8 +522,12 @@ void send_info_to_server_troublehandler() {
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
-      //TODO: Wait 30 seconds 
-      
+      //TODO: Wait 30 seconds delay(30000);
+      //TODO: That isn't really good...
+      for(int x = 0; x < 30000; x++) {
+            ServerListen();
+            delay(1);
+      }
       send_info_to_server_troublehandler(); 
     } 
     else {
