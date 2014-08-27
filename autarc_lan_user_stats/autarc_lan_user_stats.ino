@@ -237,17 +237,8 @@ void setup() {
   Serial.println();
 
   startConnection();
-
-  Serial.println(F(" Address assigned?"));
-  Serial.print(" ");
-  Serial.println(Ethernet.localIP());
-  Serial.print(" ");
-  Serial.println(Ethernet.subnetMask());
-  Serial.print(" ");
-  Serial.println(Ethernet.gatewayIP());
-  Serial.println(F(" Setup complete\n"));
-  Serial.print(F("Speicher: "));
-  Serial.println(get_mem_unused());
+  printConnectionDetails();
+  
 
   Serial.println(F("Starting server"));
   server.begin();
@@ -307,7 +298,7 @@ void loop() {
 
           } 
           else {
-            // It's not responding, next one
+            // It's not responding
             for(int mac = 0; mac < 6; mac++) {
               currMAC[mac] = 0;
             }
@@ -315,7 +306,8 @@ void loop() {
             print_ip(currIP);
             Serial.println();
           }
-          send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost, serverURL);
+          
+          send_info_to_server_troublehandler();
 
           //TODO: That isn't really good...
           for(int x = 0; x < 1000; x++) {
@@ -416,7 +408,7 @@ void getAVRID() {
 
 
     client.println(" HTTP/1.1");
-    client.print("Host: "); //TODO: www. necessary?
+    client.print("Host: ");
     client.println(serverURL);
     client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
     //TODO: Check if necessaryS
@@ -500,6 +492,7 @@ void startConnection() {
       Serial.print(millis());
       Serial.println(F(" ms"));
       //TODO: http://forum.arduino.cc/index.php/topic,12874.0.html
+      //TODO: Wait 30seconds and try again
       Serial.println(F("You have to restart the board!"));
       while(1) {
       };
@@ -507,6 +500,43 @@ void startConnection() {
   }
 }
 
+void printConnectionDetails() {
+  Serial.println(F(" Address assigned?"));
+  Serial.print(" ");
+  Serial.println(Ethernet.localIP());
+  Serial.print(" ");
+  Serial.println(Ethernet.subnetMask());
+  Serial.print(" ");
+  Serial.println(Ethernet.gatewayIP());
+  Serial.println(F(" Setup complete\n"));
+  Serial.print(F("Speicher: "));
+  Serial.println(get_mem_unused()); 
+}
+
+void send_info_to_server_troublehandler() {
+  if (send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost, serverURL) == 0) {
+    //Connection to HTTP-Server failed -> ping gateway
+    Serial.println(F("Connection to HTTP-Server failed"));
+    ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest); 
+    if (echoReplyGateway.status == SUCCESS) {
+      // Gateway response -> HTTP-Server offline?
+      Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+      //TODO: Wait 30 seconds 
+      
+      send_info_to_server_troublehandler(); 
+    } 
+    else {
+      // Gateway also not available -> Connection problem -> Try to reconnect
+      Serial.println(F("There is a connection error. Trying to start new connection..."));
+      startConnection();
+      printConnectionDetails();
+      //Reconnected. Try again to send info
+      send_info_to_server_troublehandler();
+    }
+  }
+}          
+          
+          
 void ServerListen() {
   //Serial.println(F("Servers listening..."));
   // listen for incoming clients

@@ -124,7 +124,7 @@ void GetMAC(byte *MAC) {
   MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
 
-void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL) {
+char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL) {
   // int result = Ethernet.maintain(); // renew DHCP
   // Serial.print(" DHCP renew:");
   // Serial.println(result); 
@@ -177,6 +177,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
 
     Serial.println(client.status());
     client.stop();
+    return 1;
   } 
   else {
     Serial.println(F("NOT connected to HTTP Server"));
@@ -189,7 +190,9 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
       send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL);
     } 
     else {
+      //Connection to server failed
       tries = 0;
+      return 0;
     }
   }
 }
