@@ -138,16 +138,16 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
-    // client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
-    client.print("GET /");
-    client.print("?AVR_ID=");
+    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
+    client.print(F("GET /"));
+    client.print(F("?AVR_ID="));
     client.print(AVRID);
     Serial.println(AVRID);
-    client.print("&AVR_PSW=");
+    client.print(F("&AVR_PSW="));
     client.print(AVRpsw);
 
     // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
-    client.print("&IP[]=");
+    client.print(F("&IP[]="));
     client.print(IP[0]);
     client.print(".");
     client.print(IP[1]);
@@ -155,7 +155,7 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.print(IP[2]);
     client.print(".");
     client.print(IP[3]);
-    client.print("&MAC[]=");
+    client.print(F("&MAC[]="));
     client.print(MAC[0], HEX);
     client.print(":");
     client.print(MAC[1], HEX);
@@ -168,11 +168,11 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.print(":");
     client.print(MAC[5], HEX);
 
-    client.println(" HTTP/1.1");
+    client.println(F(" HTTP/1.1"));
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
-    client.print("Host: ");
+    client.print(F("Host: "));
     client.println(serverURL);
-    client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
+    client.println(F("User-Agent: Autarc_LAN_User_Stats")); // TODO: Add version
     client.println(); // Important!
 
     Serial.println(client.status());

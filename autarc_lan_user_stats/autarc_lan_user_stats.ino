@@ -378,8 +378,6 @@ char tryDHCP() {
     manualIPConfig();
   } 
   else {
-    //TODO: Close Ethernet DHCP test
-    //Ethernet.stop();
     //DHCP possible
     Serial.println(F("DHCP successful"));
     useDhcp = 1;
@@ -462,17 +460,17 @@ char connect_getAVRID(EthernetClient &client) {
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
-    // client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
-    client.print("GET /");
-    client.print("?getAVR_ID=true");
+    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
+    client.print(F("GET /"));
+    client.print(F("?getAVR_ID=true"));
 
 
-    client.println(" HTTP/1.1");
-    client.print("Host: ");
+    client.println(F(" HTTP/1.1"));
+    client.print(F("Host: "));
     client.println(serverURL);
-    client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
+    client.println(F("User-Agent: Autarc_LAN_User_Stats")); // TODO: Add version
     //TODO: Check if necessary
-    client.println("Connection: close");
+    client.println(F("Connection: close"));
     client.println(); // Important!
 
     Serial.println(client.status());
@@ -574,31 +572,31 @@ void ServerListen() {
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           // send a standard http response header
-          serverClient.println("HTTP/1.1 200 OK");
-          serverClient.println("Content-Type: text/html");
-          serverClient.println("Connection: close");  // the connection will be closed after completion of the response
+          serverClient.println(F("HTTP/1.1 200 OK"));
+          serverClient.println(F("Content-Type: text/html"));
+          serverClient.println(F("Connection: close"));  // the connection will be closed after completion of the response
           serverClient.println();
-          serverClient.println("<!DOCTYPE HTML>");
-          serverClient.println("<html>");
-          serverClient.println("<head>");
-          serverClient.println("	<title>Autarc-Lan-User-Stat - Enter Username</title>");
-          serverClient.println("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />");
-          serverClient.println("</head>");
-          serverClient.println("<body>");
-          serverClient.println("	<p>");
-          serverClient.print("		<a href='http://");
+          serverClient.println(F("<!DOCTYPE HTML>"));
+          serverClient.println(F("<html>"));
+          serverClient.println(F("<head>"));
+          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter Username</title>"));
+          serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
+          serverClient.println(F("</head>"));
+          serverClient.println(F("<body>"));
+          serverClient.println(F("	<p>"));
+          serverClient.print(F("		<a href='http://"));
           serverClient.print(serverURL);
-          serverClient.println("/'>Go to the online-statistic</a><br /><br />");
-          serverClient.println("	</p>");
-          serverClient.println("	<p>");
-          serverClient.println("		Enter your name for this device:<br /><br />");
-          serverClient.print("		<form action='http://");
+          serverClient.println(F("/'>Go to the online-statistic</a><br /><br />"));
+          serverClient.println(F("	</p>"));
+          serverClient.println(F("	<p>"));
+          serverClient.println(F("		Enter your name for this device:<br /><br />"));
+          serverClient.print(F("		<form action='http://"));
           serverClient.print(serverURL);
-          serverClient.println("/' method='GET' accept-charset='UTF-8'>");
-          serverClient.print("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
+          serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
+          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='"));
           serverClient.print(AVRID);
-          serverClient.println("' readonly></p>");
-          serverClient.print("			<p>MAC of Device:<br><input name='mac' type='text' size='30' value='");
+          serverClient.println(F("' readonly></p>"));
+          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' size='30' value='"));
           serverClient.print(mac_shield[0], HEX);
           serverClient.print(":");
           serverClient.print(mac_shield[1], HEX);
@@ -610,13 +608,13 @@ void ServerListen() {
           serverClient.print(mac_shield[4], HEX);
           serverClient.print(":");
           serverClient.print(mac_shield[5], HEX);
-          serverClient.println("' readonly></p>");
-          serverClient.println("			<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>");
-          serverClient.println("			<input type='submit' name='cmdStore' value='Store'/>");
-          serverClient.println("		</form>");
-          serverClient.println("	</p>");
-          serverClient.println("</body>");     
-          serverClient.println("</html>");
+          serverClient.println(F("' readonly></p>"));
+          serverClient.println(F("			<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>"));
+          serverClient.println(F("			<input type='submit' name='cmdStore' value='Store'/>"));
+          serverClient.println(F("		</form>"));
+          serverClient.println(F("	</p>"));
+          serverClient.println(F("</body>"));     
+          serverClient.println(F("</html>"));
           break;
         }
         if (c == '\n') {
