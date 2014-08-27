@@ -44,6 +44,8 @@ int configuration;
 
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
 
+char serverURL[] = "lan-user.danit.de";
+
 // Ping library configuration
 SOCKET pingSocket              = 0;
 
@@ -130,10 +132,6 @@ void setup() {
         Serial.print(F("Number of ping-requests: "));
         Serial.print(pingrequest);
         Serial.println("\n");
-
-
-        //TODO: Add server URL to setup?
-
 
         Serial.println(F("Number of server retries: "));
         retryHost = GetNumber();
@@ -317,7 +315,7 @@ void loop() {
             print_ip(currIP);
             Serial.println();
           }
-          send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost);
+          send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost, serverURL);
 
           //TODO: That isn't really good...
           for(int x = 0; x < 1000; x++) {
@@ -408,17 +406,18 @@ void getAVRID() {
   startConnection();
   EthernetClient client;
 
-  if (client.connect("lan-user.danit.de", 80) == 1) {
+  if (client.connect(serverURL, 80) == 1) {
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
     // client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
-    client.print("GET /"); // lan-user.danit.de
+    client.print("GET /");
     client.print("?getAVR_ID=true");
 
 
     client.println(" HTTP/1.1");
-    client.println("Host: lan-user.danit.de"); //TODO: www. necessary?
+    client.print("Host: "); //TODO: www. necessary?
+    client.println(serverURL);
     client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
     //TODO: Check if necessaryS
     client.println("Connection: close");
@@ -537,11 +536,15 @@ void ServerListen() {
           serverClient.println("</head>");
           serverClient.println("<body>");
           serverClient.println("	<p>");
-          serverClient.println("		<a href='http://lan-user.danit.de/'>Go to the online-statistic</a><br /><br />");
+          serverClient.print("		<a href='http://");
+          serverClient.print(serverURL);
+          serverClient.println("/'>Go to the online-statistic</a><br /><br />");
           serverClient.println("	</p>");
           serverClient.println("	<p>");
           serverClient.println("		Enter your name for this device:<br /><br />");
-          serverClient.println("		<form action='http://lan-user.danit.de/' method='GET' accept-charset='UTF-8'>");
+          serverClient.print("		<form action='http://");
+          serverClient.print(serverURL);
+          serverClient.println("/' method='GET' accept-charset='UTF-8'>");
           serverClient.print("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='");
           serverClient.print(AVRID);
           serverClient.println("' readonly></p>");

@@ -124,7 +124,7 @@ void GetMAC(byte *MAC) {
   MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
 
-void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost) {
+void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL) {
   // int result = Ethernet.maintain(); // renew DHCP
   // Serial.print(" DHCP renew:");
   // Serial.println(result); 
@@ -133,13 +133,13 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
   Serial.println(get_mem_unused());
   EthernetClient client;
 
-  if (client.connect("lan-user.danit.de", 80) == 1) {
+  if (client.connect(serverURL, 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
     // client.print("GET /autarc_lan_user_stats/"); // kolchose.org 
-    client.print("GET /"); // lan-user.danit.de
+    client.print("GET /");
     client.print("?AVR_ID=");
     client.print(AVRID);
     Serial.println(AVRID);
@@ -170,7 +170,8 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
 
     client.println(" HTTP/1.1");
     // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
-    client.println("Host: lan-user.danit.de");
+    client.print("Host: ");
+    client.println(serverURL);
     client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
     client.println(); // Important!
 
@@ -185,7 +186,7 @@ void send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     if (tries < retryHost) {
       tries++;
       Serial.println(F("Retry to connect..."));
-      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost);
+      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL);
     } 
     else {
       tries = 0;
