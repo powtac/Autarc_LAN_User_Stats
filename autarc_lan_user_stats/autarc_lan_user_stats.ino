@@ -46,6 +46,8 @@ const char string_format_ip[] = ", format \"000.111.222.333\": ";
 
 char serverURL[] = "lan-user.danit.de";
 
+char tries_getAVRID = 0;
+
 // Ping library configuration
 SOCKET pingSocket              = 0;
 
@@ -372,9 +374,6 @@ char tryDHCP() {
   Serial.println(F("Testing DHCP..."));
   if (Ethernet.begin(mac_shield) == 0) {
     Serial.println(F("  DHCP failed, no automatic IP address assigned!"));
-    Serial.print(F("  Time for waiting for IP address: "));
-    Serial.print(millis());
-    Serial.println(F(" ms"));
     Serial.println(F("You have to configurate the connection settings manual:"));
     useDhcp = 0;
     manualIPConfig();
@@ -397,7 +396,67 @@ char tryDHCP() {
 void getAVRID() {
   startConnection();
   EthernetClient client;
+  
+  if (connect_getAVRID(client) == 1) {
+    int i = 0;
+    int varCount = 0;
+    char tmpc;
+    char save = 0;
+  
+    // if there are incoming bytes available 
+    // from the server, read them and print them:
+    while (client.connected())
+    {
+      if (client.available()) {
+        tmpc = client.read();
+  
+        if (tmpc == -1) {
+          break; 
+        }
+        else if (tmpc == '<') {
+          save = 1;
+          i = 0;
+        }
+        else if (tmpc == '>') {
+          save = 0;
+          varCount++;
+        }
+        else if (save == 1) {
+          switch (varCount) {
+          case 0:
+            if (i < (sizeof(AVRID) - 1)) {
+              AVRID[i] = tmpc;
+              AVRID[i + 1] = '\0';
+            }
+            break;
+          case 1:
+            if (i < (sizeof(AVRpsw) - 1)) {
+              AVRpsw[i] = tmpc;
+              AVRpsw[i + 1] = '\0';
+            }
+            break;
+          }
+          i++;
+        }
+      }
+    }
+  
+    // if the server's disconnected, stop the client:
+    if (!client.connected()) {
+      Serial.println("\n");
+      Serial.println(F("Your account data: "));
+      Serial.println(AVRID);
+      Serial.println(AVRpsw);
+      Serial.println(F("disconnecting."));
+      client.stop();
+    }
+  } else {
+    //Connection to HTTP-Server failed
+    Serial.println(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
+  }
+}
 
+char connect_getAVRID(EthernetClient &client) {
   if (client.connect(serverURL, 80) == 1) {
     Serial.println(F("Connected to HTTP Server"));
 
@@ -411,74 +470,29 @@ void getAVRID() {
     client.print("Host: ");
     client.println(serverURL);
     client.println("User-Agent: Autarc_LAN_User_Stats"); // TODO: Add version
-    //TODO: Check if necessaryS
+    //TODO: Check if necessary
     client.println("Connection: close");
     client.println(); // Important!
 
     Serial.println(client.status());
     //client.stop();
-
-  } 
-  else {
+    return 1;
+    
+  } else {
     Serial.println(F("NOT connected to HTTP Server"));
     Serial.println("\n");
     Serial.println(client.status());
     client.stop();
-  }
-
-
-  int i = 0;
-  int varCount = 0;
-  char tmpc;
-  char save = 0;
-
-  // if there are incoming bytes available 
-  // from the server, read them and print them:
-  while (client.connected())
-  {
-    if (client.available()) {
-      tmpc = client.read();
-
-      if (tmpc == -1) {
-        break; 
-      }
-      else if (tmpc == '<') {
-        save = 1;
-        i = 0;
-      }
-      else if (tmpc == '>') {
-        save = 0;
-        varCount++;
-      }
-      else if (save == 1) {
-        switch (varCount) {
-        case 0:
-          if (i < (sizeof(AVRID) - 1)) {
-            AVRID[i] = tmpc;
-            AVRID[i + 1] = '\0';
-          }
-          break;
-        case 1:
-          if (i < (sizeof(AVRpsw) - 1)) {
-            AVRpsw[i] = tmpc;
-            AVRpsw[i + 1] = '\0';
-          }
-          break;
-        }
-        i++;
-      }
+    if (tries_getAVRID < 2) {
+      tries_getAVRID++;
+      Serial.println(F("Retry to connect..."));
+      connect_getAVRID(client);
+    } 
+    else {
+      //Connection to server failed
+      return 0;
     }
-  }
-
-  // if the server's disconnected, stop the client:
-  if (!client.connected()) {
-    Serial.println("\n");
-    Serial.println(F("Your account data: "));
-    Serial.println(AVRID);
-    Serial.println(AVRpsw);
-    Serial.println(F("disconnecting."));
-    client.stop();
-  }
+  } 
 }
 
 void startConnection() {
