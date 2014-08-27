@@ -124,7 +124,7 @@ void GetMAC(byte *MAC) {
   MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
 }
 
-char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL) {
+char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL, char* VersionNR) {
   // int result = Ethernet.maintain(); // renew DHCP
   // Serial.print(" DHCP renew:");
   // Serial.println(result); 
@@ -169,10 +169,10 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.print(MAC[5], HEX);
 
     client.println(F(" HTTP/1.1"));
-    // client.println("Host: kolchose.org"); // Important! TODO check if this is required and dynamically asignable
     client.print(F("Host: "));
     client.println(serverURL);
-    client.println(F("User-Agent: Autarc_LAN_User_Stats")); // TODO: Add version
+    client.print(F("User-Agent: Autarc_LAN_User_Stats"));
+    client.println(VersionNR);
     client.println(); // Important!
 
     Serial.println(client.status());
@@ -187,7 +187,7 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     if (tries < retryHost) {
       tries++;
       Serial.println(F("Retry to connect..."));
-      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL);
+      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL, VersionNR);
     } 
     else {
       //Connection to server failed

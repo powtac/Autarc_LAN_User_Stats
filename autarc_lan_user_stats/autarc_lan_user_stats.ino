@@ -45,16 +45,13 @@ int configuration;
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
 
 char serverURL[] = "lan-user.danit.de";
+char VersionNR[] = "/1.0";
 
 char tries_getAVRID = 0;
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
 
-// HTTP server in the internet
-// EthernetClient client;
-// IPAddress server(64, 233, 187, 99);
-// IPAddress server(85,10,211,16); // kolchose.org
 
 // Global namespace to use it in setup() and loop()
 ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
@@ -468,7 +465,8 @@ char connect_getAVRID(EthernetClient &client) {
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
-    client.println(F("User-Agent: Autarc_LAN_User_Stats")); // TODO: Add version
+    client.print(F("User-Agent: Autarc_LAN_User_Stats"));
+    client.println(VersionNR);
     //TODO: Check if necessary
     client.println(F("Connection: close"));
     client.println(); // Important!
@@ -528,7 +526,7 @@ void printConnectionDetails() {
 }
 
 void send_info_to_server_troublehandler() {
-  if (send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost, serverURL) == 0) {
+  if (send_info_to_server(currIP, currMAC, AVRID, AVRpsw, retryHost, serverURL, VersionNR) == 0) {
     //Connection to HTTP-Server failed -> ping gateway
     Serial.println(F("Connection to HTTP-Server failed"));
     ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest); 
