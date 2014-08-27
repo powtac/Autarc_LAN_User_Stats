@@ -67,7 +67,7 @@ void setup() {
 
   //________________________Configuration of the board______________________________
 
-  Serial.print("Press any key start configuration");
+  Serial.print(F("Press any key start configuration"));
   for (char i = 0; i < 5 and Serial.available() <= 0; i++) {
     delay(1000);
     Serial.print(".");
@@ -547,7 +547,7 @@ void ServerListen() {
   // listen for incoming clients
   EthernetClient serverClient = server.available();
   if (serverClient) {
-    Serial.println("new client");
+    Serial.println(F("new client"));
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (serverClient.connected()) {
