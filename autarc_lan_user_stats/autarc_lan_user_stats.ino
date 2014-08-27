@@ -163,7 +163,6 @@ void setup() {
         Serial.println("\n");
       } 
       else {
-        //TODO: What if connection fails?
         getAVRID();
       }
 
@@ -453,6 +452,8 @@ void getAVRID() {
   } else {
     //Connection to HTTP-Server failed
     Serial.println(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
+    while (1) { 
+    }
   }
 }
 
