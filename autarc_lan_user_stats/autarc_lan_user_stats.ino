@@ -18,10 +18,12 @@ void getAVRID(void);
 char connect_getAVRID(EthernetClient &client);
 void startConnection(void);
 void printConnectionDetails(void);
-void send_info_to_server_troublehandler(void);
-char send_info_to_server(byte* IP, byte* MAC);
+void send_info_to_server_troublehandler(char *name);
+char send_info_to_server(char *name);
 void ServerListenLoop(int count);
 void ServerListen(void);
+char filterDevice(void);
+void pingDevice(void);
 
 //Prototypes configuration-functions
 void write_EEPROM(int startstorage, byte *value, int valuesize);
@@ -145,6 +147,8 @@ void setup() {
 
 //___________________________Scan the network_________________________________
 void loop() {
+  char filterResult;
+
   Serial.print(F("Speicher (Loop-Start): "));
   Serial.println(get_mem_unused());
   for(int b = 0; b < 4; b++) { 
@@ -155,37 +159,37 @@ void loop() {
     if (currIP[1] <= end_ip[1]) {
       if (currIP[2] <= end_ip[2]) {
         if (currIP[3] <= end_ip[3]) {
-          ICMPEchoReply echoReply = ping(currIP, pingrequest); 
-          if (echoReply.status == SUCCESS) {
-            // We found a device!
-            Serial.print(F("Speicher (Device found): "));
-            Serial.println(get_mem_unused());
-            for(int mac = 0; mac < 6; mac++) {
-              currMAC[mac] = echoReply.MACAddressSocket[mac];
-            }
-
-            Serial.print(F("Device found on: "));
-            print_ip(currIP);
-            Serial.print(F(" MAC: "));
-            print_mac(currMAC);
-            Serial.println();
-
-          } 
-          else {
-            // It's not responding
-            for(int mac = 0; mac < 6; mac++) {
-              currMAC[mac] = 0;
-            }
-            Serial.print(F("No (pingable) device on IP "));
-            print_ip(currIP);
-            Serial.println();
+          filterResult = filterDevice();
+          if (filterResult == 1) {
+            //IP of shield
+            //TODO: F()
+            send_info_to_server_troublehandler("Arduino");
           }
+          else {
+            //free, gateway or dnsSrv
+            pingDevice();
 
-          send_info_to_server_troublehandler();
-
+            if (filterResult == 0) {
+              //free IP
+              send_info_to_server_troublehandler("");
+            } 
+            else if (filterResult == 2) {
+              //IP of gateway
+              send_info_to_server_troublehandler("Gateway");
+            }
+            else if (filterResult == 4) {
+              //IP of dnsSrv
+              send_info_to_server_troublehandler("DNS-Server");
+            }
+            else if (filterResult == 6) {
+              //IP of gateway & dnsSrv
+              send_info_to_server_troublehandler("Gateway");
+              ServerListenLoop(4);
+              send_info_to_server_troublehandler("DNS-Server");
+            }
+          }
           ServerListenLoop(4);
-
-          currIP[3]++;  
+          currIP[3]++;
         } 
         else {
           currIP[3] = start_ip[3];
@@ -520,6 +524,74 @@ char tryDHCP(void) {
   }
 }
 
+char filterDevice(void) {
+  //TODO: Bugfix: more than one device...
+  char check_shield = 0;
+  char check_gateway = 0;
+  char check_dnsSrv = 0;
+
+  for (char i = 3; i >= 0; i--) {
+    if (currIP[i] == ip_shield[i]) {
+      check_shield++;
+    }
+    else if (currIP[i] == gateway[i]) {
+      check_gateway++;
+      if (currIP[i] == dnsSrv[i]) {
+        check_dnsSrv++;
+      }
+    } 
+    else if (currIP[i] == dnsSrv[i]) {
+      check_dnsSrv++;
+    } 
+    else {
+      return 0;
+      break;
+    }
+  }
+
+  char check_result = 0;
+  if (check_shield == 4) {
+    check_result++;
+  } 
+  else { 
+    if (check_gateway == 4) {
+      check_result += 2;
+    } 
+    if (check_dnsSrv == 4) {
+      check_result += 4;
+    }
+  }
+  return check_result;
+}
+
+void pingDevice(void) {
+  ICMPEchoReply echoReply = ping(currIP, pingrequest); 
+  if (echoReply.status == SUCCESS) {
+    // We found a device!
+    Serial.print(F("Speicher (Device found): "));
+    Serial.println(get_mem_unused());
+    for(int mac = 0; mac < 6; mac++) {
+      currMAC[mac] = echoReply.MACAddressSocket[mac];
+    }
+
+    Serial.print(F("Device found on: "));
+    print_ip(currIP);
+    Serial.print(F(" MAC: "));
+    print_mac(currMAC);
+    Serial.println();
+
+  } 
+  else {
+    // It's not responding
+    for(int mac = 0; mac < 6; mac++) {
+      currMAC[mac] = 0;
+    }
+    Serial.print(F("No (pingable) device on IP "));
+    print_ip(currIP);
+    Serial.println();
+  }
+}
+
 void getAVRID(void) {
   startConnection();
   EthernetClient client;
@@ -660,8 +732,8 @@ void printConnectionDetails(void) {
   Serial.println(get_mem_unused()); 
 }
 
-void send_info_to_server_troublehandler(void) {
-  if (send_info_to_server(currIP, currMAC) == 0) {
+void send_info_to_server_troublehandler(char *name) {
+  if (send_info_to_server(name) == 0) {
     //Connection to HTTP-Server failed -> ping gateway
     Serial.println(F("Connection to HTTP-Server failed"));
     ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest); 
@@ -670,7 +742,7 @@ void send_info_to_server_troublehandler(void) {
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       ServerListenLoop(30); //30seconds
 
-      send_info_to_server_troublehandler(); 
+      send_info_to_server_troublehandler(name); 
     } 
     else {
       // Gateway also not available -> Connection problem -> Try to reconnect
@@ -678,13 +750,13 @@ void send_info_to_server_troublehandler(void) {
       startConnection();
       printConnectionDetails();
       //Reconnected. Try again to send info
-      send_info_to_server_troublehandler();
+      send_info_to_server_troublehandler(name);
     }
   }
 }
 
 
-char send_info_to_server(byte* IP, byte* MAC) {
+char send_info_to_server(char *name) {
   //Todo: Maybe renew DHCP
   EthernetClient client;
   Serial.print(F("Speicher (send_info): "));
@@ -700,28 +772,30 @@ char send_info_to_server(byte* IP, byte* MAC) {
     Serial.println(AVRID);
     client.print(F("&AVR_PSW="));
     client.print(AVRpsw);
-
-    // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
+    client.print(F("&DEVICE="));
+    client.print(name);
+    
+    // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&DEVICE=name&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
     client.print(F("&IP[]="));
-    client.print(IP[0]);
+    client.print(currIP[0]);
     client.print(".");
-    client.print(IP[1]);
+    client.print(currIP[1]);
     client.print(".");
-    client.print(IP[2]);
+    client.print(currIP[2]);
     client.print(".");
-    client.print(IP[3]);
+    client.print(currIP[3]);
     client.print(F("&MAC[]="));
-    client.print(MAC[0], HEX);
+    client.print(currMAC[0], HEX);
     client.print(":");
-    client.print(MAC[1], HEX);
+    client.print(currMAC[1], HEX);
     client.print(":");
-    client.print(MAC[2], HEX);
+    client.print(currMAC[2], HEX);
     client.print(":");
-    client.print(MAC[3], HEX);
+    client.print(currMAC[3], HEX);
     client.print(":");
-    client.print(MAC[4], HEX);
+    client.print(currMAC[4], HEX);
     client.print(":");
-    client.print(MAC[5], HEX);
+    client.print(currMAC[5], HEX);
 
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
@@ -762,7 +836,7 @@ char send_info_to_server(byte* IP, byte* MAC) {
       tries++;
       Serial.println(F("Retry to connect..."));
       ServerListenLoop(4);
-      send_info_to_server(IP, MAC);
+      send_info_to_server(name);
     } 
     else {
       //Connection to server failed
@@ -861,4 +935,8 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
+
+
+
 
