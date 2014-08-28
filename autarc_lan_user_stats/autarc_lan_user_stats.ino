@@ -7,7 +7,6 @@
 #include "ICMPPing.h"
 #include "memcheck.h"
 #include "default_config.h"
-//#include "TimerOne.h"
 // init_mem();  //hier???
 
 //________________________Prototypes of functions______________________________
@@ -134,7 +133,7 @@ void setup() {
       }
     }
     if (start_ip[3] == 0) {
-      start_ip[3] = 1;   //TODO: Set to 2, because of Gateway, or don't scan gateway.
+      start_ip[3] = 1;   //TODO: Filter gateway?
     }
   }
 
@@ -142,9 +141,6 @@ void setup() {
   print_ip(start_ip);
   Serial.print(F(" - "));
   print_ip(end_ip);
-
-  //Timer1.initialize(200000);
-  //Timer1.attachInterrupt(ServerListen);
 }
 
 //___________________________Scan the network_________________________________
@@ -672,7 +668,6 @@ void send_info_to_server_troublehandler(void) {
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
-      //TODO: Wait 30 seconds delay(30000);
       ServerListenLoop(30); //30seconds
 
       send_info_to_server_troublehandler(); 
@@ -754,7 +749,7 @@ char send_info_to_server(byte* IP, byte* MAC) {
     if (!client.connected()) {
       client.stop();
     }
-    
+
     delay(10);
     return 1;
   } 
@@ -778,7 +773,7 @@ char send_info_to_server(byte* IP, byte* MAC) {
 }
 
 void ServerListenLoop(int count) {
-  //TODO: That isn't really good...
+  //Not really nice, but it works...
   for (int i = 0; i < count; i++) {
     for(int x = 0; x < 1000; x++) {
       ServerListen();
@@ -866,3 +861,4 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
