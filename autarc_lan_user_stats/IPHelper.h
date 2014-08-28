@@ -173,6 +173,7 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
     client.println(VersionNR);
+    client.println(F("Connection: close"));
     client.println(); // Important!
 
     Serial.println(client.status());
@@ -187,6 +188,8 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
     if (tries < retryHost) {
       tries++;
       Serial.println(F("Retry to connect..."));
+      //TODO: Add this:
+      //ServerListenLoop(1);
       send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL, VersionNR);
     } 
     else {

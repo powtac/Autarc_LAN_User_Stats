@@ -307,11 +307,7 @@ void loop() {
           
           send_info_to_server_troublehandler();
 
-          //TODO: That isn't really good...
-          for(int x = 0; x < 1000; x++) {
-            ServerListen();
-            delay(1);
-          }
+          ServerListenLoop(1);
 
           currIP[3]++;  
         } 
@@ -467,7 +463,6 @@ char connect_getAVRID(EthernetClient &client) {
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
     client.println(VersionNR);
-    //TODO: Check if necessary
     client.println(F("Connection: close"));
     client.println(); // Important!
 
@@ -534,11 +529,8 @@ void send_info_to_server_troublehandler() {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       //TODO: Wait 30 seconds delay(30000);
-      //TODO: That isn't really good...
-      for(int x = 0; x < 30000; x++) {
-            ServerListen();
-            delay(1);
-      }
+      ServerListenLoop(10); //10 * 3 seconds
+      
       send_info_to_server_troublehandler(); 
     } 
     else {
@@ -551,7 +543,16 @@ void send_info_to_server_troublehandler() {
     }
   }
 }          
-          
+
+void ServerListenLoop(int count) {
+  //TODO: That isn't really good...
+  for (int i = 0; i < count; i++) {
+    for(int x = 0; x < 3000; x++) {
+      ServerListen();
+      delay(1);
+    }
+  }
+}  
           
 void ServerListen() {
   //Serial.println(F("Servers listening..."));
@@ -626,7 +627,7 @@ void ServerListen() {
       }
     }
     // give the web browser time to receive the data
-    delay(10);
+    delay(20);
     // close the connection:
     serverClient.stop();
     Serial.println(F("client disconnected"));

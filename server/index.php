@@ -67,10 +67,18 @@ if (isset($_GET['AVR_ID'])) {
     }
     else {
     /* Print the Online-List */
-        $output .= '<!--
-        Letzter Request:<br />';
-        $output .= print_r (unserialize(file_get_contents("req.txt")), true);
-        $output .= '<br /><br /><br /> -->';
+	$output .= '<!--
+	Last Request:
+';
+	/* $output .= print_r (unserialize(file_get_contents("req.txt")), true); */
+
+	$file = file("req.txt");
+	foreach($file AS $line)
+	{
+		$output .= print_r (unserialize($line), true);
+	}
+
+	$output .= '-->';
         $output .= 'Folgende Ger&aumlte sind online: <br /><br />';
         $output .= '<table border="0" width="50%">';
         $output .= '<tr><th>IP</th><th>MAC</th><th>Offline seit</th><th>Letzte &Uumlberpr&uumlfung: </th></tr>';
@@ -111,7 +119,8 @@ echo $output;
 
 
 /* Save this request */
-$fp = fopen("req.txt","w");
+/* $fp = fopen("req.txt","w"); 	overwrite last request */
+$fp = fopen("req.txt","a");
 fwrite($fp, serialize($_GET));
 fclose($fp);
 
