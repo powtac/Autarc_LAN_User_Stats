@@ -307,7 +307,7 @@ void loop() {
           
           send_info_to_server_troublehandler();
 
-          ServerListenLoop(1);
+          ServerListenLoop(4);
 
           currIP[3]++;  
         } 
@@ -529,7 +529,7 @@ void send_info_to_server_troublehandler() {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       //TODO: Wait 30 seconds delay(30000);
-      ServerListenLoop(10); //10 * 3 seconds
+      ServerListenLoop(30); //30seconds
       
       send_info_to_server_troublehandler(); 
     } 
@@ -547,7 +547,7 @@ void send_info_to_server_troublehandler() {
 void ServerListenLoop(int count) {
   //TODO: That isn't really good...
   for (int i = 0; i < count; i++) {
-    for(int x = 0; x < 3000; x++) {
+    for(int x = 0; x < 1000; x++) {
       ServerListen();
       delay(1);
     }

@@ -189,7 +189,7 @@ char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte re
       tries++;
       Serial.println(F("Retry to connect..."));
       //TODO: Add this:
-      //ServerListenLoop(1);
+      //ServerListenLoop(4);
       send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL, VersionNR);
     } 
     else {
