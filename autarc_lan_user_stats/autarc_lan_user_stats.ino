@@ -17,6 +17,7 @@ char tryDHCP(void);
 void getAVRID(void);
 char connect_getAVRID(EthernetClient &client);
 void startConnection(void);
+char renewDHCP(void);
 void printConnectionDetails(void);
 void send_info_to_server_troublehandler(char *name);
 char send_info_to_server(char *name);
@@ -531,9 +532,9 @@ char filterDevice(void) {
   for (char i = 3; i >= 0; i--) {
     if (currIP[i] == ip_shield[i]) {
       check_shield++;
-       if (currIP[i] == gateway[i]) {
+      if (currIP[i] == gateway[i]) {
         check_gateway++;
-       }
+      }
       if (currIP[i] == dnsSrv[i]) {
         check_dnsSrv++;
       }
@@ -709,17 +710,26 @@ void startConnection(void) {
   else {
     if (Ethernet.begin(mac_shield) == 0) {
       //TODO: Check if it works fine
-      int result = Ethernet.maintain();
-      if (result == 2 || result == 4) {
-        Serial.println(F("DHCP renewed")); 
-      } 
-      else {
+      if (renewDHCP() == 0) {
         Serial.println(F("DHCP failed, no automatic IP address assigned!"));
         Serial.println(F("Trying to reconnect in 30 seconds..."));
         delay(30000);
         startConnection();
-      }
+      } 
     }
+  }
+}
+
+char renewDHCP(void) {
+  delay(50);
+  int result = Ethernet.maintain();
+  delay(150);
+  if (result == 2 || result == 4) {
+    Serial.println(F("DHCP renewed"));
+    return 1;
+  } 
+  else {
+    return 0; 
   }
 }
 
@@ -759,9 +769,9 @@ void send_info_to_server_troublehandler(char *name) {
   }
 }
 
-
 char send_info_to_server(char *name) {
-  //Todo: Maybe renew DHCP
+  renewDHCP();
+
   EthernetClient client;
   Serial.print(F("Speicher (send_info): "));
   Serial.println(get_mem_unused());
@@ -778,7 +788,7 @@ char send_info_to_server(char *name) {
     client.print(AVRpsw);
     client.print(F("&DEVICE="));
     client.print(name);
-    
+
     // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&DEVICE=name&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
     client.print(F("&IP[]="));
     client.print(currIP[0]);
@@ -827,8 +837,7 @@ char send_info_to_server(char *name) {
     if (!client.connected()) {
       client.stop();
     }
-
-    delay(10);
+    delay(10);  
     return 1;
   } 
   else {
@@ -939,8 +948,4 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
-
-
-
-
 
