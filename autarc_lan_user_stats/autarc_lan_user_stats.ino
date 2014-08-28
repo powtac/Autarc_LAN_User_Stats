@@ -686,21 +686,17 @@ void send_info_to_server_troublehandler(void) {
       send_info_to_server_troublehandler();
     }
   }
-}          
+}
+
 
 char send_info_to_server(byte* IP, byte* MAC) {
-  // int result = Ethernet.maintain(); // renew DHCP
-  // Serial.print(" DHCP renew:");
-  // Serial.println(result); 
-  // delay(1000);
+  //Todo: Maybe renew DHCP
+  EthernetClient client;
   Serial.print(F("Speicher (send_info): "));
   Serial.println(get_mem_unused());
-  EthernetClient client;
-
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
-
     // Make a HTTP request:
     // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
     client.print(F("GET /"));
@@ -741,7 +737,25 @@ char send_info_to_server(byte* IP, byte* MAC) {
     client.println(); // Important!
 
     Serial.println(client.status());
-    client.stop();
+    char tmpc;
+    // if there are incoming bytes available 
+    // from the server, read them and print them:
+    while (client.connected())
+    {
+      if (client.available()) {
+        tmpc = client.read();
+        //Serial.print(tmpc);
+        if (tmpc == -1) {
+          break; 
+        }
+      }
+    }
+    // if the server's disconnected, stop the client:
+    if (!client.connected()) {
+      client.stop();
+    }
+    
+    delay(10);
     return 1;
   } 
   else {
