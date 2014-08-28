@@ -1,203 +1,29 @@
-// Some helpers for TCP/IP stuff
+#ifndef IPHELPER
+  #define IPHELPER
+  #include "memcheck.h"
+  #include "default_config.cpp"
+  #include "global.h"
+  
+  #include "ConfigHelper.h"
+  
+  
+  extern char tries;
+  extern char tries_getAVRID;
+  
+  void print_ip(byte* ip);
+  void print_mac(byte* mac);
+  char tryDHCP(void);
+  void getAVRID(void);
+  char connect_getAVRID(EthernetClient &client);
+  void startConnection(void);
+  void printConnectionDetails(void);
+  void send_info_to_server_troublehandler(void);
+  char send_info_to_server(byte* IP, byte* MAC);
+  void ServerListenLoop(int count);
+  void ServerListen(void);
+  
+  #include "IPHelper.cpp"
+  
+  //char* AVRID, char* AVRpsw, byte retryHost, char* serverURL, char* VersionNR
 
-#include <stdarg.h>
-#include "memcheck.h"
-
-char tries = 0;
-
-void print_ip(byte* ip) {
-  Serial.print(ip[0]);
-  Serial.print(".");
-  Serial.print(ip[1]);
-  Serial.print(".");
-  Serial.print(ip[2]);
-  Serial.print(".");
-  Serial.print(ip[3]);
-}
-
-
-void print_mac(byte* mac) {
-  Serial.print(mac[0], HEX);
-  Serial.print(":");
-  Serial.print(mac[1], HEX);
-  Serial.print(":");
-  Serial.print(mac[2], HEX);
-  Serial.print(":");
-  Serial.print(mac[3], HEX);
-  Serial.print(":");
-  Serial.print(mac[4], HEX);
-  Serial.print(":");
-  Serial.print(mac[5], HEX);
-}
-
-
-void write_EEPROM(int startstorage, byte *value, int valuesize) {
-  for (int i = 0; i < valuesize; i++) {
-    EEPROM.write(i + startstorage, value[i]);
-  }
-}
-
-void write_EEPROM(int startstorage, char *value, int valuesize) {
-  for (int i = 0; i < valuesize; i++) {
-    EEPROM.write(i + startstorage, value[i]);
-  }
-}
-
-void write_EEPROM(int startstorage, byte value) {
-  EEPROM.write(startstorage, value);
-}
-
-
-void read_EEPROM(int startstorage, byte *value, int valuesize) {
-  for (int i = 0; i < valuesize; i++) {
-    value[i] = EEPROM.read(i + startstorage);
-  }
-}
-
-void read_EEPROM(int startstorage, char *value, int valuesize) {
-  for (int i = 0; i < valuesize; i++) {
-    value[i] = EEPROM.read(i + startstorage);
-  }
-}
-
-byte read_EEPROM(int startstorage) {
-  return EEPROM.read(startstorage);
-}
-
-void GetString(char *buf, int bufsize) {
-  int i;
-  char ch;
-  for (i=0; ; ++i) {
-    while (Serial.available() == 0); // wait for character to arrive
-    ch = Serial.read();
-    Serial.print(ch);
-    if (ch == '\r') {
-      Serial.println("\n");
-      break;
-    } 
-    else if (ch == '\n') {
-      //Ignore new-line
-      i--;
-    } 
-    else if (ch == 8) {
-      //Backspace
-      if (i >= 1) {
-        i = i - 2;
-      }
-    } 
-    else {
-      if (i < bufsize - 1) {
-        buf[i] = ch;
-        buf[i + 1] = 0; // 0 string terminator
-      }
-    }
-  }
-}
-
-byte GetNumber(void) {
-  char input[2];
-  GetString(input, sizeof(input));
-  return atoi(input);
-}
-
-void GetIP(byte *IP) {
-  char input[16];
-  GetString(input, sizeof(input));
-
-  char *i;
-  IP[0] = atoi(strtok_r(input,".",&i));
-  IP[1] = atoi(strtok_r(NULL,".",&i));
-  IP[2] = atoi(strtok_r(NULL,".",&i));
-  IP[3] = atoi(strtok_r(NULL,".",&i));
-}
-
-void GetMAC(byte *MAC) {
-  char input[18];
-  GetString(input, sizeof(input));
-
-  char *i;
-  MAC[0] = strtol(strtok_r(input,":",&i), NULL, 16);
-  MAC[1] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[2] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[3] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[4] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-}
-
-char send_info_to_server(byte* IP, byte* MAC, char* AVRID, char* AVRpsw, byte retryHost, char* serverURL, char* VersionNR) {
-  // int result = Ethernet.maintain(); // renew DHCP
-  // Serial.print(" DHCP renew:");
-  // Serial.println(result); 
-  // delay(1000);
-  Serial.print(F("Speicher (send_info): "));
-  Serial.println(get_mem_unused());
-  EthernetClient client;
-
-  if (client.connect(serverURL, 80) == 1) {
-    tries = 0;
-    Serial.println(F("Connected to HTTP Server"));
-
-    // Make a HTTP request:
-    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
-    client.print(F("GET /"));
-    client.print(F("?AVR_ID="));
-    client.print(AVRID);
-    Serial.println(AVRID);
-    client.print(F("&AVR_PSW="));
-    client.print(AVRpsw);
-
-    // HTTP String:  AVR_ID=AVR_ID&AVR_PSW=AVRpsw&IP[]=Ip&MAC[]=Mac&IP[]=IP&MAC[]=Mac
-    client.print(F("&IP[]="));
-    client.print(IP[0]);
-    client.print(".");
-    client.print(IP[1]);
-    client.print(".");
-    client.print(IP[2]);
-    client.print(".");
-    client.print(IP[3]);
-    client.print(F("&MAC[]="));
-    client.print(MAC[0], HEX);
-    client.print(":");
-    client.print(MAC[1], HEX);
-    client.print(":");
-    client.print(MAC[2], HEX);
-    client.print(":");
-    client.print(MAC[3], HEX);
-    client.print(":");
-    client.print(MAC[4], HEX);
-    client.print(":");
-    client.print(MAC[5], HEX);
-
-    client.println(F(" HTTP/1.1"));
-    client.print(F("Host: "));
-    client.println(serverURL);
-    client.print(F("User-Agent: Autarc_LAN_User_Stats"));
-    client.println(VersionNR);
-    client.println(F("Connection: close"));
-    client.println(); // Important!
-
-    Serial.println(client.status());
-    client.stop();
-    return 1;
-  } 
-  else {
-    Serial.println(F("NOT connected to HTTP Server"));
-    Serial.println("\n");
-    Serial.println(client.status());
-    client.stop();
-    if (tries < retryHost) {
-      tries++;
-      Serial.println(F("Retry to connect..."));
-      //TODO: Add this:
-      //ServerListenLoop(4);
-      send_info_to_server(IP, MAC, AVRID, AVRpsw, retryHost, serverURL, VersionNR);
-    } 
-    else {
-      //Connection to server failed
-      tries = 0;
-      return 0;
-    }
-  }
-}
-
-
+#endif
