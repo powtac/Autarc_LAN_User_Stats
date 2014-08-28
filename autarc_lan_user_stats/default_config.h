@@ -1,9 +1,23 @@
 #ifndef DEFAULT_CONFIG
   #define DEFAULT_CONFIG
-  #include "global.h"
   
   void Load_Default_Config(void);
-
+  byte mac_shield[6];
+  byte ip_shield[4];
+  byte gateway[4];
+  byte subnet[4];
+  byte useDhcp;
+  byte pingrequest;
+  byte useSubnetting;
+  byte start_ip[4];
+  byte end_ip[4];
+  byte dnsSrv[4];
+  byte retryHost;
+  
+  char AVRID[6];
+  char AVRpsw[7];
+  
+  
   void Load_Default_Config(void) {
     mac_shield[0] = 0x90;
     mac_shield[1] = 0xA2;
@@ -67,5 +81,5 @@
   //byte ip_shield[4]              = { 192, 168, 1, 30 };
   //byte gateway[4]                = { 192, 168, 1, 1 };
   //byte subnet[4]                 = { 255, 255, 0, 0 };
-  
+
 #endif
