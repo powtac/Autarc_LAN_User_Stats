@@ -135,7 +135,7 @@ void setup() {
       }
     }
     if (start_ip[3] == 0) {
-      start_ip[3] = 1;   //TODO: Filter gateway?
+      start_ip[3] = 1;
     }
   }
 
@@ -162,7 +162,6 @@ void loop() {
           filterResult = filterDevice();
           if (filterResult == 1) {
             //IP of shield
-            //TODO: F()
             send_info_to_server_troublehandler("Arduino");
           }
           else {
@@ -525,7 +524,6 @@ char tryDHCP(void) {
 }
 
 char filterDevice(void) {
-  //TODO: Bugfix: more than one device...
   char check_shield = 0;
   char check_gateway = 0;
   char check_dnsSrv = 0;
@@ -533,6 +531,12 @@ char filterDevice(void) {
   for (char i = 3; i >= 0; i--) {
     if (currIP[i] == ip_shield[i]) {
       check_shield++;
+       if (currIP[i] == gateway[i]) {
+        check_gateway++;
+       }
+      if (currIP[i] == dnsSrv[i]) {
+        check_dnsSrv++;
+      }
     }
     else if (currIP[i] == gateway[i]) {
       check_gateway++;
