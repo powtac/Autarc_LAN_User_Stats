@@ -13,11 +13,13 @@
 //Prototypes IP-functions
 void print_ip(byte* ip);
 void print_mac(byte* mac);
+void readSubnettingIP(void);
 char tryDHCP(void);
 void getAVRID(void);
 char connect_getAVRID(EthernetClient &client);
 void startConnection(void);
 char renewDHCP(void);
+void readConnectionValues(void);
 void printConnectionDetails(void);
 void send_info_to_server_troublehandler(char *name);
 char send_info_to_server(char *name);
@@ -61,8 +63,6 @@ EthernetServer server(80);
 //_________________________________Setup_____________________________________________  
 void setup() {
   int configuration;
-  byte readSubnet[4];
-  byte readIP[4];
   delay(1000);
   Serial.begin(115200);
   Serial.print(F("Memory: "));
@@ -124,21 +124,7 @@ void setup() {
   server.begin();
 
 
-  //Set start_ip and end_ip if subnetting is choosed
-  if (useSubnetting != 0) {
-    for (byte i = 0; i < 4; i++) {
-      readSubnet[i] = Ethernet.subnetMask()[i], DEC;
-      readIP[i]     = Ethernet.localIP()[i], DEC;
-      start_ip[i]   = readIP[i] & readSubnet[i];
-      end_ip[i]     = readIP[i] | ~readSubnet[i];
-      if (end_ip[i] == 255) {
-        end_ip[i] = 254; 
-      }
-    }
-    if (start_ip[3] == 0) {
-      start_ip[3] = 1;
-    }
-  }
+  readSubnettingIP();
 
   Serial.print(F("\nStarting loop trough IP range "));
   print_ip(start_ip);
@@ -208,6 +194,7 @@ void loop() {
   Serial.print(F("Speicher (End ServerSend): "));
   Serial.println(get_mem_unused());
   Serial.println(F("Restart loop"));
+  readSubnettingIP();  //Important if Subnet of the board has changed
 }
 
 
@@ -503,6 +490,22 @@ void print_mac(byte* mac) {
   Serial.print(mac[5], HEX);
 }
 
+void readSubnettingIP(void) {
+  //Set start_ip and end_ip if subnetting is choosed
+  if (useSubnetting != 0) {
+    for (byte i = 0; i < 4; i++) {
+      start_ip[i]   = ip_shield[i] & subnet[i];
+      end_ip[i]     = ip_shield[i] | ~subnet[i];
+      if (end_ip[i] == 255) {
+        end_ip[i] = 254; 
+      }
+    }
+    if (start_ip[3] == 0) {
+      start_ip[3] = 1;
+    }
+  }
+}
+
 char tryDHCP(void) {
   Serial.println(F("Testing DHCP..."));
   if (Ethernet.begin(mac_shield) == 0) {
@@ -515,12 +518,7 @@ char tryDHCP(void) {
     //DHCP possible
     Serial.println(F("DHCP successful"));
     useDhcp = 1;
-    for (byte i = 0; i < 4; i++) {
-      ip_shield[i] = Ethernet.localIP()[i], DEC;
-      gateway[i] = Ethernet.gatewayIP()[i], DEC;
-      subnet[i] = Ethernet.subnetMask()[i], DEC;
-      dnsSrv[i] = Ethernet.dnsServerIP()[i], DEC;
-    }
+    readConnectionValues();
   }
 }
 
@@ -706,6 +704,7 @@ char connect_getAVRID(EthernetClient &client) {
 void startConnection(void) {
   if (useDhcp == 0) {
     Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
+    readConnectionValues();
   } 
   else {
     if (Ethernet.begin(mac_shield) == 0) {
@@ -717,6 +716,9 @@ void startConnection(void) {
         startConnection();
       } 
     }
+    else {
+      readConnectionValues();
+    }
   }
 }
 
@@ -724,13 +726,27 @@ char renewDHCP(void) {
   delay(50);
   int result = Ethernet.maintain();
   delay(150);
-  if (result == 2 || result == 4) {
+  if (result == 2) {
     Serial.println(F("DHCP renewed"));
+    readConnectionValues();
     return 1;
   } 
+  else if (result == 4) {
+    Serial.println(F("DHCP rebind"));
+    return 1;
+  }
   else {
     return 0; 
   }
+}
+
+void readConnectionValues(void) {
+  for (byte i = 0; i < 4; i++) {
+    ip_shield[i] = Ethernet.localIP()[i], DEC;
+    gateway[i] = Ethernet.gatewayIP()[i], DEC;
+    subnet[i] = Ethernet.subnetMask()[i], DEC;
+    dnsSrv[i] = Ethernet.dnsServerIP()[i], DEC;
+  } 
 }
 
 void printConnectionDetails(void) {
@@ -948,4 +964,5 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
 
