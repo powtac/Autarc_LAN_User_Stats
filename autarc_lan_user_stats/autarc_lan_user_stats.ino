@@ -1,5 +1,3 @@
-#include <stdarg.h>
-#include <util.h>
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EEPROM.h>
@@ -458,7 +456,6 @@ void manualIPConfig(void) {
   print_ip(gateway);
   Serial.println("\n");
 
-  //TODO: Check if it works fine!
   Serial.print(F("Subnetmask"));
   Serial.println(string_format_ip);
   GetIP(subnet);
@@ -722,7 +719,6 @@ void startConnection(void) {
   } 
   else {
     if (Ethernet.begin(mac_shield) == 0) {
-      //TODO: Check if it works fine
       if (renewDHCP() == 0) {
         Serial.println(F("DHCP failed, no automatic IP address assigned!"));
         Serial.println(F("Trying to reconnect in 30 seconds..."));
