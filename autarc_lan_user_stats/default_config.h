@@ -1,6 +1,9 @@
 #ifndef DEFAULT_CONFIG
   #define DEFAULT_CONFIG
   
+  //Prints the status of RAM
+  #define SHOW_MEMORY
+  
   void Load_Default_Config(void);
   byte mac_shield[6];
   byte ip_shield[4];

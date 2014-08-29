@@ -5,9 +5,13 @@
 #include <EEPROM.h>
 // See https://github.com/BlakeFoster/Arduino-Ping/
 #include "ICMPPing.h"
-#include "memcheck.h"
 #include "default_config.h"
-// init_mem();  //hier???
+
+#ifdef SHOW_MEMORY
+  #include "memcheck.h"
+  // init_mem();  //neccessary?
+#endif
+
 
 //________________________Prototypes of functions______________________________
 //Prototypes IP-functions
@@ -65,8 +69,10 @@ void setup() {
   int configuration;
   delay(1000);
   Serial.begin(115200);
-  Serial.print(F("Memory: "));
-  Serial.println(get_mem_unused());
+  #ifdef SHOW_MEMORY
+    Serial.print(F("Memory (startup): "));
+    Serial.println(get_mem_unused());
+  #endif
 
   //________________________Configuration of the board______________________________
   Serial.print(F("Press any key start configuration"));
@@ -136,8 +142,10 @@ void setup() {
 void loop() {
   char filterResult;
 
-  Serial.print(F("Speicher (Loop-Start): "));
-  Serial.println(get_mem_unused());
+  #ifdef SHOW_MEMORY
+    Serial.print(F("Memory (start loop): "));
+    Serial.println(get_mem_unused());
+  #endif
   for(int b = 0; b < 4; b++) { 
     currIP[b] = start_ip[b]; 
   }
@@ -191,8 +199,10 @@ void loop() {
       break; // Exit Loop
     }
   }
-  Serial.print(F("Speicher (End ServerSend): "));
-  Serial.println(get_mem_unused());
+  #ifdef SHOW_MEMORY
+    Serial.print(F("Memory (end loop): "));
+    Serial.println(get_mem_unused());
+  #endif
   Serial.println(F("Restart loop"));
   readSubnettingIP();  //Important if Subnet of the board has changed
 }
@@ -571,8 +581,10 @@ void pingDevice(void) {
   ICMPEchoReply echoReply = ping(currIP, pingrequest); 
   if (echoReply.status == SUCCESS) {
     // We found a device!
-    Serial.print(F("Speicher (Device found): "));
-    Serial.println(get_mem_unused());
+    #ifdef SHOW_MEMORY
+      Serial.print(F("Memory (device found): "));
+      Serial.println(get_mem_unused());
+    #endif
     for(int mac = 0; mac < 6; mac++) {
       currMAC[mac] = echoReply.MACAddressSocket[mac];
     }
@@ -758,8 +770,10 @@ void printConnectionDetails(void) {
   Serial.print(" ");
   Serial.println(Ethernet.gatewayIP());
   Serial.println(F(" Setup complete\n"));
-  Serial.print(F("Speicher: "));
-  Serial.println(get_mem_unused()); 
+  #ifdef SHOW_MEMORY
+    Serial.print(F("Memory (setup complete): "));
+    Serial.println(get_mem_unused());
+  #endif 
 }
 
 void send_info_to_server_troublehandler(char *name) {
@@ -789,8 +803,10 @@ char send_info_to_server(char *name) {
   renewDHCP();
 
   EthernetClient client;
-  Serial.print(F("Speicher (send_info): "));
-  Serial.println(get_mem_unused());
+  #ifdef SHOW_MEMORY
+    Serial.print(F("Memory (send info): "));
+    Serial.println(get_mem_unused());
+  #endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
@@ -964,5 +980,6 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
 
 
