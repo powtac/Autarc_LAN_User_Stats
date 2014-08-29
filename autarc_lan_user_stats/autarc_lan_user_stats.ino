@@ -658,9 +658,11 @@ void getAVRID(void) {
     // if the server's disconnected, stop the client:
     if (!client.connected()) {
       Serial.println("\n");
+      Serial.println(F("--------------"));
       Serial.println(F("Your account data: "));
       Serial.println(AVRID);
       Serial.println(AVRpsw);
+      Serial.println(F("--------------"));
       Serial.println(F("disconnecting."));
       client.stop();
     }
@@ -859,7 +861,7 @@ char send_info_to_server(char *name) {
     {
       if (client.available()) {
         tmpc = client.read();
-        //Serial.print(tmpc);
+        //Serial.print(tmpc);  //prints the servers answer
         if (tmpc == -1) {
           break; 
         }
@@ -912,7 +914,8 @@ void ServerListen(void) {
     while (serverClient.connected()) {
       if (serverClient.available()) {
         char c = serverClient.read();
-        Serial.write(c);
+        //Serial.write(c);  //prints the clients request
+        
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
