@@ -809,19 +809,50 @@ char send_info_to_server(char *name) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
     // Make a HTTP request:
-    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
-
-    client.println(F("GET / HTTP/1.1"));
+    client.println(F("POST / HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
     client.println(VersionNR);
-    client.println(F("Content-Length: 17"));
+    client.println(F("Content-Length: 110"));
     client.println(F("Connection: close"));
-    client.println(F("Content-Type: application/json"));
+    client.println(F("Content-Type: application/x-www-form-urlencoded"));
     client.println(); // Important!
     
-    client.print(F("{\"AVR_ID\": \"ich\"}"));
+    client.print("{");
+    client.print(F("\"AVR_ID\": \""));
+    client.print(AVRID);
+    client.print("\",");
+    Serial.println(AVRID);
+    client.print(F("\"AVR_PSW\": \""));
+    client.print(AVRpsw);
+    client.print(F("\","));
+    client.print(F("\"DEVICE\": \""));
+    client.print(name);
+    client.print(F("\","));
+    client.print(F("\"IP\": \""));
+    client.print(currIP[0]);
+    client.print(F("."));
+    client.print(currIP[1]);
+    client.print(F("."));
+    client.print(currIP[2]);
+    client.print(F("."));
+    client.print(currIP[3]);
+    client.print(F("\","));
+    client.print(F("\"MAC\": \""));
+    client.print(currMAC[0], HEX);
+    client.print(F(":"));
+    client.print(currMAC[1], HEX);
+    client.print(F(":"));
+    client.print(currMAC[2], HEX);
+    client.print(F(":"));
+    client.print(currMAC[3], HEX);
+    client.print(F(":"));
+    client.print(currMAC[4], HEX);
+    client.print(F(":"));
+    client.print(currMAC[5], HEX);
+    client.print(F("\""));
+    client.print(F("}"));
 
     Serial.println(client.status());
     char tmpc;
