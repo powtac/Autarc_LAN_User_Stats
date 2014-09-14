@@ -8,7 +8,7 @@
  */
 
 #include "ICMPPing.h"
-#include <util.h>
+#include "utility/util.h"
 
 inline uint16_t _makeUint16(const uint8_t& highOrder, const uint8_t& lowOrder)
 {
@@ -193,8 +193,8 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
         {
             uint8_t ipHeader [6];
             uint8_t buffer = W5100.readSnRX_RD(_socket);
-            //W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader)); // -> Doesn't work!
-            W5100.read_data(_socket, (uint8_t*)buffer, ipHeader, sizeof(ipHeader));
+            W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader)); // -> Doesn't work!
+            //W5100.read_data(_socket, (uint8_t*)buffer, ipHeader, sizeof(ipHeader));
             buffer += sizeof(ipHeader);
             for (int i=0; i<4; ++i) echoReply.addr[i] = ipHeader[i];
             uint8_t dataLen = ipHeader[4];
@@ -202,8 +202,8 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
 
             uint8_t serialized [sizeof(ICMPEcho)];
             if (dataLen > sizeof(ICMPEcho)) dataLen = sizeof(ICMPEcho);
-            //W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen); // -> Doesn't work!
-            W5100.read_data(_socket, (uint8_t*)buffer, serialized, dataLen);
+            W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen); // -> Doesn't work!
+            // W5100.read_data(_socket, (uint8_t*)buffer, serialized, dataLen);
             echoReply.data.deserialize(serialized);
 
             buffer += dataLen;
