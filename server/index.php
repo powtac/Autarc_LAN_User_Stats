@@ -99,7 +99,7 @@ if (isset($_GET['AVR_ID'])) {
 else if (isset($_GET["getAVR_ID"])) {
 	$getAVR_ID = mysql_real_escape_string($_GET["getAVR_ID"]);
 	if ($getAVR_ID == true) {
-		echo '<srvID><srvPSW>';
+		echo '{"AVRID": "srvID","AVRpsw": "srvPSW"}';
 	}
 }
 else {

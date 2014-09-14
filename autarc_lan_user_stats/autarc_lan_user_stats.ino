@@ -18,6 +18,7 @@ void print_mac(byte* mac);
 void readSubnettingIP(void);
 char tryDHCP(void);
 void getAVRID(void);
+char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2);
 char connect_getAVRID(EthernetClient &client);
 void startConnection(void);
 char renewDHCP(void);
@@ -579,8 +580,8 @@ void pingDevice(void) {
   if (echoReply.status == SUCCESS) {
     // We found a device!
     #ifdef SHOW_MEMORY
-      Serial.print(F("Memory (device found): "));
-      Serial.println(get_mem_unused());
+        Serial.print(F("Memory (device found): "));
+        Serial.println(get_mem_unused());
     #endif
     for(int mac = 0; mac < 6; mac++) {
       currMAC[mac] = echoReply.MACAddressSocket[mac];
@@ -610,9 +611,11 @@ void getAVRID(void) {
 
   if (connect_getAVRID(client) == 1) {
     int i = 0;
-    int varCount = 0;
     char tmpc;
-    char save = 0;
+    char startJSON = 0;
+    char varNameChar[8];  //TODO: Set Size
+    char startName = 0;
+    char startVarValue = 0;
 
     // if there are incoming bytes available 
     // from the server, read them and print them:
@@ -624,30 +627,52 @@ void getAVRID(void) {
         if (tmpc == -1) {
           break; 
         }
-        else if (tmpc == '<') {
-          save = 1;
-          i = 0;
+        else if (startJSON == 0 && tmpc == '{') {
+          startJSON = 1;
         }
-        else if (tmpc == '>') {
-          save = 0;
-          varCount++;
+        else if (startJSON == 1 && tmpc == '}') {
+          startJSON = 0;
         }
-        else if (save == 1) {
-          switch (varCount) {
-          case 0:
-            if (i < (sizeof(AVRID) - 1)) {
-              AVRID[i] = tmpc;
-              AVRID[i + 1] = '\0';
+        else if (startJSON == 1) {
+          if (tmpc == '"') {
+            if (startName == 0) {
+              startName = 1;
+              i = 0;
             }
-            break;
-          case 1:
-            if (i < (sizeof(AVRpsw) - 1)) {
-              AVRpsw[i] = tmpc;
-              AVRpsw[i + 1] = '\0';
+            else {
+              startName = 0;
             }
-            break;
           }
-          i++;
+          else if (startName == 0 && tmpc == ':') {
+            startVarValue = 1;
+          }
+          else if (startName == 0 && tmpc == ',') {
+            startVarValue = 0;
+          }
+          else if (startName == 1) {
+            if (startVarValue == 0) {
+              if (i < (sizeof(varNameChar) - 1)) {
+                varNameChar[i] = tmpc;
+                varNameChar[i + 1] = '\0';
+                i++;
+              }
+            }
+            else {
+              if (compare_CharArray(varNameChar, "AVRID", sizeof(varNameChar), sizeof("AVRID")) == 1) {
+                if (i < (sizeof(AVRID) - 1)) {
+                  AVRID[i] = tmpc;
+                  AVRID[i + 1] = '\0';
+                }
+              }
+              else if (compare_CharArray(varNameChar, "AVRpsw", sizeof(varNameChar), sizeof("AVRpsw")) == 1) {
+                if (i < (sizeof(AVRpsw) - 1)) {
+                  AVRpsw[i] = tmpc;
+                  AVRpsw[i + 1] = '\0';
+                }
+              }
+              i++;
+            }
+          }
         }
       }
     }
@@ -670,6 +695,28 @@ void getAVRID(void) {
     while (1) { 
     }
   }
+}
+
+char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2) {
+  for (byte i = 0; ; i++) {
+    if (i >= sizechar1 || i >= sizechar2) {
+      return 0;
+    }
+    else {
+      Serial.println(char1[i]);
+      Serial.println(char2[i]);
+      if (char1[i] != char2[i]) {
+        return 0;
+      }
+      if (char1[i] == '\0') {
+        break;
+      }
+      else if (char2[i] == '\0') {
+        break;
+      }
+    }
+  }
+  return 1;
 }
 
 char connect_getAVRID(EthernetClient &client) {
@@ -809,16 +856,16 @@ char send_info_to_server(char *name) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
     // Make a HTTP request:
-    client.println(F("POST / HTTP/1.1"));
+    client.println(F("POST /?device_info=true HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
     client.println(VersionNR);
-    client.println(F("Content-Length: 110"));
+    client.println(F("Content-Length: 110"));  //TODO: Calculate this?
     client.println(F("Connection: close"));
     client.println(F("Content-Type: application/x-www-form-urlencoded"));
     client.println(); // Important!
-    
+
     client.print("{");
     client.print(F("\"AVR_ID\": \""));
     client.print(AVRID);
@@ -916,7 +963,7 @@ void ServerListen(void) {
       if (serverClient.available()) {
         char c = serverClient.read();
         //Serial.write(c);  //prints the clients request
-        
+
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
@@ -984,6 +1031,8 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
+
 
 
 
