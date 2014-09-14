@@ -963,6 +963,7 @@ void ServerListen(void) {
     boolean currentLineIsBlank = true;
     while (serverClient.connected()) {
       if (serverClient.available()) {
+        
         char c = serverClient.read();
         //Serial.write(c);  //prints the clients request
 
@@ -970,6 +971,10 @@ void ServerListen(void) {
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
+          //Read the MAC of this device
+          byte MACClient[6];
+          W5100.readSnDHAR(0, MACClient);
+          
           // send a standard http response header
           serverClient.println(F("HTTP/1.1 200 OK"));
           serverClient.println(F("Content-Type: text/html"));
@@ -997,17 +1002,17 @@ void ServerListen(void) {
           serverClient.print(AVRID);
           serverClient.println(F("' readonly></p>"));
           serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
-          serverClient.print(mac_shield[0], HEX);
+          serverClient.print(MACClient[0], HEX);
           serverClient.print(":");
-          serverClient.print(mac_shield[1], HEX);
+          serverClient.print(MACClient[1], HEX);
           serverClient.print(":");
-          serverClient.print(mac_shield[2], HEX);
+          serverClient.print(MACClient[2], HEX);
           serverClient.print(":");
-          serverClient.print(mac_shield[3], HEX);
+          serverClient.print(MACClient[3], HEX);
           serverClient.print(":");
-          serverClient.print(mac_shield[4], HEX);
+          serverClient.print(MACClient[4], HEX);
           serverClient.print(":");
-          serverClient.print(mac_shield[5], HEX);
+          serverClient.print(MACClient[5], HEX);
           serverClient.println(F("' readonly></p>"));
           serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
