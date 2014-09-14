@@ -925,7 +925,7 @@ void ServerListen(void) {
           serverClient.println(F("HTTP/1.1 200 OK"));
           serverClient.println(F("Content-Type: text/html"));
           serverClient.println(F("Connection: close"));  // the connection will be closed after completion of the response
-          serverClient.println();
+          serverClient.println(); // Important!
           serverClient.println(F("<!DOCTYPE HTML>"));
           serverClient.println(F("<html>"));
           serverClient.println(F("<head>"));
@@ -936,14 +936,14 @@ void ServerListen(void) {
           serverClient.println(F("	<div>"));
           serverClient.print(F("		<a href='http://"));
           serverClient.print(serverURL);
-          serverClient.println(F("/'>Go to the online-statistic</a><br /><br />"));
+          serverClient.println(F("/'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
-          serverClient.println(F("		Enter a name for the device that is vistiting this page:<br /><br />"));
+          serverClient.println(F("		<br /><br />"));
           serverClient.print(F("		<form action='http://"));
           serverClient.print(serverURL);
           serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
-          serverClient.println(F("			<p>Device name:<br><input name='user' type='text'></p>"));
+          serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
           serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
           serverClient.print(AVRID);
           serverClient.println(F("' readonly></p>"));
