@@ -579,19 +579,11 @@ void pingDevice(void) {
   ICMPEchoReply echoReply = ping(currIP, pingrequest);
   if (echoReply.status == SUCCESS) {
     // We found a device!
-<<<<<<< HEAD
     #ifdef SHOW_MEMORY
-        Serial.print(F("Memory (device found): "));
+        Serial.print(F("Free Arduino Memory in bytes (device found): "));
         Serial.println(get_mem_unused());
     #endif
-    for(int mac = 0; mac < 6; mac++) {
-=======
-#ifdef SHOW_MEMORY
-    Serial.print(F("Free Arduino Memory in bytes (device found): "));
-    Serial.println(get_mem_unused());
-#endif
     for (int mac = 0; mac < 6; mac++) {
->>>>>>> 6527d529307869955c2f4051335b8e1a40f0444b
       currMAC[mac] = echoReply.MACAddressSocket[mac];
     }
 
@@ -641,7 +633,6 @@ void getAVRID(void) {
         else if (startJSON == 1 && tmpc == '}') {
           startJSON = 0;
         }
-<<<<<<< HEAD
         else if (startJSON == 1) {
           if (tmpc == '"') {
             if (startName == 0) {
@@ -681,22 +672,6 @@ void getAVRID(void) {
               }
               i++;
             }
-=======
-        else if (save == 1) {
-          switch (varCount) {
-            case 0:
-              if (i < (sizeof(AVRID) - 1)) {
-                AVRID[i] = tmpc;
-                AVRID[i + 1] = '\0';
-              }
-              break;
-            case 1:
-              if (i < (sizeof(AVRpsw) - 1)) {
-                AVRpsw[i] = tmpc;
-                AVRpsw[i + 1] = '\0';
-              }
-              break;
->>>>>>> 6527d529307869955c2f4051335b8e1a40f0444b
           }
         }
       }
