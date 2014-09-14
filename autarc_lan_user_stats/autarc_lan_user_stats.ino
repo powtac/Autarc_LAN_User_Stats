@@ -29,7 +29,7 @@ char send_info_to_server(char *name);
 void ServerListenLoop(int count);
 void ServerListen(void);
 char filterDevice(void);
-void pingDevice(void);
+char pingDevice(void);
 
 //Prototypes configuration-functions
 void write_EEPROM(int startstorage, byte *value, int valuesize);
@@ -160,25 +160,25 @@ void loop() {
           }
           else {
             //free, gateway or dnsSrv
-            pingDevice();
-
-            if (filterResult == 0) {
-              //free IP
-              send_info_to_server_troublehandler("");
-            }
-            else if (filterResult == 2) {
-              //IP of gateway
-              send_info_to_server_troublehandler("Gateway");
-            }
-            else if (filterResult == 4) {
-              //IP of dnsSrv
-              send_info_to_server_troublehandler("DNS-Server");
-            }
-            else if (filterResult == 6) {
-              //IP of gateway & dnsSrv
-              send_info_to_server_troublehandler("Gateway");
-              ServerListenLoop(4);
-              send_info_to_server_troublehandler("DNS-Server");
+            if (pingDevice() == 1) {
+              if (filterResult == 0) {
+                //free IP
+                send_info_to_server_troublehandler("");
+              }
+              else if (filterResult == 2) {
+                //IP of gateway
+                send_info_to_server_troublehandler("Gateway");
+              }
+              else if (filterResult == 4) {
+                //IP of dnsSrv
+                send_info_to_server_troublehandler("DNS-Server");
+              }
+              else if (filterResult == 6) {
+                //IP of gateway & dnsSrv
+                send_info_to_server_troublehandler("Gateway");
+                ServerListenLoop(4);
+                send_info_to_server_troublehandler("DNS-Server");
+              }
             }
           }
           ServerListenLoop(4);
@@ -575,7 +575,7 @@ char filterDevice(void) {
   return check_result;
 }
 
-void pingDevice(void) {
+char pingDevice(void) {
   ICMPEchoReply echoReply = ping(currIP, pingrequest);
   if (echoReply.status == SUCCESS) {
     // We found a device!
@@ -592,16 +592,18 @@ void pingDevice(void) {
     Serial.print(F(" MAC: "));
     print_mac(currMAC);
     Serial.println();
-
+    return 1;
   }
   else {
     // It's not responding
+    //TODO: Maybe delete this
     for (int mac = 0; mac < 6; mac++) {
       currMAC[mac] = 0;
     }
     Serial.print(F("No (pingable) device on IP "));
     print_ip(currIP);
     Serial.println();
+    return 0;
   }
 }
 
