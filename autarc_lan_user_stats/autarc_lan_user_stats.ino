@@ -68,7 +68,7 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
 #ifdef SHOW_MEMORY
-  Serial.print(F("Free Arduino Memory (startup): "));
+  Serial.print(F("Free Arduino Memory in bytes (startup): "));
   Serial.println(get_mem_unused());
 #endif
 
@@ -141,7 +141,7 @@ void loop() {
   char filterResult;
 
 #ifdef SHOW_MEMORY
-  Serial.print(F("Free Arduino Memory (start loop): "));
+  Serial.print(F("Free Arduino Memory in bytes (start loop): "));
   Serial.println(get_mem_unused());
 #endif
   for (int b = 0; b < 4; b++) {
@@ -198,7 +198,7 @@ void loop() {
     }
   }
 #ifdef SHOW_MEMORY
-  Serial.print(F("Free Arduino Memory (end loop): "));
+  Serial.print(F("Free Arduino Memory in bytes (end loop): "));
   Serial.println(get_mem_unused());
 #endif
   Serial.println(F("Restart loop"));
@@ -579,7 +579,7 @@ void pingDevice(void) {
   if (echoReply.status == SUCCESS) {
     // We found a device!
 #ifdef SHOW_MEMORY
-    Serial.print(F("Free Arduino Memory (device found): "));
+    Serial.print(F("Free Arduino Memory in bytes (device found): "));
     Serial.println(get_mem_unused());
 #endif
     for (int mac = 0; mac < 6; mac++) {
@@ -769,7 +769,7 @@ void printConnectionDetails(void) {
   Serial.println(Ethernet.gatewayIP());
   Serial.println(F("Setup complete\n"));
 #ifdef SHOW_MEMORY
-  Serial.print(F("Free Arduino Memory (setup complete): "));
+  Serial.print(F("Free Arduino Memory in bytes (setup complete): "));
   Serial.println(get_mem_unused());
 #endif
 }
@@ -802,7 +802,7 @@ char send_info_to_server(char *name) {
 
   EthernetClient client;
 #ifdef SHOW_MEMORY
-  Serial.print(F("Free Arduino Memory (send info): "));
+  Serial.print(F("Free Arduino Memory in bytes (send info): "));
   Serial.println(get_mem_unused());
 #endif
   if (client.connect(serverURL, 80) == 1) {
