@@ -68,7 +68,7 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
 #ifdef SHOW_MEMORY
-  Serial.print(F("Memory (startup): "));
+  Serial.print(F("Free Arduino Memory (startup): "));
   Serial.println(get_mem_unused());
 #endif
 
@@ -141,7 +141,7 @@ void loop() {
   char filterResult;
 
 #ifdef SHOW_MEMORY
-  Serial.print(F("Memory (start loop): "));
+  Serial.print(F("Free Arduino Memory (start loop): "));
   Serial.println(get_mem_unused());
 #endif
   for (int b = 0; b < 4; b++) {
@@ -198,7 +198,7 @@ void loop() {
     }
   }
 #ifdef SHOW_MEMORY
-  Serial.print(F("Memory (end loop): "));
+  Serial.print(F("Free Arduino Memory (end loop): "));
   Serial.println(get_mem_unused());
 #endif
   Serial.println(F("Restart loop"));
@@ -579,7 +579,7 @@ void pingDevice(void) {
   if (echoReply.status == SUCCESS) {
     // We found a device!
 #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (device found): "));
+    Serial.print(F("Free Arduino Memory (device found): "));
     Serial.println(get_mem_unused());
 #endif
     for (int mac = 0; mac < 6; mac++) {
@@ -769,7 +769,7 @@ void printConnectionDetails(void) {
   Serial.println(Ethernet.gatewayIP());
   Serial.println(F("Setup complete\n"));
 #ifdef SHOW_MEMORY
-  Serial.print(F("Memory (setup complete): "));
+  Serial.print(F("Free Arduino Memory (setup complete): "));
   Serial.println(get_mem_unused());
 #endif
 }
@@ -802,7 +802,7 @@ char send_info_to_server(char *name) {
 
   EthernetClient client;
 #ifdef SHOW_MEMORY
-  Serial.print(F("Memory (send info): "));
+  Serial.print(F("Free Arduino Memory (send info): "));
   Serial.println(get_mem_unused());
 #endif
   if (client.connect(serverURL, 80) == 1) {
@@ -862,7 +862,7 @@ char send_info_to_server(char *name) {
     {
       if (client.available()) {
         tmpc = client.read();
-        Serial.print(tmpc);  //prints the servers answer //TODO
+        // Serial.print(tmpc);  //prints the servers answer //TODO
         if (tmpc == -1) {
           break;
         }
@@ -929,7 +929,7 @@ void ServerListen(void) {
           serverClient.println(F("<!DOCTYPE HTML>"));
           serverClient.println(F("<html>"));
           serverClient.println(F("<head>"));
-          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter Username</title>"));
+          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter device name</title>"));
           serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
           serverClient.println(F("</head>"));
           serverClient.println(F("<body>"));
@@ -939,14 +939,15 @@ void ServerListen(void) {
           serverClient.println(F("/'>Go to the online-statistic</a><br /><br />"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
-          serverClient.println(F("		Enter your name for this device:<br /><br />"));
+          serverClient.println(F("		Enter a name for the device that is vistiting this page:<br /><br />"));
           serverClient.print(F("		<form action='http://"));
           serverClient.print(serverURL);
           serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
-          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='"));
+          serverClient.println(F("			<p>Device name:<br><input name='user' type='text'></p>"));
+          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
           serverClient.print(AVRID);
           serverClient.println(F("' readonly></p>"));
-          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' size='30' value='"));
+          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
           serverClient.print(mac_shield[0], HEX);
           serverClient.print(":");
           serverClient.print(mac_shield[1], HEX);
@@ -959,8 +960,7 @@ void ServerListen(void) {
           serverClient.print(":");
           serverClient.print(mac_shield[5], HEX);
           serverClient.println(F("' readonly></p>"));
-          serverClient.println(F("			<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>"));
-          serverClient.println(F("			<input type='submit' name='cmdStore' value='Store'/>"));
+          serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("</body>"));
