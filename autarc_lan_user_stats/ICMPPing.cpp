@@ -8,7 +8,7 @@
  */
 
 #include "ICMPPing.h"
-#include "utility/util.h"
+#include "util.h"
 
 inline uint16_t _makeUint16(const uint8_t& highOrder, const uint8_t& lowOrder)
 {
