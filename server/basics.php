@@ -8,7 +8,7 @@ function mac_format($mac, $separator = ':', $uppercase = TRUE) {
     }
     
     if ($uppercase) {
-        $mac = ucfirst($mac);
+        $mac = strtoupper($mac);
     }
     
     return $mac;

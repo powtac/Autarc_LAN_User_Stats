@@ -6,8 +6,8 @@
 #include "default_config.h"
 
 #ifdef SHOW_MEMORY
-  #include "memcheck.h"
-  // init_mem();  //neccessary?
+#include "memcheck.h"
+// init_mem();  //neccessary?
 #endif
 
 
@@ -63,15 +63,15 @@ ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
 EthernetServer server(80);
 
-//_________________________________Setup_____________________________________________  
+//_________________________________Setup_____________________________________________
 void setup() {
   int configuration;
   delay(1000);
   Serial.begin(115200);
-  #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (startup): "));
-    Serial.println(get_mem_unused());
-  #endif
+#ifdef SHOW_MEMORY
+  Serial.print(F("Free Arduino Memory in bytes (startup): "));
+  Serial.println(get_mem_unused());
+#endif
 
   //________________________Configuration of the board______________________________
   Serial.print(F("Press any key start configuration"));
@@ -85,7 +85,7 @@ void setup() {
     Serial.println(F("Starting configuration"));
     startConfiguration();
 
-  } 
+  }
   else {
     Serial.println(F("no configuration"));
   }
@@ -95,7 +95,7 @@ void setup() {
     //use default values:
     Serial.println(F("No configuration stored yet. Using default values..."));
     Load_Default_Config();
-  } 
+  }
   else {
     //Read values from EEPROM:
     Serial.println(F("Using configuration from EEPROM."));
@@ -141,12 +141,12 @@ void setup() {
 void loop() {
   char filterResult;
 
-  #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (start loop): "));
-    Serial.println(get_mem_unused());
-  #endif
-  for(int b = 0; b < 4; b++) { 
-    currIP[b] = start_ip[b]; 
+#ifdef SHOW_MEMORY
+  Serial.print(F("Free Arduino Memory in bytes (start loop): "));
+  Serial.println(get_mem_unused());
+#endif
+  for (int b = 0; b < 4; b++) {
+    currIP[b] = start_ip[b];
   }
 
   while (1) {
@@ -165,7 +165,7 @@ void loop() {
             if (filterResult == 0) {
               //free IP
               send_info_to_server_troublehandler("");
-            } 
+            }
             else if (filterResult == 2) {
               //IP of gateway
               send_info_to_server_troublehandler("Gateway");
@@ -183,25 +183,25 @@ void loop() {
           }
           ServerListenLoop(4);
           currIP[3]++;
-        } 
+        }
         else {
           currIP[3] = start_ip[3];
           currIP[2]++;
         }
-      } 
+      }
       else {
         currIP[2] = start_ip[2];
         currIP[1]++;
       }
-    } 
+    }
     else {
       break; // Exit Loop
     }
   }
-  #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (end loop): "));
-    Serial.println(get_mem_unused());
-  #endif
+#ifdef SHOW_MEMORY
+  Serial.print(F("Free Arduino Memory in bytes (end loop): "));
+  Serial.println(get_mem_unused());
+#endif
   Serial.println(F("Restart loop"));
   readSubnettingIP();  //Important if Subnet of the board has changed
 }
@@ -265,24 +265,24 @@ byte read_EEPROM(int startstorage) {
 void GetString(char *buf, int bufsize) {
   int i;
   char ch;
-  for (i=0; ; ++i) {
+  for (i = 0; ; ++i) {
     while (Serial.available() == 0); // wait for character to arrive
     ch = Serial.read();
     Serial.print(ch);
     if (ch == '\r') {
       Serial.println("\n");
       break;
-    } 
+    }
     else if (ch == '\n') {
       //Ignore new-line
       i--;
-    } 
+    }
     else if (ch == 8) {
       //Backspace
       if (i >= 1) {
         i = i - 2;
       }
-    } 
+    }
     else {
       if (i < bufsize - 1) {
         buf[i] = ch;
@@ -303,10 +303,10 @@ void GetIP(byte *IP) {
   GetString(input, sizeof(input));
 
   char *i;
-  IP[0] = atoi(strtok_r(input,".",&i));
-  IP[1] = atoi(strtok_r(NULL,".",&i));
-  IP[2] = atoi(strtok_r(NULL,".",&i));
-  IP[3] = atoi(strtok_r(NULL,".",&i));
+  IP[0] = atoi(strtok_r(input, ".", &i));
+  IP[1] = atoi(strtok_r(NULL, ".", &i));
+  IP[2] = atoi(strtok_r(NULL, ".", &i));
+  IP[3] = atoi(strtok_r(NULL, ".", &i));
 }
 
 void GetMAC(byte *MAC) {
@@ -314,12 +314,12 @@ void GetMAC(byte *MAC) {
   GetString(input, sizeof(input));
 
   char *i;
-  MAC[0] = strtol(strtok_r(input,":",&i), NULL, 16);
-  MAC[1] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[2] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[3] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[4] = strtol(strtok_r(NULL,":",&i), NULL, 16);
-  MAC[5] = strtol(strtok_r(NULL,":",&i), NULL, 16);
+  MAC[0] = strtol(strtok_r(input, ":", &i), NULL, 16);
+  MAC[1] = strtol(strtok_r(NULL, ":", &i), NULL, 16);
+  MAC[2] = strtol(strtok_r(NULL, ":", &i), NULL, 16);
+  MAC[3] = strtol(strtok_r(NULL, ":", &i), NULL, 16);
+  MAC[4] = strtol(strtok_r(NULL, ":", &i), NULL, 16);
+  MAC[5] = strtol(strtok_r(NULL, ":", &i), NULL, 16);
 }
 
 void startConfiguration(void) {
@@ -342,7 +342,7 @@ void startConfiguration(void) {
       if (useDhcp == 0) {
         Serial.println(F("Don't use DHCP"));
         manualIPConfig();
-      } 
+      }
       else {
         Serial.println(F("Use DHCP"));
         tryDHCP();
@@ -367,7 +367,7 @@ void startConfiguration(void) {
         Serial.println();
         print_ip(end_ip);
         Serial.println("\n");
-      } 
+      }
       else {
         Serial.println(F("Use Subnetting"));
         Serial.println("\n");
@@ -386,7 +386,7 @@ void startConfiguration(void) {
       Serial.println(retryHost);
       Serial.println("\n");
 
-    } 
+    }
     else {
       tryDHCP();
       useSubnetting = 1;
@@ -405,7 +405,7 @@ void startConfiguration(void) {
       GetString(AVRpsw, sizeof(AVRpsw));
       Serial.print(AVRpsw);
       Serial.println("\n");
-    } 
+    }
     else {
       getAVRID();
     }
@@ -413,7 +413,7 @@ void startConfiguration(void) {
     //Store settings and set configured = 1 in EEPROM
     write_EEPROM(7, ip_shield , sizeof(ip_shield));
     write_EEPROM(11, gateway , sizeof(gateway));
-    write_EEPROM(15, subnet , sizeof(subnet)); 
+    write_EEPROM(15, subnet , sizeof(subnet));
     write_EEPROM(40, dnsSrv , sizeof(dnsSrv));
     write_EEPROM(1, mac_shield , sizeof(mac_shield));
     write_EEPROM(30, AVRID , sizeof(AVRID));
@@ -433,7 +433,7 @@ void startConfiguration(void) {
     Serial.println(F("All values have been stored!"));
     Serial.println(F("Configuration finished"));
 
-  } 
+  }
   else {
     //Delete settings and set configured = 0 in EEPROM
     write_EEPROM(0, 0);
@@ -505,7 +505,7 @@ void readSubnettingIP(void) {
       start_ip[i]   = ip_shield[i] & subnet[i];
       end_ip[i]     = ip_shield[i] | ~subnet[i];
       if (end_ip[i] == 255) {
-        end_ip[i] = 254; 
+        end_ip[i] = 254;
       }
     }
     if (start_ip[3] == 0) {
@@ -521,7 +521,7 @@ char tryDHCP(void) {
     Serial.println(F("You have to configurate the connection settings manual:"));
     useDhcp = 0;
     manualIPConfig();
-  } 
+  }
   else {
     //DHCP possible
     Serial.println(F("DHCP successful"));
@@ -550,10 +550,10 @@ char filterDevice(void) {
       if (currIP[i] == dnsSrv[i]) {
         check_dnsSrv++;
       }
-    } 
+    }
     else if (currIP[i] == dnsSrv[i]) {
       check_dnsSrv++;
-    } 
+    }
     else {
       return 0;
       break;
@@ -563,11 +563,11 @@ char filterDevice(void) {
   char check_result = 0;
   if (check_shield == 4) {
     check_result++;
-  } 
-  else { 
+  }
+  else {
     if (check_gateway == 4) {
       check_result += 2;
-    } 
+    }
     if (check_dnsSrv == 4) {
       check_result += 4;
     }
@@ -576,14 +576,22 @@ char filterDevice(void) {
 }
 
 void pingDevice(void) {
-  ICMPEchoReply echoReply = ping(currIP, pingrequest); 
+  ICMPEchoReply echoReply = ping(currIP, pingrequest);
   if (echoReply.status == SUCCESS) {
     // We found a device!
+<<<<<<< HEAD
     #ifdef SHOW_MEMORY
         Serial.print(F("Memory (device found): "));
         Serial.println(get_mem_unused());
     #endif
     for(int mac = 0; mac < 6; mac++) {
+=======
+#ifdef SHOW_MEMORY
+    Serial.print(F("Free Arduino Memory in bytes (device found): "));
+    Serial.println(get_mem_unused());
+#endif
+    for (int mac = 0; mac < 6; mac++) {
+>>>>>>> 6527d529307869955c2f4051335b8e1a40f0444b
       currMAC[mac] = echoReply.MACAddressSocket[mac];
     }
 
@@ -593,10 +601,10 @@ void pingDevice(void) {
     print_mac(currMAC);
     Serial.println();
 
-  } 
+  }
   else {
     // It's not responding
-    for(int mac = 0; mac < 6; mac++) {
+    for (int mac = 0; mac < 6; mac++) {
       currMAC[mac] = 0;
     }
     Serial.print(F("No (pingable) device on IP "));
@@ -617,7 +625,7 @@ void getAVRID(void) {
     char startName = 0;
     char startVarValue = 0;
 
-    // if there are incoming bytes available 
+    // if there are incoming bytes available
     // from the server, read them and print them:
     while (client.connected())
     {
@@ -625,7 +633,7 @@ void getAVRID(void) {
         tmpc = client.read();
 
         if (tmpc == -1) {
-          break; 
+          break;
         }
         else if (startJSON == 0 && tmpc == '{') {
           startJSON = 1;
@@ -633,6 +641,7 @@ void getAVRID(void) {
         else if (startJSON == 1 && tmpc == '}') {
           startJSON = 0;
         }
+<<<<<<< HEAD
         else if (startJSON == 1) {
           if (tmpc == '"') {
             if (startName == 0) {
@@ -672,6 +681,22 @@ void getAVRID(void) {
               }
               i++;
             }
+=======
+        else if (save == 1) {
+          switch (varCount) {
+            case 0:
+              if (i < (sizeof(AVRID) - 1)) {
+                AVRID[i] = tmpc;
+                AVRID[i + 1] = '\0';
+              }
+              break;
+            case 1:
+              if (i < (sizeof(AVRpsw) - 1)) {
+                AVRpsw[i] = tmpc;
+                AVRpsw[i + 1] = '\0';
+              }
+              break;
+>>>>>>> 6527d529307869955c2f4051335b8e1a40f0444b
           }
         }
       }
@@ -688,11 +713,11 @@ void getAVRID(void) {
       Serial.println(F("disconnecting."));
       client.stop();
     }
-  } 
+  }
   else {
     //Connection to HTTP-Server failed
     Serial.println(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
-    while (1) { 
+    while (1) {
     }
   }
 }
@@ -724,7 +749,7 @@ char connect_getAVRID(EthernetClient &client) {
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
-    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org 
+    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org
     client.print(F("GET /"));
     client.print(F("?getAVR_ID=true"));
 
@@ -741,7 +766,7 @@ char connect_getAVRID(EthernetClient &client) {
     //client.stop();
     return 1;
 
-  } 
+  }
   else {
     Serial.println(F("NOT connected to HTTP Server"));
     Serial.println("\n");
@@ -751,19 +776,19 @@ char connect_getAVRID(EthernetClient &client) {
       tries_getAVRID++;
       Serial.println(F("Retry to connect..."));
       connect_getAVRID(client);
-    } 
+    }
     else {
       //Connection to server failed
       return 0;
     }
-  } 
+  }
 }
 
 void startConnection(void) {
   if (useDhcp == 0) {
     Ethernet.begin(mac_shield, ip_shield, dnsSrv, gateway, subnet);
     readConnectionValues();
-  } 
+  }
   else {
     if (Ethernet.begin(mac_shield) == 0) {
       if (renewDHCP() == 0) {
@@ -771,7 +796,7 @@ void startConnection(void) {
         Serial.println(F("Trying to reconnect in 30 seconds..."));
         delay(30000);
         startConnection();
-      } 
+      }
     }
     else {
       readConnectionValues();
@@ -787,13 +812,13 @@ char renewDHCP(void) {
     Serial.println(F("DHCP renewed"));
     readConnectionValues();
     return 1;
-  } 
+  }
   else if (result == 4) {
     Serial.println(F("DHCP rebind"));
     return 1;
   }
   else {
-    return 0; 
+    return 0;
   }
 }
 
@@ -803,7 +828,7 @@ void readConnectionValues(void) {
     gateway[i] = Ethernet.gatewayIP()[i], DEC;
     subnet[i] = Ethernet.subnetMask()[i], DEC;
     dnsSrv[i] = Ethernet.dnsServerIP()[i], DEC;
-  } 
+  }
 }
 
 void printConnectionDetails(void) {
@@ -814,25 +839,25 @@ void printConnectionDetails(void) {
   Serial.println(Ethernet.subnetMask());
   Serial.print(" ");
   Serial.println(Ethernet.gatewayIP());
-  Serial.println(F(" Setup complete\n"));
-  #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (setup complete): "));
-    Serial.println(get_mem_unused());
-  #endif 
+  Serial.println(F("Setup complete\n"));
+#ifdef SHOW_MEMORY
+  Serial.print(F("Free Arduino Memory in bytes (setup complete): "));
+  Serial.println(get_mem_unused());
+#endif
 }
 
 void send_info_to_server_troublehandler(char *name) {
   if (send_info_to_server(name) == 0) {
     //Connection to HTTP-Server failed -> ping gateway
     Serial.println(F("Connection to HTTP-Server failed"));
-    ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest); 
+    ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest);
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       ServerListenLoop(30); //30seconds
 
-      send_info_to_server_troublehandler(name); 
-    } 
+      send_info_to_server_troublehandler(name);
+    }
     else {
       // Gateway also not available -> Connection problem -> Try to reconnect
       Serial.println(F("There is a connection error. Trying to start new connection..."));
@@ -848,10 +873,10 @@ char send_info_to_server(char *name) {
   renewDHCP();
 
   EthernetClient client;
-  #ifdef SHOW_MEMORY
-    Serial.print(F("Memory (send info): "));
-    Serial.println(get_mem_unused());
-  #endif
+#ifdef SHOW_MEMORY
+  Serial.print(F("Free Arduino Memory in bytes (send info): "));
+  Serial.println(get_mem_unused());
+#endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
     Serial.println(F("Connected to HTTP Server"));
@@ -903,15 +928,15 @@ char send_info_to_server(char *name) {
 
     Serial.println(client.status());
     char tmpc;
-    // if there are incoming bytes available 
+    // if there are incoming bytes available
     // from the server, read them and print them:
     while (client.connected())
     {
       if (client.available()) {
         tmpc = client.read();
-        Serial.print(tmpc);  //prints the servers answer //TODO
+        // Serial.print(tmpc);  //prints the servers answer //TODO
         if (tmpc == -1) {
-          break; 
+          break;
         }
       }
     }
@@ -919,9 +944,9 @@ char send_info_to_server(char *name) {
     if (!client.connected()) {
       client.stop();
     }
-    delay(10);  
+    delay(10);
     return 1;
-  } 
+  }
   else {
     Serial.println(F("NOT connected to HTTP Server"));
     Serial.println("\n");
@@ -932,7 +957,7 @@ char send_info_to_server(char *name) {
       Serial.println(F("Retry to connect..."));
       ServerListenLoop(4);
       send_info_to_server(name);
-    } 
+    }
     else {
       //Connection to server failed
       tries = 0;
@@ -944,12 +969,12 @@ char send_info_to_server(char *name) {
 void ServerListenLoop(int count) {
   //Not really nice, but it works...
   for (int i = 0; i < count; i++) {
-    for(int x = 0; x < 1000; x++) {
+    for (int x = 0; x < 1000; x++) {
       ServerListen();
       delay(1);
     }
   }
-}  
+}
 
 void ServerListen(void) {
   //Serial.println(F("Servers listening..."));
@@ -972,28 +997,29 @@ void ServerListen(void) {
           serverClient.println(F("HTTP/1.1 200 OK"));
           serverClient.println(F("Content-Type: text/html"));
           serverClient.println(F("Connection: close"));  // the connection will be closed after completion of the response
-          serverClient.println();
+          serverClient.println(); // Important!
           serverClient.println(F("<!DOCTYPE HTML>"));
           serverClient.println(F("<html>"));
           serverClient.println(F("<head>"));
-          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter Username</title>"));
+          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter device name</title>"));
           serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
           serverClient.println(F("</head>"));
           serverClient.println(F("<body>"));
-          serverClient.println(F("	<p>"));
+          serverClient.println(F("	<div>"));
           serverClient.print(F("		<a href='http://"));
           serverClient.print(serverURL);
-          serverClient.println(F("/'>Go to the online-statistic</a><br /><br />"));
-          serverClient.println(F("	</p>"));
-          serverClient.println(F("	<p>"));
-          serverClient.println(F("		Enter your name for this device:<br /><br />"));
+          serverClient.println(F("/'>Go to the usage statistics</a><br /><br />"));
+          serverClient.println(F("	</div>"));
+          serverClient.println(F("	<div>"));
+          serverClient.println(F("		<br /><br />"));
           serverClient.print(F("		<form action='http://"));
           serverClient.print(serverURL);
           serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
-          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' size='30' value='"));
+          serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
+          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
           serverClient.print(AVRID);
           serverClient.println(F("' readonly></p>"));
-          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' size='30' value='"));
+          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
           serverClient.print(mac_shield[0], HEX);
           serverClient.print(":");
           serverClient.print(mac_shield[1], HEX);
@@ -1006,18 +1032,17 @@ void ServerListen(void) {
           serverClient.print(":");
           serverClient.print(mac_shield[5], HEX);
           serverClient.println(F("' readonly></p>"));
-          serverClient.println(F("			<p>Username:<br><input name='user' type='text' size='30' maxlength='30'></p>"));
-          serverClient.println(F("			<input type='submit' name='cmdStore' value='Store'/>"));
+          serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
-          serverClient.println(F("	</p>"));
-          serverClient.println(F("</body>"));     
+          serverClient.println(F("	</div>"));
+          serverClient.println(F("</body>"));
           serverClient.println(F("</html>"));
           break;
         }
         if (c == '\n') {
           // you're starting a new line
           currentLineIsBlank = true;
-        } 
+        }
         else if (c != '\r') {
           // you've gotten a character on the current line
           currentLineIsBlank = false;
