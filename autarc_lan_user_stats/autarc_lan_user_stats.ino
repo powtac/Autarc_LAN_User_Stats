@@ -988,13 +988,21 @@ void ServerListen(void) {
           serverClient.println(F("</head>"));
           serverClient.println(F("<body>"));
           serverClient.println(F("	<div>"));
-          serverClient.print(F("		<a href='http://"));
+          #if ARDUINO > 105
+            serverClient.print(F("		<a href='http:\/\/"));
+          #else
+            serverClient.print(F("		<a href='http://"));
+          #endif
           serverClient.print(serverURL);
           serverClient.println(F("/'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
           serverClient.println(F("		<br /><br />"));
-          serverClient.print(F("		<form action='http://"));
+          #if ARDUINO > 105
+            serverClient.print(F("		<form action='http:\/\/"));
+          #else
+            serverClient.print(F("		<form action='http://"));
+          #endif
           serverClient.print(serverURL);
           serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
           serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
