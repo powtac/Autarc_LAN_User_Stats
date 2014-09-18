@@ -52,7 +52,7 @@ char tries = 0;
 char tries_getAVRID = 0;
 
 char serverURL[] = "lan-user.danit.de";
-char VersionNR[] = "/1.0";
+char VersionNR[] = "/1.0";  //TODO: Automatically?
 
 byte currIP[4];
 byte currMAC[6];
@@ -125,6 +125,24 @@ void setup() {
   printConnectionDetails();
 
 
+  #if ARDUINO > 105
+    Serial.print(F("Visit http:\/\/"));
+  #else
+    Serial.print(F("Visit http://"));
+  #endif
+  print_ip(ip_shield);
+  Serial.println(F("/ with your browser to add a name to your device. Tell all users to do the same."));
+  #if ARDUINO > 105
+    Serial.print(F("Also check out http:\/\/"));
+  #else
+    Serial.print(F("Also check out http://"));
+  #endif
+  Serial.print(serverURL);
+  Serial.print(F("/?AVR_ID="));
+  Serial.print(AVRID);
+  Serial.println(F(" to see your stats online!"));
+  
+  
   Serial.println(F("Starting server"));
   server.begin();
 
