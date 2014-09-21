@@ -8,7 +8,11 @@
  */
 
 #include "ICMPPing.h"
-#include "util.h"
+#if ARDUINO > 105
+    #include "utility/util.h"
+#else
+    #include "util.h"
+#endif
 
 inline uint16_t _makeUint16(const uint8_t& highOrder, const uint8_t& lowOrder)
 {
