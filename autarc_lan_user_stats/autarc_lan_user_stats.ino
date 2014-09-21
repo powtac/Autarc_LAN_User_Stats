@@ -1025,7 +1025,7 @@ void ServerListen(void) {
             serverClient.print(F("		<form action='http://"));
           #endif
           serverClient.print(serverURL);
-          serverClient.println(F("/' method='GET' accept-charset='UTF-8'>"));
+          serverClient.println(F("/' method='POST' accept-charset='UTF-8'>"));
           serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
           serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
           serverClient.print(AVRID);
