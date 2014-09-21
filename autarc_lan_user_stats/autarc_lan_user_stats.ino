@@ -1042,7 +1042,19 @@ void ServerListen(void) {
           serverClient.print(MACClient[4], HEX);
           serverClient.print(":");
           serverClient.print(MACClient[5], HEX);
-          serverClient.println(F("' readonly></p>"));
+          serverClient.println(F("' readonly>"));
+          #if ARDUINO > 105
+            serverClient.print(F(" <a href='http:\/\/"));
+          #else
+            serverClient.print(F(" <a href='http://"));
+          #endif
+          serverClient.print(F("hwaddress.com?q="));
+          serverClient.print(MACClient[0], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[1], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[2], HEX);
+          serverClient.println(F("' target='blank'>Vendor?</a></p>"));
           serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
           serverClient.println(F("	</div>"));
