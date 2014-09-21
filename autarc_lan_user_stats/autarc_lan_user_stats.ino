@@ -153,6 +153,7 @@ void setup() {
   print_ip(start_ip);
   Serial.print(F(" - "));
   print_ip(end_ip);
+  Serial.println("\n");
 }
 
 //___________________________Scan the network_________________________________
@@ -1012,7 +1013,9 @@ void ServerListen(void) {
             serverClient.print(F("		<a href='http://"));
           #endif
           serverClient.print(serverURL);
-          serverClient.println(F("/'>Go to the usage statistics</a><br /><br />"));
+          serverClient.print("/?AVR_ID=");
+          serverClient.print(AVRID);
+          serverClient.println(F("'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
           serverClient.println(F("		<br /><br />"));
