@@ -52,7 +52,7 @@ char tries = 0;
 char tries_getAVRID = 0;
 
 char serverURL[] = "lan-user.danit.de";
-char VersionNR[] = "/1.0";  //TODO: Automatically?
+char VersionNR[] = "/1.1";  //TODO: Automatically?
 
 byte currIP[4];
 byte currMAC[6];
