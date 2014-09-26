@@ -175,6 +175,9 @@ void loop() {
           filterResult = filterDevice();
           if (filterResult == 1) {
             //IP of shield
+            Serial.print(F("Arduino on IP "));
+            print_ip(currIP);
+            Serial.println();
             send_info_to_server_troublehandler("Arduino");
           }
           else {
@@ -182,22 +185,52 @@ void loop() {
             if (pingDevice() == 1) {
               if (filterResult == 0) {
                 //free IP
+                Serial.print(F("Device found on IP "));
+                print_ip(currIP);
+                Serial.print(F(" MAC: "));
+                print_mac(currMAC);
+                Serial.println();
                 send_info_to_server_troublehandler("");
               }
               else if (filterResult == 2) {
                 //IP of gateway
+                Serial.print(F("Gateway found on IP "));
+                print_ip(currIP);
+                Serial.print(F(" MAC: "));
+                print_mac(currMAC);
+                Serial.println();
                 send_info_to_server_troublehandler("Gateway");
               }
               else if (filterResult == 4) {
                 //IP of dnsSrv
+                Serial.print(F("DNS-Server found on IP "));
+                print_ip(currIP);
+                Serial.print(F(" MAC: "));
+                print_mac(currMAC);
+                Serial.println();
                 send_info_to_server_troublehandler("DNS-Server");
               }
               else if (filterResult == 6) {
                 //IP of gateway & dnsSrv
+                Serial.print(F("Gateway found on IP "));
+                print_ip(currIP);
+                Serial.print(F(" MAC: "));
+                print_mac(currMAC);
+                Serial.println();
                 send_info_to_server_troublehandler("Gateway");
                 ServerListenLoop(4);
+                Serial.print(F("DNS-Server found on IP "));
+                print_ip(currIP);
+                Serial.print(F(" MAC: "));
+                print_mac(currMAC);
+                Serial.println();
                 send_info_to_server_troublehandler("DNS-Server");
               }
+            }
+            else {
+              Serial.print(F("No (pingable) device on IP "));
+              print_ip(currIP);
+              Serial.println();
             }
           }
           ServerListenLoop(4);
@@ -605,19 +638,10 @@ char pingDevice(void) {
     for (int mac = 0; mac < 6; mac++) {
       currMAC[mac] = echoReply.MACAddressSocket[mac];
     }
-
-    Serial.print(F("Device found on: "));
-    print_ip(currIP);
-    Serial.print(F(" MAC: "));
-    print_mac(currMAC);
-    Serial.println();
     return 1;
   }
   else {
     // It's not responding
-    Serial.print(F("No (pingable) device on IP "));
-    print_ip(currIP);
-    Serial.println();
     return 0;
   }
 }
