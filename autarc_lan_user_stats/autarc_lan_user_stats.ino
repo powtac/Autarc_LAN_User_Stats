@@ -228,7 +228,7 @@ void loop() {
               }
             }
             else {
-              Serial.print(F("No (pingable) device on IP "));
+              Serial.print("No (pingable) device on IP ");
               print_ip(currIP);
               Serial.println();
             }
@@ -764,7 +764,6 @@ char connect_getAVRID(EthernetClient &client) {
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
-    // client.print(F("GET /autarc_lan_user_stats/")); // kolchose.org
     client.print(F("GET /"));
     client.print(F("?getAVR_ID=true"));
 
@@ -901,7 +900,7 @@ char send_info_to_server(char *name) {
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
     client.println(VersionNR);
-    client.println(F("Content-Length: 110"));  //TODO: Calculate this?
+    client.println(F("Content-Length: 110"));  //TODO: Maybe calculate this later..?
     client.println(F("Connection: close"));
     client.println(F("Content-Type: application/x-www-form-urlencoded"));
     client.println(); // Important!
@@ -913,33 +912,33 @@ char send_info_to_server(char *name) {
     Serial.println(AVRID);
     client.print(F("\"AVR_PSW\": \""));
     client.print(AVRpsw);
-    client.print(F("\","));
+    client.print("\",");
     client.print(F("\"DEVICE\": \""));
     client.print(name);
-    client.print(F("\","));
+    client.print("\",");
     client.print(F("\"IP\": \""));
     client.print(currIP[0]);
-    client.print(F("."));
+    client.print(".");
     client.print(currIP[1]);
-    client.print(F("."));
+    client.print(".");
     client.print(currIP[2]);
-    client.print(F("."));
+    client.print(".");
     client.print(currIP[3]);
-    client.print(F("\","));
+    client.print("\",");
     client.print(F("\"MAC\": \""));
     client.print(currMAC[0], HEX);
-    client.print(F(":"));
+    client.print(":");
     client.print(currMAC[1], HEX);
-    client.print(F(":"));
+    client.print(":");
     client.print(currMAC[2], HEX);
-    client.print(F(":"));
+    client.print(":");
     client.print(currMAC[3], HEX);
-    client.print(F(":"));
+    client.print(":");
     client.print(currMAC[4], HEX);
-    client.print(F(":"));
+    client.print(":");
     client.print(currMAC[5], HEX);
-    client.print(F("\""));
-    client.print(F("}"));
+    client.print("\"");
+    client.print("}");
 
     Serial.println(client.status());
     char tmpc;
@@ -992,7 +991,6 @@ void ServerListenLoop(int count) {
 }
 
 void ServerListen(void) {
-  //Serial.println(F("Servers listening..."));
   // listen for incoming clients
   EthernetClient serverClient = server.available();
   if (serverClient) {
@@ -1051,7 +1049,7 @@ void ServerListen(void) {
           serverClient.println(F("' readonly></p>"));
           serverClient.print(F("			<input name='psw' type='hidden' value='"));
           serverClient.print(AVRpsw);
-          serverClient.println(F("'>"));
+          serverClient.println("'>");
           serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
           serverClient.print(MACClient[0], HEX);
           serverClient.print(":");
