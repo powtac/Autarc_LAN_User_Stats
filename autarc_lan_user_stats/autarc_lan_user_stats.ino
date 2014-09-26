@@ -1074,7 +1074,7 @@ void ServerListen(void) {
           serverClient.print(MACClient[1], HEX);
           serverClient.print(":");
           serverClient.print(MACClient[2], HEX);
-          serverClient.println(F("' target='blank'>Vendor?</a></p>"));
+          serverClient.println(F("' target='_blank'>Vendor?</a></p>"));
           serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
           serverClient.println(F("	</div>"));
