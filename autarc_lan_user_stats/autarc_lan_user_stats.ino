@@ -654,7 +654,7 @@ void getAVRID(void) {
     int i = 0;
     char tmpc;
     char startJSON = 0;
-    char varNameChar[8];  //TODO: Set Size
+    char varNameChar[7];
     char startName = 0;
     char startVarValue = 0;
 
@@ -711,6 +711,7 @@ void getAVRID(void) {
                   AVRpsw[i + 1] = '\0';
                 }
               }
+              //Attention: If you add a var > 6 chars, you have to change the space of the char array!
               i++;
             }
           }
@@ -744,8 +745,6 @@ char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2)
       return 0;
     }
     else {
-      Serial.println(char1[i]);
-      Serial.println(char2[i]);
       if (char1[i] != char2[i]) {
         return 0;
       }
@@ -950,7 +949,7 @@ char send_info_to_server(char *name) {
     {
       if (client.available()) {
         tmpc = client.read();
-        // Serial.print(tmpc);  //prints the servers answer //TODO
+        // Serial.print(tmpc);  //prints the servers answer //TODO Check if it's empty
         if (tmpc == -1) {
           break;
         }
@@ -1102,8 +1101,3 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
-
-
-
-
-
