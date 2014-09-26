@@ -63,7 +63,7 @@ if (isset($_GET['AVR_ID'])) {
         while ($row = mysql_fetch_assoc($online_list))
         {
             $timediff = $date - $row['time_offline'];
-            $output .= '<tr><td>'.$row['IP'].'</td><td><a href="http://www.coffer.com/mac_find/?string="'.urlencode(mac_format($row['MAC'])).'" target="_blank">'.mac_format($row['MAC']).'</a></td><td>'.(date("j" , $timediff) - 1).' Tage '.(date("G" , $timediff) - 1).' h '.date("i" , $timediff).' min '.date("s" , $timediff)." sec</td><td>".date("Y-m-d - G:i" , $row['last_scan']).' Uhr</td></tr>';
+            $output .= '<tr><td>'.$row['IP'].'</td><td><a href="http://www.coffer.com/mac_find/?string='.urlencode(mac_format($row['MAC'])).'" target="_blank">'.mac_format($row['MAC']).'</a></td><td>'.(date("j" , $timediff) - 1).' Tage '.(date("G" , $timediff) - 1).' h '.date("i" , $timediff).' min '.date("s" , $timediff)." sec</td><td>".date("Y-m-d - G:i" , $row['last_scan']).' Uhr</td></tr>';
         }
         $output .= '</table>';
 	$output .= '<a href="https://github.com/powtac/Autarc_LAN_User_Stats/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>';
@@ -82,11 +82,6 @@ else if (isset($JSON["AVR_ID"])) {
 	$currIP = mysql_real_escape_string(htmlspecialchars($JSON["IP"], ENT_QUOTES));
 	$currMAC = mysql_real_escape_string(htmlspecialchars($JSON["MAC"], ENT_QUOTES));
 
-	if ($currMAC == "0:0:0:0:0:0") {
-		/* Device is offline -> Update last_scan time */
-		$mysql_updateScanTime = mysql_query("UPDATE Online_DB SET last_scan = '".$date."' WHERE AVR_ID='".$AVR_ID."' AND IP = '".$currIP."'");
-	}
-	else {
 	$check_queryMACstored = mysql_query("SELECT id FROM Online_DB WHERE AVR_ID='".$AVR_ID."' AND MAC = '".$currMAC."' LIMIT 1");
 	if (mysql_num_rows($check_queryMACstored) == 0) {
 	/* MAC not stored yet */
@@ -107,7 +102,6 @@ else if (isset($JSON["AVR_ID"])) {
 		$mysql_updateTime = mysql_query("UPDATE Online_DB SET time_offline = '".$date."', last_scan = '".$date."' WHERE AVR_ID='".$AVR_ID."' AND MAC = '".$currMAC."' AND IP = '".$currIP."' LIMIT 1");
 	    }
 	}
-    }
 }
 
 else if (isset($_GET["getAVR_ID"])) {
