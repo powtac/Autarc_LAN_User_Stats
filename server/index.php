@@ -70,11 +70,22 @@ if (isset($_GET['AVR_ID'])) {
 ';
 	/* $output .= print_r (unserialize(file_get_contents("req.txt")), true); */
 
+	$output .= "____________Request______________";
+
 	$file = file("req.txt");
 	foreach($file AS $line)
 	{
 		$output .= print_r (unserialize($line), true);
 	}
+
+	$output .= "____________Body______________";
+
+	$file = file("body.txt");
+	foreach($file AS $line)
+	{
+		$output .= print_r (json_decode($line, true), true);
+	}
+
 
 	$output .= '-->';
         $output .= 'Folgende Ger&aumlte sind online: <br /><br />';
@@ -87,6 +98,10 @@ if (isset($_GET['AVR_ID'])) {
             $output .= "<tr><td>".$row['IP']."</td><td><a href=\"http://www.coffer.com/mac_find/?string=".urlencode(mac_format($row['MAC'])).""\" target=\"_blank\">".mac_format($row['MAC'])."</a></td><td>".(date("j" , $timediff) - 1)." Tage ".(date("G" , $timediff) - 1)." h ".date("i" , $timediff)." min ".date("s" , $timediff)." sec</td><td>".date("Y-m-d - G:i" , $row['last_scan'])." Uhr</td></tr>";
         }
         $output .= '</table>';
+	$output .= '<a href="https://github.com/powtac/Autarc_LAN_User_Stats/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>';
+	$output .= '</body>
+	</html>';
+	echo $output;
     }
 
 }
@@ -105,16 +120,25 @@ else {
             $output .= '<option value="'.$row['AVR_ID'].'">&nbsp;'.$row['AVR_ID'].'&nbsp;</option>';
         }
     $output .= '</select><br /><br /><input type="submit" name="cmdShow" value="Anzeigen"/></form>';
+    $output .= '<a href="https://github.com/powtac/Autarc_LAN_User_Stats/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>';
+    $output .= '</body>
+    </html>';
+    echo $output;
+
 }
 
-$output .= '<a href="https://github.com/powtac/Autarc_LAN_User_Stats/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>';
-echo $output;
-echo "</body></html>";
+
+
 
 /* Save this request */
 /* $fp = fopen("req.txt","w"); 	overwrite last request */
-$fp = fopen("req.txt","a");
-fwrite($fp, serialize($_GET));
+$fp = fopen("req.txt", "a");
+fwrite($fp, serialize($_GET)."\r\n");
 fclose($fp);
 
+$body = file_get_contents('php://input');
 
+$fpb = fopen("body.txt", "a");
+fwrite($fpb, $body."\r\n");
+fclose($fpb);
+?>

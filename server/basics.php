@@ -6,10 +6,11 @@ function mac_format($mac, $separator = ':', $uppercase = TRUE) {
     } else {
         $mac = str_replace(array(':', '.', '-', '_', ' ', ','), $separator, $mac);
     }
-    
+
     if ($uppercase) {
         $mac = strtoupper($mac);
     }
-    
+
     return $mac;
 }
+?>
