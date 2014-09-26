@@ -1050,6 +1050,9 @@ void ServerListen(void) {
           serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
           serverClient.print(AVRID);
           serverClient.println(F("' readonly></p>"));
+          serverClient.print(F("			<input name='psw' type='hidden' value='"));
+          serverClient.print(AVRpsw);
+          serverClient.println(F("'>"));
           serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
           serverClient.print(MACClient[0], HEX);
           serverClient.print(":");
