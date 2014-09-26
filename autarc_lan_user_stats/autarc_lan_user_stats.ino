@@ -615,10 +615,6 @@ char pingDevice(void) {
   }
   else {
     // It's not responding
-    //TODO: Maybe delete this
-    for (int mac = 0; mac < 6; mac++) {
-      currMAC[mac] = 0;
-    }
     Serial.print(F("No (pingable) device on IP "));
     print_ip(currIP);
     Serial.println();
