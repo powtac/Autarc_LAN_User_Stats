@@ -198,7 +198,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
             uint8_t ipHeader [6];
             uint8_t buffer = W5100.readSnRX_RD(_socket);
             #if ARDUINO > 105
-              W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader)); // -> Doesn't work! TODO: Check
+              W5100.read_data(_socket, (uint16_t)buffer, ipHeader, sizeof(ipHeader));
             #else
               W5100.read_data(_socket, (uint8_t*)buffer, ipHeader, sizeof(ipHeader));
             #endif
@@ -210,7 +210,7 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
             uint8_t serialized [sizeof(ICMPEcho)];
             if (dataLen > sizeof(ICMPEcho)) dataLen = sizeof(ICMPEcho);
             #if ARDUINO > 105
-              W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen); // -> Doesn't work! TODO: Check
+              W5100.read_data(_socket, (uint16_t)buffer, serialized, dataLen);
             #else
               W5100.read_data(_socket, (uint8_t*)buffer, serialized, dataLen);
             #endif
