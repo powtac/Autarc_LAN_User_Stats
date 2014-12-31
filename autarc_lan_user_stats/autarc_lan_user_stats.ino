@@ -51,7 +51,9 @@ const char string_format_ip[] = ", format \"000.111.222.333\": ";
 char tries = 0;
 char tries_getAVRID = 0;
 
-char serverURL[] = "lan-user.danit.de";
+// char serverURL[] = "lan-user.danit.de";
+char serverURL[] = "kolchose.org";
+char serverPath[] = "/autarc_lan_user_stats/02/api/store/mac/";
 char VersionNR[] = "/1.1";  //TODO: Automatically?
 
 byte currIP[4];
@@ -75,7 +77,7 @@ void setup() {
 
   //________________________Configuration of the board______________________________
   Serial.print(F("Press any key start configuration"));
-  for (char i = 0; i < 5 and Serial.available() <= 0; i++) {
+  for (char i = 0; i < 1 and Serial.available() <= 0; i++) {
     delay(1000);
     Serial.print(".");
   }
@@ -138,6 +140,7 @@ void setup() {
     Serial.print(F("Also check out http://"));
   #endif
   Serial.print(serverURL);
+  Serial.print(serverPath);
   Serial.print(F("/?AVR_ID="));
   Serial.print(AVRID);
   Serial.println(F(" to see your stats online!"));
@@ -442,7 +445,7 @@ void startConfiguration(void) {
     else {
       tryDHCP();
       useSubnetting = 1;
-      pingrequest = 4;
+      pingrequest = 1;
       retryHost = 2;
     }
 
@@ -764,10 +767,9 @@ char connect_getAVRID(EthernetClient &client) {
     Serial.println(F("Connected to HTTP Server"));
 
     // Make a HTTP request:
-    client.print(F("GET /"));
+    client.print(F("GET "));
+    client.print(serverPath);
     client.print(F("?getAVR_ID=true"));
-
-
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
@@ -868,7 +870,7 @@ void send_info_to_server_troublehandler(char *name) {
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
-      ServerListenLoop(30); //30seconds
+      ServerListenLoop(1); //30seconds
 
       send_info_to_server_troublehandler(name);
     }
@@ -893,9 +895,12 @@ char send_info_to_server(char *name) {
   #endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
-    Serial.println(F("Connected to HTTP Server"));
+    Serial.print(F("Connected to HTTP Server "));
+    Serial.println(serverURL);
     // Make a HTTP request:
-    client.println(F("POST /?device_info=true HTTP/1.1"));
+    client.print(F("POST "));
+    client.print(serverPath);
+    client.println(F("?device_info=true HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats"));
@@ -903,6 +908,7 @@ char send_info_to_server(char *name) {
     client.println(F("Content-Length: 110"));  //TODO: Maybe calculate this later..?
     client.println(F("Connection: close"));
     client.println(F("Content-Type: application/x-www-form-urlencoded"));
+    client.println(); // Important!
     client.println(); // Important!
 
     client.print("{");
@@ -948,7 +954,7 @@ char send_info_to_server(char *name) {
     {
       if (client.available()) {
         tmpc = client.read();
-        // Serial.print(tmpc);  //prints the servers answer //TODO Check if it's empty
+        Serial.print(tmpc);  //prints the servers answer //TODO Check if it's empty
         if (tmpc == -1) {
           break;
         }

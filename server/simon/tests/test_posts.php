@@ -2,7 +2,7 @@
 <html style="min-height:100%; position:relative">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>Test POSTs</title>
+	<title>API Test</title>
 	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function() {
@@ -11,11 +11,8 @@
 
 			var posting = $.post($(this).find("#url").val(), $(this).find("#body").val());
 			
-			$("#result").empty();
-			
 			posting.always(function(){
-				$("#result").empty();
-				$("#code").empty();
+				$("#result, #code").empty();
 				
 				// Reload iframe
 				$("#iframe").attr("src", function ( i, val ) { return val; });

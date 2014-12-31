@@ -11,7 +11,7 @@ respond('POST', '[*]', function ($request, $response) {
 	
 	file_put_contents(AUTARC_TMP.'requests.txt', 
 		"-------------------\n".
-		date('d.m.Y h:i:s').' '.$request->method().' '.$request->uri()."\n".
+		date('d.m.Y H:i:s').' '.$request->method().' '.$request->uri()."\n".
 		'User-Agent: '.$request->userAgent()."\n".
 		'Params: '.var_export($request->params(), 1)."\n".
 		'Body: '.$request->body()."\n\n",

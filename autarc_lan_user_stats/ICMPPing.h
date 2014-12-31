@@ -17,7 +17,7 @@
 #define ICMP_ECHOREQ 8
 #define ICMP_ECHOREP 0
 #define TIME_EXCEEDED 11
-#define PING_TIMEOUT 100
+#define PING_TIMEOUT 20
 
 typedef unsigned long time_t;
 
