@@ -6,3 +6,5 @@ Slightliy similar to  https://github.com/raumzeitlabor/raumzeitstatus but with a
 
 ![technical structure](https://raw.githubusercontent.com/powtac/Autarc_LAN_User_Stats/master/autarc_lan_user_stats.png)
 
+###Configuration
+![config](https://raw.githubusercontent.com/powtac/Autarc_LAN_User_Stats/master/configuration.jpg)
