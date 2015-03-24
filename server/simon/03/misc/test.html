@@ -34,7 +34,13 @@
 						"online": [{"ip": "10.0.1.12", "t": 0, "mac": "111:111:111:111:111"}],
 						"offline": [{"ip": "10.0.1.8",  "t": 13},{"ip": "10.0.1.9",  "t": 7},{"ip": "10.0.1.10", "t": 4},{"ip": "10.0.1.11", "t": 2}],
 				}};
-				
+/*
+				var options = {'type': 'POST', 'xhrFields': {'withCredentials': true}, 'data': {
+						"network_name": "Fischergasse",
+						"mac": "111:111:111:111:113",
+						"name": "Simon iPhone"+Math.random(),
+				}};
+				*/
 				if ($('#type').is(':checked')) {
 					options.contentType = 'application/json; charset=UTF-8';
 					options.data  		= JSON.stringify(options.data);

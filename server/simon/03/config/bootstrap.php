@@ -55,7 +55,7 @@ if (IS_JSON AND IS_POST) {
 		define('NETWORK_NAME', $JSON->network_name);
 	}
 } else if(preg_match('~/network/~', URI)) {
-	preg_match('~/network/([^/]+)/~', URI, $matches);
+	preg_match('~/network/([^/]+)[/]{0,1}~', URI, $matches);
 	if (!empty($matches[1])) {
 		define('NETWORK_NAME', $matches[1]);
 	}

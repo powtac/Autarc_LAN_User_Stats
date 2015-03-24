@@ -17,6 +17,17 @@ function mac_format($mac, $separator = ':', $uppercase = TRUE) {
 }
 
 
+function ip_format($ip) {
+	$ip = trim($ip);
+	if (!filter_var($ip, FILTER_VALIDATE_IP) === false) {
+		// ok
+	} else {
+		echo 'IP "'.$ip.'" malformed';
+	}
+	return $ip;
+}
+
+
 function error($msg) {
     echo '<div style="border:1px solid red; color: red; margin: 5px; padding-left: 10px; border-radius: 3px">'.$msg.'</div>';
 }
@@ -52,6 +63,12 @@ function return_json($data = NULL) {
 	if (json_encode(@json_decode($data)) == $data) {
 		return $data;
 	} else {
-		return json_encode($data);
+		if (PRETTY_JSON) {
+			$json = json_encode($data, JSON_PRETTY_PRINT);
+		} else {
+			$json = json_encode($data);
+		}
+		return $json;
 	}
 }
+
