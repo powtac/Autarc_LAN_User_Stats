@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test REST login with POST</title>
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script>
+		$(document).ready(function() {
+
+		
+			$('#go').on('click', function() {
+			
+				$('#run').text('Test started');
+				$('#status').text('');
+				$('#result').text('');
+
+				/*
+{
+    "network_name": "Fischergasse",
+    "online": [
+        {"ip": "10.0.1.12", "t": 0, "mac": "111:111:111:111:111"}
+    ],
+    "offline": [
+        {"ip": "10.0.1.8",  "t": 13},
+        {"ip": "10.0.1.9",  "t": 7},
+        {"ip": "10.0.1.10", "t": 4},
+        {"ip": "10.0.1.11", "t": 2}
+    ]
+}
+				*/
+				
+				
+				var options = {'type': 'POST', 'xhrFields': {'withCredentials': true}, 'data': {
+						"network_name": "Fischergasse",
+						"online": [{"ip": "10.0.1.12", "t": 0, "mac": "111:111:111:111:111"}],
+						"offline": [{"ip": "10.0.1.8",  "t": 13},{"ip": "10.0.1.9",  "t": 7},{"ip": "10.0.1.10", "t": 4},{"ip": "10.0.1.11", "t": 2}],
+				}};
+				
+				if ($('#type').is(':checked')) {
+					options.contentType = 'application/json; charset=UTF-8';
+					options.data  		= JSON.stringify(options.data);
+				}
+				
+				console.log("The data: ");
+				console.log(options.data);
+				
+				$.ajax( $('#url').val(), options)
+				
+				.done(function(result) {
+					$('#status').text(' success');
+
+					if (typeof result === 'object') {
+						console.log(result);
+						$('#result').text(result.msg);
+					} else {
+						$('#result').text(result);
+					}
+				})
+				
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					console.log(jqXHR);
+					console.log(errorThrown);
+					console.log(textStatus);
+					
+					$('#status').text(' error');
+					$('#result').text(textStatus);
+				})
+				
+				.always(function() {
+					$('#run').text('Test ended');
+				})
+			});
+		})
+		</script>
+		<style type="text/css">
+			textarea { width:670px; height:300px; }
+			#result { white-space: pre; }
+			#url { width:300px; }
+		</style>
+	</head>
+<body>
+	<!--input type="text" name="username" placeholder="Username" /><br />
+	<input type="text" name="password" placeholder="Password" /><br /-->
+	<input type="text" id="url" value="../?/ping_result/add"></input><br />
+	<input type="checkbox" id="type">Add JSON Content-Type to Request</input><br />
+	<input type="button" id="go" value="Test POST"></input><br /><br />
+	<div id="status"></div>
+	<div id="result" style="font-family:monospace"></div>
+	<div id="run"></div>
+</body>
+</html>
+
+
+
+<!--doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Yarnee Login</title>
+  <script type="text/javascript">
+	setTimeout("document.getElementsByTagName('input')[0].focus()", 100);
+  </script>
+</head>
+<body>
+  <form action="http://yp-env2.elasticbeanstalk.com/2/login_fix" method="post">
+	<input type="text" name="username" placeholder="Username" />
+	<input type="text" name="password" placeholder="Password" />
+	<input type="Submit" />
+  </form>
+  
+  <a href="http://yp-env2.elasticbeanstalk.com/2/check/cookie">Check Cookie</a>
+</body>
+</html>
