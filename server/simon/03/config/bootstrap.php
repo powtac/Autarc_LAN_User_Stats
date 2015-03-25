@@ -11,28 +11,8 @@ if (strlen($_SERVER['REQUEST_METHOD'])) {
 	define('HTTP_TYPE', $_SERVER['REQUEST_METHOD']);
 }
 
-if (!empty($_SERVER['PATH_INFO'])) {
-	define('URI', $_SERVER['PATH_INFO']);
-} else if (strlen($_SERVER['REQUEST_URI'])) {
-	define('URI', $_SERVER['REQUEST_URI']);
-}
-
-define('BODY', trim(file_get_contents('php://input')));
-
-define('IS_JSON', (bool)json_decode(BODY));
-
-if (IS_JSON) {
-	$JSON = json_decode(BODY);
-} else {
-	$JSON = FALSE;
-}
-
 if (!defined('HTTP_TYPE')) {
 	define('HTTP_TYPE', NULL);
-}
-
-if (!defined('URI')) {
-	define('URI', NULL);
 }
 
 switch(HTTP_TYPE) {
@@ -48,6 +28,30 @@ switch(HTTP_TYPE) {
 		define('IS_POST', FALSE);
 		define('IS_GET',  FALSE);
 }
+
+
+if (!empty($_SERVER['PATH_INFO'])) {
+	define('URI', $_SERVER['PATH_INFO']);
+} else if (strlen($_SERVER['REQUEST_URI'])) {
+	define('URI', $_SERVER['REQUEST_URI']);
+}
+
+if (!defined('URI')) {
+	define('URI', NULL);
+}
+
+
+define('BODY', trim(file_get_contents('php://input')));
+
+
+define('IS_JSON', (bool)json_decode(BODY));
+
+if (IS_JSON) {
+	$JSON = json_decode(BODY);
+} else {
+	$JSON = FALSE;
+}
+
 
 // Get network_name
 if (IS_JSON AND IS_POST) {

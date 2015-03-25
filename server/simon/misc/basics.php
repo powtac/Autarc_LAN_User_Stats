@@ -38,3 +38,13 @@ function db_init($reset = FALSE) {
     return $DB;
 }
 
+function ip_formt($ip) {
+	$ip = trim($ip);
+	if (!filter_var($ip, FILTER_VALIDATE_IP) === false) {
+		// ok
+	} else {
+		echo 'IP "'.$ip.'" malformed';
+	}
+	return $ip;
+}
+
