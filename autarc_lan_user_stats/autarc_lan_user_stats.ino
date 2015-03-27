@@ -53,8 +53,8 @@ char tries_getAVRID = 0;
 
 // char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
-char serverPath[] = "/autarc_lan_user_stats/02/api/store/mac/";
-char VersionNR[] = "/1.1";  //TODO: Automatically?
+char serverPath[] = "/autarc_lan_user_stats/03/?";
+char VersionNR[] = "1.2";  //TODO: Automatically?
 
 byte currIP[4];
 byte currMAC[6];
@@ -141,7 +141,7 @@ void setup() {
   #endif
   Serial.print(serverURL);
   Serial.print(serverPath);
-  Serial.print(F("/?AVR_ID="));
+  Serial.print(F("/stats/network/")); // GET /stats/network/[network_name][/range]
   Serial.print(AVRID);
   Serial.println(F(" to see your stats online!"));
   
@@ -451,7 +451,7 @@ void startConfiguration(void) {
 
     Serial.println(F("Register AVR online? (0 = no): "));
     if (GetNumber() == 0) {
-      Serial.println(F("AVR-ID (5 chars): "));
+      Serial.println(F("AVR-ID (5 chars) (NEW: Network Name): "));
       GetString(AVRID, sizeof(AVRID));
       Serial.print(AVRID);
       Serial.println("\n");
@@ -722,7 +722,7 @@ void getAVRID(void) {
       }
     }
 
-    // if the server's disconnected, stop the client:
+    // if the server is disconnected, stop the client:
     if (!client.connected()) {
       Serial.println("\n");
       Serial.println(F("--------------"));
@@ -764,16 +764,17 @@ char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2)
 
 char connect_getAVRID(EthernetClient &client) {
   if (client.connect(serverURL, 80) == 1) {
-    Serial.println(F("Connected to HTTP Server"));
+    Serial.print(F("Connected to HTTP Server"));
+    Serial.println(serverURL);
 
     // Make a HTTP request:
     client.print(F("GET "));
     client.print(serverPath);
-    client.print(F("?getAVR_ID=true"));
+    client.print(F("/networks/list")); // Just a dummy call?
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
-    client.print(F("User-Agent: Autarc_LAN_User_Stats"));
+    client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
     client.println(F("Connection: close"));
     client.println(); // Important!
@@ -809,8 +810,8 @@ void startConnection(void) {
     if (Ethernet.begin(mac_shield) == 0) {
       if (renewDHCP() == 0) {
         Serial.println(F("DHCP failed, no automatic IP address assigned!"));
-        Serial.println(F("Trying to reconnect in 30 seconds..."));
-        delay(30000);
+        Serial.println(F("Trying to reconnect in 20 seconds..."));
+        delay(20000);
         startConnection();
       }
     }
@@ -897,32 +898,34 @@ char send_info_to_server(char *name) {
     tries = 0;
     Serial.print(F("Connected to HTTP Server "));
     Serial.println(serverURL);
+    
+    
     // Make a HTTP request:
-    client.print(F("POST "));
     client.print(serverPath);
-    client.println(F("?device_info=true HTTP/1.1"));
+    client.println(F("/ping_result/add HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
-    client.print(F("User-Agent: Autarc_LAN_User_Stats"));
+    client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
-    client.println(F("Content-Length: 110"));  //TODO: Maybe calculate this later..?
+    client.println(F("Content-Length: 300"));  //TODO: Maybe calculate this later..?
     client.println(F("Connection: close"));
     client.println(F("Content-Type: application/x-www-form-urlencoded"));
     client.println(); // Important!
     client.println(); // Important!
 
     client.print("{");
-    client.print(F("\"AVR_ID\": \""));
+
+    client.print(F("\"network_name:\""));
+    client.print("\"");
     client.print(AVRID);
     client.print("\",");
-    Serial.println(AVRID);
-    client.print(F("\"AVR_PSW\": \""));
-    client.print(AVRpsw);
-    client.print("\",");
-    client.print(F("\"DEVICE\": \""));
-    client.print(name);
-    client.print("\",");
-    client.print(F("\"IP\": \""));
+ 
+    client.print(F("\"online:\""));
+    client.print("[");
+    
+    client.print("{");
+    client.print(F("\"ip\":"));
+    client.print("\"");
     client.print(currIP[0]);
     client.print(".");
     client.print(currIP[1]);
@@ -931,7 +934,13 @@ char send_info_to_server(char *name) {
     client.print(".");
     client.print(currIP[3]);
     client.print("\",");
-    client.print(F("\"MAC\": \""));
+    
+    client.print(F("\"t\":"));
+    client.print("0");
+    client.print(",");
+    
+    client.print(F("\"mac\":"));
+    client.print("\"");
     client.print(currMAC[0], HEX);
     client.print(":");
     client.print(currMAC[1], HEX);
@@ -944,9 +953,19 @@ char send_info_to_server(char *name) {
     client.print(":");
     client.print(currMAC[5], HEX);
     client.print("\"");
+    
+    client.print("}");
+    
+    client.print("],");
+    
+    client.print(F("\"offline:\""));
+    client.print("[");
+    client.print("]");
+
     client.print("}");
 
-    Serial.println(client.status());
+    Serial.print(F("Ethernet Client status: "));
+    Serial.println(client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
     char tmpc;
     // if there are incoming bytes available
     // from the server, read them and print them:
@@ -960,7 +979,7 @@ char send_info_to_server(char *name) {
         }
       }
     }
-    // if the server's disconnected, stop the client:
+    // if the server disconnects, stop the client:
     if (!client.connected()) {
       client.stop();
     }
@@ -1036,7 +1055,8 @@ void ServerListen(void) {
             serverClient.print(F("		<a href='http://"));
           #endif
           serverClient.print(serverURL);
-          serverClient.print("/?AVR_ID=");
+          serverClient.print(serverPath);
+          serverClient.print(F("/stats/network/"));
           serverClient.print(AVRID);
           serverClient.println(F("'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
