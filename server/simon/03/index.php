@@ -156,7 +156,7 @@ if (IS_GET AND preg_match('~/debug/phpinfo~', URI)) {
 
 // Default
 if (!headers_sent()) {
-	header('501 Not Implemented', true, 501);
+	#header('501 Not Implemented', true, 501);
 }
 
 
