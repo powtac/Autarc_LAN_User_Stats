@@ -69,7 +69,7 @@ if (IS_JSON AND IS_POST) {
 
 if (LOG_ALL) {
 	try {
-		if (isset($_SERVER['HTTP_USER_AGENT']) {
+		if (isset($_SERVER['HTTP_USER_AGENT'])) {
 			$ua = $_SERVER['HTTP_USER_AGENT'];
 		} else {
 			$ua = 'unknown';
