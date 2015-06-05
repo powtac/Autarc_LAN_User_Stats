@@ -50,11 +50,15 @@ void manualIPConfig(void);
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
 char tries = 0;
 char tries_getAVRID = 0;
+char countOfflineDevices = 0;
 
 // char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
 char serverPath[] = "/autarc_lan_user_stats/03/?";
 char VersionNR[] = "1.2";  //TODO: Automatically?
+#define MAX_DEVICES_INFO 5
+
+byte offlineIP[MAX_DEVICES_INFO][4];
 
 byte currIP[4];
 byte currMAC[6];
@@ -234,6 +238,18 @@ void loop() {
               Serial.print("No (pingable) device on IP ");
               print_ip(currIP);
               Serial.println();
+              offlineIP[countOfflineDevices][0] = currIP[0];
+              offlineIP[countOfflineDevices][1] = currIP[1];
+              offlineIP[countOfflineDevices][2] = currIP[2];
+              offlineIP[countOfflineDevices][3] = currIP[3];
+              countOfflineDevices++;
+              if (countOfflineDevices == MAX_DEVICES_INFO) {
+                //number of max offline devices reached -> send info to server
+                
+                //TODO: Send info with max offline devices to server
+                
+                countOfflineDevices = 0;
+              }
             }
           }
           ServerListenLoop(4);
@@ -960,8 +976,29 @@ char send_info_to_server(char *name) {
     
     client.print(F("\"offline:\""));
     client.print("[");
+    char tmpSendOffline;
+    for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
+      if (tmpSendOffline != 0) {
+        client.print(",");
+      }
+      client.print("{");
+      client.print(F("\"ip\":"));
+      client.print("\"");
+      client.print(offlineIP[tmpSendOffline][0]);
+      client.print(".");
+      client.print(offlineIP[tmpSendOffline][1]);
+      client.print(".");
+      client.print(offlineIP[tmpSendOffline][2]);
+      client.print(".");
+      client.print(offlineIP[tmpSendOffline][3]);
+      client.print("\",");
+      client.print(F("\"t\":"));
+      client.print("0");  //TODO: Set and count time!
+      client.print("}");
+    }
     client.print("]");
-
+    countOfflineDevices = 0;
+    
     client.print("}");
 
     Serial.print(F("Ethernet Client status: "));
