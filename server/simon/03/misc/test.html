@@ -43,7 +43,8 @@
 				*/
 				if ($('#type').is(':checked')) {
 					options.contentType = 'application/json; charset=UTF-8';
-					options.data  		= JSON.stringify(options.data);
+					// options.data  		= JSON.stringify(options.data);
+					options.data 		= $('#options').val();
 				}
 				
 				console.log("The data: ");
@@ -87,6 +88,7 @@
 	<!--input type="text" name="username" placeholder="Username" /><br />
 	<input type="text" name="password" placeholder="Password" /><br /-->
 	<input type="text" id="url" value="../?/ping_result/add"></input><br />
+	<textarea id="options">{"network_name":"Fischergasse","online":[{"ip":"10.0.1.12","t":0,"mac":"111:111:111:111:111"}],"offline":[{"ip":"10.0.1.8","t":13},{"ip":"10.0.1.9","t":7},{"ip":"10.0.1.10","t":4},{"ip":"10.0.1.11","t":2}]}</textarea><br />
 	<input type="checkbox" id="type">Add JSON Content-Type to Request</input><br />
 	<input type="button" id="go" value="Test POST"></input><br /><br />
 	<div id="status"></div>
