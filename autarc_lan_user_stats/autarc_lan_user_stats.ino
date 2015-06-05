@@ -52,9 +52,10 @@ byte tries = 0;
 byte tries_getAVRID = 0;
 byte countOfflineDevices = 0;
 
-// char serverURL[] = "lan-user.danit.de";
+//char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
-char serverPath[] = "/autarc_lan_user_stats/03/?";
+//char serverPath[] = "";
+char serverPath[] = "/autarc_lan_user_stats/03/%3F";
 char VersionNR[] = "1.2";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
@@ -919,20 +920,22 @@ char send_info_to_server(char *name) {
     long timeDifference;
     
     Serial.print(F("Connected to HTTP Server "));
-    Serial.println(serverURL);
-    
+    Serial.println(serverURL);   
     
     // Make a HTTP request:
+    client.print(F("POST "));
     client.print(serverPath);
     client.println(F("/ping_result/add HTTP/1.1"));
+    //client.println("/ HTTP/1.1");
     client.print(F("Host: "));
     client.println(serverURL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
-    client.println(F("Content-Length: 300"));  //TODO: Maybe calculate this later..?
     client.println(F("Connection: close"));
-    client.println(F("Content-Type: application/x-www-form-urlencoded"));
-    client.println(); // Important!
+    client.println(F("Content-Type: application/x-www-form-urlencoded;"));
+    //client.println(F("Content-Type: application/json;"));
+    client.print(F("Content-Length: "));
+    client.println("300"); //TODO: Maybe calculate this later..?
     client.println(); // Important!
 
     client.print("{");
@@ -1017,7 +1020,8 @@ char send_info_to_server(char *name) {
     client.print("]");
     countOfflineDevices = 0;
     
-    client.print("}");
+    client.println("}");
+    
 
     Serial.print(F("Ethernet Client status: "));
     Serial.println(client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
@@ -1180,3 +1184,4 @@ void ServerListen(void) {
     Serial.println(F("client disconnected"));
   }
 }
+
