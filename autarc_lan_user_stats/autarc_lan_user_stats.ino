@@ -56,6 +56,8 @@ byte countOfflineDevices = 0;
 char serverURL[] = "kolchose.org";
 //char serverPath[] = "";
 char serverPath[] = "/autarc_lan_user_stats/03/?";
+#define SERVER_ADD_URI "/ping_result/add"
+
 char VersionNR[] = "1.2";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
@@ -920,12 +922,15 @@ char send_info_to_server(char *name) {
     long timeDifference;
     
     Serial.print(F("Connected to HTTP Server "));
-    Serial.println(serverURL);   
+    Serial.print(serverURL);
+    Serial.print(serverPath);
+    Serial.println(SERVER_ADD_URI);
     
     // Make a HTTP request:
     client.print(F("POST "));
     client.print(serverPath);
-    client.println(F("/ping_result/add HTTP/1.1"));
+    client.print(SERVER_ADD_URI);
+    client.println(F(" HTTP/1.1"));
     //client.println("/ HTTP/1.1");
     client.print(F("Host: "));
     client.println(serverURL);
