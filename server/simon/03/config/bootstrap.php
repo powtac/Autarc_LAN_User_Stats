@@ -80,6 +80,7 @@ if (LOG_ALL) {
 			date('d.m.Y H:i:s').' '.HTTP_TYPE.' '.URI."\n".
 			'User-Agent: '.@$ua."\n".
 			'Params: '.var_export($_REQUEST, 1)."\n".
+			'JSON correct: '.var_export(IS_JSON, 1)."\n".
 			'Body: '.BODY."\n\n",
 			FILE_APPEND);
 	} catch (Exception $e) {
