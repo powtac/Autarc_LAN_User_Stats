@@ -1002,9 +1002,8 @@ char send_info_to_server(char *name) {
         //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
         timeDifference = 0;
       }
-      
       client.print(timeDifference);
-      client.print("0");  //TODO: Set and count time!
+      client.print("0");
       client.print("}");
     }
     client.print("]");
