@@ -920,7 +920,7 @@ char send_info_to_server(char *name) {
   #endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
-    long timeDifference;
+    unsigned long timeDifference;
     
     Serial.print(F("Connected to HTTP Server "));
     Serial.print(serverURL);
@@ -967,10 +967,13 @@ char send_info_to_server(char *name) {
       client.print("\",");
       
       client.print(F("\"t\":"));
-      timeDifference = (millis() - timeDeviceFound) / 1000;
-      if (timeDifference < 0) {
-        //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
-        timeDifference = 0;  //(Todo: Maybe calculate with overflow value?)
+      
+      if ((millis() - timeDeviceFound) < 0) {
+        //consider overflow of time since arduino runs (afer ~50 days)
+        timeDifference = (millis() - timeDeviceFound + 4294967295 + 1) / 1000;
+      }
+      else {
+        timeDifference = (millis() - timeDeviceFound) / 1000;
       }
       client.print(timeDifference);
       
@@ -1015,10 +1018,12 @@ char send_info_to_server(char *name) {
       client.print("\",");
       client.print(F("\"t\":"));
       
-      timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
-      if (timeDifference < 0) {
-        //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
-        timeDifference = 0;  //(Todo: Maybe calculate with overflow value?)
+      if ((millis() - timeScanned[tmpSendOffline]) < 0) {
+        //consider overflow of time since arduino runs (afer ~50 days)
+        timeDifference = (millis() - timeScanned[tmpSendOffline] + 4294967295 + 1) / 1000;
+      }
+      else {
+        timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
       }
       client.print(timeDifference);
       client.print("}");
