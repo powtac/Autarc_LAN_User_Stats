@@ -63,6 +63,7 @@ unsigned long timeScanned[MAX_DEVICES_INFO];
 
 byte currIP[4];
 byte currMAC[6];
+unsigned long timeDeviceFound;
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
@@ -191,6 +192,7 @@ void loop() {
           else {
             //free, gateway or dnsSrv
             if (pingDevice() == 1) {
+              timeDeviceFound = millis();
               if (filterResult == 0) {
                 //free IP
                 Serial.print(F("Device found on IP "));
@@ -914,6 +916,8 @@ char send_info_to_server(char *name) {
   #endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
+    long timeDifference;
+    
     Serial.print(F("Connected to HTTP Server "));
     Serial.println(serverURL);
     
@@ -954,7 +958,13 @@ char send_info_to_server(char *name) {
       client.print("\",");
       
       client.print(F("\"t\":"));
-      client.print("0");
+      timeDifference = (millis() - timeDeviceFound) / 1000;
+      if (timeDifference < 0) {
+        //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
+        timeDifference = 0;  //(Todo: Maybe calculate with overflow value?)
+      }
+      client.print(timeDifference);
+      
       client.print(",");
       
       client.print(F("\"mac\":"));
@@ -979,7 +989,6 @@ char send_info_to_server(char *name) {
     client.print(F("\"offline:\""));
     client.print("[");
     byte tmpSendOffline;
-    long timeDifference;
     for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
       if (tmpSendOffline != 0) {
         client.print(",");
@@ -1000,10 +1009,9 @@ char send_info_to_server(char *name) {
       timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
       if (timeDifference < 0) {
         //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
-        timeDifference = 0;
+        timeDifference = 0;  //(Todo: Maybe calculate with overflow value?)
       }
       client.print(timeDifference);
-      client.print("0");
       client.print("}");
     }
     client.print("]");
