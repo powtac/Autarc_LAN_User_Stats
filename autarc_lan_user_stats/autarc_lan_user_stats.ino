@@ -940,12 +940,12 @@ char send_info_to_server(char *name) {
 
     client.print("{");
 
-    client.print(F("\"network_name:\""));
+    client.print(F("\"network_name\":"));
     client.print("\"");
     client.print(AVRID);
     client.print("\",");
  
-    client.print(F("\"online:\""));
+    client.print(F("\"online\":"));
     client.print("[");
     if (countOfflineDevices != MAX_DEVICES_INFO) {
       client.print("{");
@@ -989,7 +989,7 @@ char send_info_to_server(char *name) {
     }
     client.print("],");
     
-    client.print(F("\"offline:\""));
+    client.print(F("\"offline\":"));
     client.print("[");
     byte tmpSendOffline;
     for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
