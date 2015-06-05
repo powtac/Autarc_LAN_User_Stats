@@ -238,6 +238,7 @@ void loop() {
               Serial.print("No (pingable) device on IP ");
               print_ip(currIP);
               Serial.println();
+              
               offlineIP[countOfflineDevices][0] = currIP[0];
               offlineIP[countOfflineDevices][1] = currIP[1];
               offlineIP[countOfflineDevices][2] = currIP[2];
@@ -245,9 +246,8 @@ void loop() {
               countOfflineDevices++;
               if (countOfflineDevices == MAX_DEVICES_INFO) {
                 //number of max offline devices reached -> send info to server
-                
-                //TODO: Send info with max offline devices to server
-                
+                Serial.println(F("Max offline devices reached. Sending devices to server."));
+                send_info_to_server_troublehandler("");
                 countOfflineDevices = 0;
               }
             }
@@ -938,40 +938,40 @@ char send_info_to_server(char *name) {
  
     client.print(F("\"online:\""));
     client.print("[");
-    
-    client.print("{");
-    client.print(F("\"ip\":"));
-    client.print("\"");
-    client.print(currIP[0]);
-    client.print(".");
-    client.print(currIP[1]);
-    client.print(".");
-    client.print(currIP[2]);
-    client.print(".");
-    client.print(currIP[3]);
-    client.print("\",");
-    
-    client.print(F("\"t\":"));
-    client.print("0");
-    client.print(",");
-    
-    client.print(F("\"mac\":"));
-    client.print("\"");
-    client.print(currMAC[0], HEX);
-    client.print(":");
-    client.print(currMAC[1], HEX);
-    client.print(":");
-    client.print(currMAC[2], HEX);
-    client.print(":");
-    client.print(currMAC[3], HEX);
-    client.print(":");
-    client.print(currMAC[4], HEX);
-    client.print(":");
-    client.print(currMAC[5], HEX);
-    client.print("\"");
-    
-    client.print("}");
-    
+    if (countOfflineDevices != MAX_DEVICES_INFO) {
+      client.print("{");
+      client.print(F("\"ip\":"));
+      client.print("\"");
+      client.print(currIP[0]);
+      client.print(".");
+      client.print(currIP[1]);
+      client.print(".");
+      client.print(currIP[2]);
+      client.print(".");
+      client.print(currIP[3]);
+      client.print("\",");
+      
+      client.print(F("\"t\":"));
+      client.print("0");
+      client.print(",");
+      
+      client.print(F("\"mac\":"));
+      client.print("\"");
+      client.print(currMAC[0], HEX);
+      client.print(":");
+      client.print(currMAC[1], HEX);
+      client.print(":");
+      client.print(currMAC[2], HEX);
+      client.print(":");
+      client.print(currMAC[3], HEX);
+      client.print(":");
+      client.print(currMAC[4], HEX);
+      client.print(":");
+      client.print(currMAC[5], HEX);
+      client.print("\"");
+      
+      client.print("}");
+    }
     client.print("],");
     
     client.print(F("\"offline:\""));
