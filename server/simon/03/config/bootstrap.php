@@ -69,14 +69,22 @@ if (IS_JSON AND IS_POST) {
 
 if (LOG_ALL) {
 	try {
+		if (isset($_SERVER['HTTP_USER_AGENT']) {
+			$ua = $_SERVER['HTTP_USER_AGENT'];
+		} else {
+			$ua = 'unknown';
+		}
+		
 		file_put_contents(AUTARC_TMP.'requests.txt', 
 			"-------------------\n".
 			date('d.m.Y H:i:s').' '.HTTP_TYPE.' '.URI."\n".
-			'User-Agent: '.$_SERVER['HTTP_USER_AGENT']."\n".
+			'User-Agent: '.@$ua."\n".
 			'Params: '.var_export($_REQUEST, 1)."\n".
 			'Body: '.BODY."\n\n",
 			FILE_APPEND);
-	} catch (Exception $e) {}
+	} catch (Exception $e) {
+		var_dump($e);
+	}
 }
 
 
