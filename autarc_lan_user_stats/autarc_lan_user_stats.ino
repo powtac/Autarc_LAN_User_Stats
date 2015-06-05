@@ -48,9 +48,9 @@ void manualIPConfig(void);
 
 //________________________Global declarations______________________________
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
-char tries = 0;
-char tries_getAVRID = 0;
-char countOfflineDevices = 0;
+byte tries = 0;
+byte tries_getAVRID = 0;
+byte countOfflineDevices = 0;
 
 // char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
@@ -59,6 +59,7 @@ char VersionNR[] = "1.2";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
 byte offlineIP[MAX_DEVICES_INFO][4];
+
 
 byte currIP[4];
 byte currMAC[6];
@@ -976,7 +977,7 @@ char send_info_to_server(char *name) {
     
     client.print(F("\"offline:\""));
     client.print("[");
-    char tmpSendOffline;
+    byte tmpSendOffline;
     for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
       if (tmpSendOffline != 0) {
         client.print(",");
