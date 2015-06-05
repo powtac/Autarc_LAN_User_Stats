@@ -55,10 +55,9 @@ byte countOfflineDevices = 0;
 //char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
 //char serverPath[] = "";
-char serverPath[] = "/autarc_lan_user_stats/03/?";
+char serverPath[] = "/autarc_lan_user_stats/03/\?";
 #define SERVER_ADD_URI "/ping_result/add"
-
-char VersionNR[] = "1.2";  //TODO: Automatically?
+char VersionNR[] = "1.3";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
 byte offlineIP[MAX_DEVICES_INFO][4];
@@ -937,8 +936,8 @@ char send_info_to_server(char *name) {
     client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
     client.println(F("Connection: close"));
-    client.println(F("Content-Type: application/x-www-form-urlencoded;"));
-    //client.println(F("Content-Type: application/json;"));
+    // client.println(F("Content-Type: application/x-www-form-urlencoded;"));
+    client.println(F("Content-Type: application/json; charset=UTF-8"));
     client.print(F("Content-Length: "));
     client.println("300"); //TODO: Maybe calculate this later..?
     client.println(); // Important!
