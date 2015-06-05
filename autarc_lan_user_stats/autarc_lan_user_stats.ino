@@ -56,6 +56,9 @@ byte countOfflineDevices = 0;
 char serverURL[] = "kolchose.org";
 //char serverPath[] = "";
 char serverPath[] = "/autarc_lan_user_stats/03/\?";
+#define SERVER_ADD_URI "/ping_result/add"
+#define SERVER_STATS_URI "/stats/network/"
+#define SERVER_GET_ID_URI "/networks/list"
 char VersionNR[] = "1.3";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
@@ -148,7 +151,7 @@ void setup() {
   #endif
   Serial.print(serverURL);
   Serial.print(serverPath);
-  Serial.print(F("/stats/network/")); // GET /stats/network/[network_name][/range]
+  Serial.print(F(SERVER_STATS_URI)); // GET /stats/network/[network_name][/range]
   Serial.print(AVRID);
   Serial.println(F(" to see your stats online!"));
   
@@ -791,7 +794,7 @@ char connect_getAVRID(EthernetClient &client) {
     // Make a HTTP request:
     client.print(F("GET "));
     client.print(serverPath);
-    client.print(F("/networks/list")); // Just a dummy call?
+    client.print(F(SERVER_GET_ID_URI)); // Just a dummy call?
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
     client.println(serverURL);
@@ -920,12 +923,15 @@ char send_info_to_server(char *name) {
     long timeDifference;
     
     Serial.print(F("Connected to HTTP Server "));
-    Serial.println(serverURL);   
+    Serial.print(serverURL);
+    Serial.print(serverPath);
+    Serial.println(SERVER_ADD_URI);
     
     // Make a HTTP request:
     client.print(F("POST "));
     client.print(serverPath);
-    client.println(F("/ping_result/add HTTP/1.1"));
+    client.print(F(SERVER_ADD_URI));
+    client.println(F(" HTTP/1.1"));
     //client.println("/ HTTP/1.1");
     client.print(F("Host: "));
     client.println(serverURL);
@@ -935,7 +941,7 @@ char send_info_to_server(char *name) {
     // client.println(F("Content-Type: application/x-www-form-urlencoded;"));
     client.println(F("Content-Type: application/json; charset=UTF-8"));
     client.print(F("Content-Length: "));
-    client.println("105"); //TODO: Maybe calculate this later..?
+    client.println("300"); //TODO: Maybe calculate this later..?
     client.println(); // Important!
 
     client.print("{");
@@ -1115,7 +1121,7 @@ void ServerListen(void) {
           #endif
           serverClient.print(serverURL);
           serverClient.print(serverPath);
-          serverClient.print(F("/stats/network/"));
+          serverClient.print(F(SERVER_STATS_URI));
           serverClient.print(AVRID);
           serverClient.println(F("'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
