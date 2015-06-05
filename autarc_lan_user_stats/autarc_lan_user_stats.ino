@@ -59,7 +59,7 @@ char VersionNR[] = "1.2";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
 byte offlineIP[MAX_DEVICES_INFO][4];
-
+unsigned long timeScanned[MAX_DEVICES_INFO];
 
 byte currIP[4];
 byte currMAC[6];
@@ -244,6 +244,7 @@ void loop() {
               offlineIP[countOfflineDevices][1] = currIP[1];
               offlineIP[countOfflineDevices][2] = currIP[2];
               offlineIP[countOfflineDevices][3] = currIP[3];
+              timeScanned[countOfflineDevices] = millis();
               countOfflineDevices++;
               if (countOfflineDevices == MAX_DEVICES_INFO) {
                 //number of max offline devices reached -> send info to server
@@ -978,6 +979,7 @@ char send_info_to_server(char *name) {
     client.print(F("\"offline:\""));
     client.print("[");
     byte tmpSendOffline;
+    long timeDifference;
     for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
       if (tmpSendOffline != 0) {
         client.print(",");
@@ -994,6 +996,14 @@ char send_info_to_server(char *name) {
       client.print(offlineIP[tmpSendOffline][3]);
       client.print("\",");
       client.print(F("\"t\":"));
+      
+      timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
+      if (timeDifference < 0) {
+        //overflow of time since arduino runs (afer ~50 days) - set time difference to 0. This shouldn't happen that often... ;)
+        timeDifference = 0;
+      }
+      
+      client.print(timeDifference);
       client.print("0");  //TODO: Set and count time!
       client.print("}");
     }
