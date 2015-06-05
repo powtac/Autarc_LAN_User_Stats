@@ -935,7 +935,7 @@ char send_info_to_server(char *name) {
     client.println(F("Content-Type: application/x-www-form-urlencoded;"));
     //client.println(F("Content-Type: application/json;"));
     client.print(F("Content-Length: "));
-    client.println("300"); //TODO: Maybe calculate this later..?
+    client.println("105"); //TODO: Maybe calculate this later..?
     client.println(); // Important!
 
     client.print("{");
