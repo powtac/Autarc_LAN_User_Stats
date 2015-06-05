@@ -55,7 +55,7 @@ byte countOfflineDevices = 0;
 //char serverURL[] = "lan-user.danit.de";
 char serverURL[] = "kolchose.org";
 //char serverPath[] = "";
-char serverPath[] = "/autarc_lan_user_stats/03/%3F";
+char serverPath[] = "/autarc_lan_user_stats/03/?";
 char VersionNR[] = "1.2";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
