@@ -994,6 +994,10 @@ char send_info_to_server(char *name) {
       client.print(currMAC[5], HEX);
       client.print("\"");
       
+      for (int macreset = 0; macreset < 6; macreset++) {
+        currMAC[macreset] = 0x00;
+      }
+      
       client.print("}");
     }
     client.print("],");
