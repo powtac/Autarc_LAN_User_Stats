@@ -25,6 +25,7 @@ char renewDHCP(void);
 void readConnectionValues(void);
 void printConnectionDetails(void);
 void send_info_to_server_troublehandler(char *name);
+byte send_info_to_server_check_troubles(char *name);
 char send_info_to_server(char *name);
 void ServerListenLoop(int count);
 void ServerListen(void);
@@ -887,7 +888,11 @@ void printConnectionDetails(void) {
   #endif
 }
 
-void send_info_to_server_troublehandler(char *name) {
+void send_info_to_server_troublehandler(char *name) { 
+  while (send_info_to_server_check_troubles(name) == 0) {}
+}
+
+byte send_info_to_server_check_troubles(char *name) {
   if (send_info_to_server(name) == 0) {
     //Connection to HTTP-Server failed -> ping gateway
     Serial.println(F("Connection to HTTP-Server failed"));
@@ -896,8 +901,7 @@ void send_info_to_server_troublehandler(char *name) {
       // Gateway response -> HTTP-Server offline?
       Serial.println(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       ServerListenLoop(1); //30seconds
-
-      send_info_to_server_troublehandler(name);
+      return 0;
     }
     else {
       // Gateway also not available -> Connection problem -> Try to reconnect
@@ -905,10 +909,15 @@ void send_info_to_server_troublehandler(char *name) {
       startConnection();
       printConnectionDetails();
       //Reconnected. Try again to send info
-      send_info_to_server_troublehandler(name);
+      return 0;
     }
   }
+  else {
+    //send_info_to_server succeded
+    return 1;
+  }
 }
+
 
 char send_info_to_server(char *name) {
   renewDHCP();
@@ -1069,7 +1078,7 @@ char send_info_to_server(char *name) {
       tries++;
       Serial.println(F("Retry to connect..."));
       ServerListenLoop(4);
-      send_info_to_server(name);
+      send_info_to_server(name);  //Todo: Maybe change this to save memory. Also we could get problems with the recursive function!
     }
     else {
       //Connection to server failed
