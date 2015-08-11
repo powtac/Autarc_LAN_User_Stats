@@ -9,7 +9,9 @@
   #include "memcheck.h"
   // init_mem();  //neccessary?
 #endif
-
+#ifdef LOG_TO_SD
+  #include <SD.h>
+#endif
 
 //________________________Prototypes of functions______________________________
 //Prototypes IP-functions
@@ -46,6 +48,9 @@ void GetMAC(byte *MAC);
 void startConfiguration(void);
 void manualIPConfig(void);
 
+#ifdef LOG_TO_SD
+  void testSDcard(void);
+#endif
 
 //________________________Global declarations______________________________
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
@@ -84,6 +89,10 @@ void setup() {
   #ifdef SHOW_MEMORY
     Serial.print(F("Free Arduino Memory in bytes (startup): "));
     Serial.println(get_mem_unused());
+  #endif
+  
+  #ifdef LOG_TO_SD
+    testSDcard();
   #endif
 
   //________________________Configuration of the board______________________________
@@ -1209,3 +1218,39 @@ void ServerListen(void) {
   }
 }
 
+#ifdef LOG_TO_SD
+  void testSDcard(void) {
+    Serial.println("start SD");
+    
+    pinMode(10, OUTPUT);
+    pinMode(4, OUTPUT);
+    
+    //activate SD
+    digitalWrite(10, HIGH);  //turn off ETH
+    digitalWrite(4, LOW);
+    
+      if (!SD.begin(4)) {
+        Serial.println(F("init failed"));
+      }
+      else {
+        Serial.println(F("card initialised"));
+      }
+      
+      File datei = SD.open("Log.txt", FILE_WRITE);
+      
+      if (datei) {
+        Serial.println(F("write to SD..."));
+        datei.println(F("Test 123"));
+        datei.close();
+      }
+      else {
+        Serial.println(F("Can not write to SD!"));
+      }
+    
+    //activate ETH
+    digitalWrite(4, HIGH);  //turn off SD
+    digitalWrite(10, LOW);
+    
+    Serial.println(F("end SD"));
+  }
+#endif

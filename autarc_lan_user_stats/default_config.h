@@ -2,7 +2,8 @@
   #define DEFAULT_CONFIG
   
   //Prints the status of RAM
-  #define SHOW_MEMORY
+  #define SHOW_MEMORY  //Also comment the '#include' Tag in the main program because of arduino bug
+  #define LOG_TO_SD  //Also comment the '#include' Tag in the main program because of arduino bug
   
   void Load_Default_Config(void);
   byte mac_shield[6];
