@@ -1225,6 +1225,31 @@ void ServerListen(void) {
           serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
           serverClient.println(F("		</form>"));
           serverClient.println(F("	</div>"));
+
+          #ifdef LOG_TO_SD
+            serverClient.println(F("  <br />"));
+            serverClient.println(F("  <br />"));
+            serverClient.println(F("  <div>"));
+            serverClient.print(F("    The current log file ("));
+            serverClient.print(SDfileName);
+            serverClient.println(F(") contains the following log:"));
+            serverClient.println(F("    <br />"));
+            serverClient.println(F("    <textarea rows='50' cols='100'>"));
+  
+            File fileToShow;
+            fileToShow = SD.open(SDfileName); //Load actual log file
+            if (fileToShow)
+            {
+              while(fileToShow.available())
+              {
+                serverClient.write(fileToShow.read());  //send log file to client
+              }
+              fileToShow.close();
+            }
+            serverClient.println(F("    </textarea>"));
+            serverClient.println(F("  </div>"));
+          #endif
+          
           serverClient.println(F("</body>"));
           serverClient.println(F("</html>"));
           break;
