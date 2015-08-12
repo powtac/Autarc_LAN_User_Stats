@@ -54,18 +54,19 @@ void manualIPConfig(void);
 #endif
 
 #ifdef LOG_TO_SD
-  void init_SD(void);
+  void init_SD(bool reinit = 0);
   void start_SD_Log(void);
   void end_SD_Log(void);
   void set_next_log_filename(void);
   File logfile;
   char SDfileName[11];
+  bool SDfailed;
 
   #ifdef LOG_TO_SD_AND_SERIAL
-    #define LOG_PRINT( ... ) Serial.print( __VA_ARGS__ ); start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
+    #define LOG_PRINT( ... ) Serial.print( __VA_ARGS__ ); start_SD_Log(); ((SDfailed == 0) ? logfile.print( __VA_ARGS__ ) : 0); end_SD_Log()
     #define LOG_PRINT_LN( ... ) Serial.println( __VA_ARGS__ ); start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
   #else
-    #define LOG_PRINT( ... ) start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
+    #define LOG_PRINT( ... ) start_SD_Log(); ((SDfailed == 0) ? logfile.print( __VA_ARGS__ ) : 0); end_SD_Log()
     #define LOG_PRINT_LN( ... ) start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
   #endif
 #else
@@ -1255,7 +1256,7 @@ void ServerListen(void) {
 #endif
 
 #ifdef LOG_TO_SD
-  void init_SD(void) {
+  void init_SD(bool reinit) {
     SDfileName[0] = 'l';
     SDfileName[1] = 'o';
     SDfileName[2] = 'g';
@@ -1267,7 +1268,7 @@ void ServerListen(void) {
     SDfileName[8] = 'x';
     SDfileName[9] = 't';
     SDfileName[10] = '\0';
-    
+
     pinMode(10, OUTPUT);
     pinMode(4, OUTPUT);
     
@@ -1276,12 +1277,13 @@ void ServerListen(void) {
     digitalWrite(4, LOW);
     
       if (!SD.begin(4)) {
-        Serial.println(F("initializing of SD card failed"));
+        Serial.println(F("Initializing of SD card failed! No log will be stored!"));
+        SDfailed = 1;
       }
       else {
         Serial.println(F("SD card initialized"));
       }
-      
+
       if (SD.exists("log/")) {
         //Check for existing files and set the actual log file to the continued one
         // if all 99 files exist, not important which was the actual file always start with 00)
@@ -1304,18 +1306,27 @@ void ServerListen(void) {
       }
       
       logfile = SD.open(SDfileName, FILE_WRITE);
-      
+
       if (logfile) {
-        logfile.println(F("### Restart of board ###"));
+        SDfailed = 0;
+        if (reinit == 0) {
+          logfile.println(F("### Restart of board ###"));
+        }
+        else {
+          logfile.println(F("--- Reinit of SD card ---"));
+        }
         logfile.close();
       }
       else {
+        SDfailed = 1;
         Serial.println(F("Can't write to SD card! No log will be stored!"));
       }
-    
-    //activate ETH
-    digitalWrite(4, HIGH);  //turn off SD
-    digitalWrite(10, LOW);
+      
+    if (reinit == 0) {
+      //activate ETH
+      digitalWrite(4, HIGH);  //turn off SD
+      digitalWrite(10, LOW);
+    }
   }
 
   void start_SD_Log(void) {
@@ -1323,30 +1334,29 @@ void ServerListen(void) {
     digitalWrite(10, HIGH);  //turn off ETH
     digitalWrite(4, LOW);
 
-    /* Todo: maybe reinitialize
-    if (!SD.begin(4)) {
-      Serial.println(F("initializing of SD card failed"));
+    if (SDfailed == 1) {
+      init_SD(1);
     }
-    else {
-      Serial.println(F("SD card initialized"));
-    }
-    */
-    
-    logfile = SD.open(SDfileName, FILE_WRITE);
-    
-    if (logfile) {
-      if (logfile.size() >= MAX_LOG_SIZE) {
-        //next time new file -> set filename
-        set_next_log_filename();
-        
-        //delete the new file, if it exist
-        SD.remove(SDfileName);
-        Serial.print(F("New logfile will be created: "));
-        Serial.println(SDfileName);
+    if (SDfailed == 0) {
+      logfile = SD.open(SDfileName, FILE_WRITE);
+      
+      if (logfile) {
+        SDfailed = 0;
+        if (logfile.size() >= MAX_LOG_SIZE) {
+          //next time new file -> set filename
+          set_next_log_filename();
+          
+          //delete the new file, if it exist
+          SD.remove(SDfileName);
+          Serial.print(F("New logfile will be created: "));
+          Serial.println(SDfileName);
+        }
       }
-    }
-    else {
-      Serial.println(F("Can't write to SD card! No log will be stored!"));
+      else {
+        Serial.println(F("Can't write to SD card! No log will be stored!"));
+        //try next time to reinit the SD card
+        SDfailed = 1;
+      }
     }
   }
 
