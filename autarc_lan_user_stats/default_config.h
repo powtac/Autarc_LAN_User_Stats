@@ -4,6 +4,7 @@
   //Prints the status of RAM
   #define SHOW_MEMORY  //Also comment the '#include' Tag in the main program because of arduino bug
   #define LOG_TO_SD  //Also comment the '#include' Tag in the main program because of arduino bug
+  #define MAX_LOG_SIZE 500000
   
   void Load_Default_Config(void);
   byte mac_shield[6];

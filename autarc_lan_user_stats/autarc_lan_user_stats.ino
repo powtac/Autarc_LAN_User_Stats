@@ -52,6 +52,7 @@ void manualIPConfig(void);
   void init_SD(void);
   void start_SD_Log(void);
   void end_SD_Log(void);
+  void set_next_log_filename(void);
   File logfile;
   char SDfileName[11];
   
@@ -1262,9 +1263,21 @@ void ServerListen(void) {
       }
       
       if (SD.exists("log/")) {
-        //Todo: Check for existing files
-        SDfileName[4] = '0';
-        SDfileName[5] = '0';
+        //Check for existing files and set the actual log file to the continued one
+        // if all 99 files exist, not important which was the actual file always start with 00)
+        int i;
+        for (i=0;i<=99;i++) {
+          if (SD.exists(SDfileName)) {
+            set_next_log_filename();
+          }
+          else {
+            break;
+          }
+        }
+        //delete the new file, if it exist (only case if all 99 files exist; so delete 00)
+        SD.remove(SDfileName);
+        Serial.print("New logfile will be created: ");
+        Serial.println(SDfileName);
       }
       else {
         SD.mkdir("log");
@@ -1302,26 +1315,10 @@ void ServerListen(void) {
     logfile = SD.open(SDfileName, FILE_WRITE);
     
     if (logfile) {
-      //Todo: Check max. number of lines, maybe start new log file
-      if (logfile.size() >= 500) {  //Todo: Increase to min. 500000
+      if (logfile.size() >= MAX_LOG_SIZE) {
         //next time new file -> set filename
-        int fileNr = (SDfileName[5] - '0');
-        if (fileNr == 9) {
-          fileNr = (SDfileName[4] - '0');
-          if (fileNr == 9) {
-            //99 files reached, start with 00
-            SDfileName[4] = '0';
-          }
-          else {
-            fileNr = fileNr + 49;
-            SDfileName[4] = char(fileNr);
-          }
-          SDfileName[5] = '0';
-        }
-        else {
-          fileNr = fileNr + 49;
-          SDfileName[5] = char(fileNr);
-        }
+        set_next_log_filename();
+        
         //delete the new file, if it exist
         SD.remove(SDfileName);
         Serial.print("New logfile will be created: ");
@@ -1341,6 +1338,25 @@ void ServerListen(void) {
     digitalWrite(4, HIGH);  //turn off SD
     digitalWrite(10, LOW);  
   }
-  
+
+  void set_next_log_filename(void) {
+    int fileNr = (SDfileName[5] - '0');
+    if (fileNr == 9) {
+      fileNr = (SDfileName[4] - '0');
+      if (fileNr == 9) {
+        //99 files reached, start with 00
+        SDfileName[4] = '0';
+      }
+      else {
+        fileNr = fileNr + 49;
+        SDfileName[4] = char(fileNr);
+      }
+      SDfileName[5] = '0';
+    }
+    else {
+      fileNr = fileNr + 49;
+      SDfileName[5] = char(fileNr);
+    }
+  }
 #endif
 
