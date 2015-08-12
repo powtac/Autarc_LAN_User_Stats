@@ -5,6 +5,10 @@
 #include "ICMPPing.h"
 #include "default_config.h"
 
+#ifdef LOG_TO_SD_AND_SERIAL
+  #define LOG_TO_SD
+#endif
+
 #ifdef LOG_TO_SD
   #include <SD.h>
 #endif
@@ -1292,7 +1296,7 @@ void ServerListen(void) {
         }
         //delete the new file, if it exist (only case if all 99 files exist; so delete 00)
         SD.remove(SDfileName);
-        Serial.print("New logfile will be created: ");
+        Serial.print(F("New logfile will be created: "));
         Serial.println(SDfileName);
       }
       else {
@@ -1337,7 +1341,7 @@ void ServerListen(void) {
         
         //delete the new file, if it exist
         SD.remove(SDfileName);
-        Serial.print("New logfile will be created: ");
+        Serial.print(F("New logfile will be created: "));
         Serial.println(SDfileName);
       }
     }
