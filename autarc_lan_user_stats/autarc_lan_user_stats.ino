@@ -6,7 +6,7 @@
 #include "default_config.h"
 
 #ifdef LOG_TO_SD
-  //#include <SD.h>
+  #include <SD.h>
 #endif
 
 //________________________Prototypes of functions______________________________
@@ -56,9 +56,14 @@ void manualIPConfig(void);
   void set_next_log_filename(void);
   File logfile;
   char SDfileName[11];
-  
-  #define LOG_PRINT( ... ) start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
-  #define LOG_PRINT_LN( ... ) start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
+
+  #ifdef LOG_TO_SD_AND_SERIAL
+    #define LOG_PRINT( ... ) Serial.print( __VA_ARGS__ ); start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
+    #define LOG_PRINT_LN( ... ) Serial.println( __VA_ARGS__ ); start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
+  #else
+    #define LOG_PRINT( ... ) start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
+    #define LOG_PRINT_LN( ... ) start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
+  #endif
 #else
   #define LOG_PRINT( ... ) Serial.print( __VA_ARGS__ )
   #define LOG_PRINT_LN( ... ) Serial.println( __VA_ARGS__ )
@@ -101,15 +106,17 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
   #ifdef LOG_TO_SD
-    Serial.println(F("The complete log will be stored on SD, so you can't use the Serial monitor even not for configuration."));
     init_SD();
+    #ifdef LOG_TO_SD_AND_SERIAL
+      LOG_PRINT_LN(F("The complete log output will also be stored on SD"));
+    #else
+      Serial.println(F("The complete log will be stored on SD, so you can't use the Serial monitor even not for configuration."));
+    #endif
   #endif
   
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (startup): "));
     LOG_PRINT_LN(freeRam());
-    
-    
   #endif
 
   //________________________Configuration of the board______________________________
