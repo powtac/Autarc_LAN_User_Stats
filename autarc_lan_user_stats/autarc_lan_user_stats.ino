@@ -5,12 +5,8 @@
 #include "ICMPPing.h"
 #include "default_config.h"
 
-#ifdef SHOW_MEMORY
-  #include "memcheck.h"
-  // init_mem();  //neccessary?
-#endif
 #ifdef LOG_TO_SD
-  #include <SD.h>
+  //#include <SD.h>
 #endif
 
 //________________________Prototypes of functions______________________________
@@ -47,6 +43,11 @@ void GetIP(byte *IP);
 void GetMAC(byte *MAC);
 void startConfiguration(void);
 void manualIPConfig(void);
+
+//Prototypes global functions
+#ifdef SHOW_MEMORY
+  int freeRam(void);
+#endif
 
 #ifdef LOG_TO_SD
   void init_SD(void);
@@ -106,10 +107,10 @@ void setup() {
   
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (startup): "));
-    LOG_PRINT_LN(get_mem_unused());
+    LOG_PRINT_LN(freeRam());
+    
+    
   #endif
-  
-
 
   //________________________Configuration of the board______________________________
   LOG_PRINT(F("Press any key start configuration"));
@@ -201,7 +202,7 @@ void loop() {
 
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (start loop): "));
-    LOG_PRINT_LN(get_mem_unused());
+    LOG_PRINT_LN(freeRam());
   #endif
   for (int b = 0; b < 4; b++) {
     currIP[b] = start_ip[b];
@@ -305,7 +306,7 @@ void loop() {
   }
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (end loop): "));
-    LOG_PRINT_LN(get_mem_unused());
+    LOG_PRINT_LN(freeRam());
   #endif
   LOG_PRINT_LN(F("Restart loop"));
   readSubnettingIP();  //Important if Subnet of the board has changed
@@ -686,7 +687,7 @@ char pingDevice(void) {
     // We found a device!
     #ifdef SHOW_MEMORY
         LOG_PRINT(F("Free Arduino Memory in bytes (device found): "));
-        LOG_PRINT_LN(get_mem_unused());
+        LOG_PRINT_LN(freeRam());
     #endif
     for (int mac = 0; mac < 6; mac++) {
       currMAC[mac] = echoReply.MACAddressSocket[mac];
@@ -909,7 +910,7 @@ void printConnectionDetails(void) {
   LOG_PRINT_LN(F("Setup complete\n"));
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (setup complete): "));
-    LOG_PRINT_LN(get_mem_unused());
+    LOG_PRINT_LN(freeRam());
   #endif
 }
 
@@ -950,7 +951,7 @@ char send_info_to_server(char *name) {
   EthernetClient client;
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (send info): "));
-    LOG_PRINT_LN(get_mem_unused());
+    LOG_PRINT_LN(freeRam());
   #endif
   if (client.connect(serverURL, 80) == 1) {
     tries = 0;
@@ -1233,6 +1234,14 @@ void ServerListen(void) {
     LOG_PRINT_LN(F("client disconnected"));
   }
 }
+
+#ifdef SHOW_MEMORY
+  int freeRam(void) {
+    extern int __heap_start, *__brkval; 
+    int v; 
+    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+  }
+#endif
 
 #ifdef LOG_TO_SD
   void init_SD(void) {
