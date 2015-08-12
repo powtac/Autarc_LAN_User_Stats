@@ -53,6 +53,8 @@ void manualIPConfig(void);
   void start_SD_Log(void);
   void end_SD_Log(void);
   File logfile;
+  char SDfileName[11];
+  
   #define LOG_PRINT( ... ) start_SD_Log(); logfile.print( __VA_ARGS__ ); end_SD_Log()
   #define LOG_PRINT_LN( ... ) start_SD_Log(); logfile.println( __VA_ARGS__ ); end_SD_Log()
 #else
@@ -1233,6 +1235,18 @@ void ServerListen(void) {
 
 #ifdef LOG_TO_SD
   void init_SD(void) {
+    SDfileName[0] = 'l';
+    SDfileName[1] = 'o';
+    SDfileName[2] = 'g';
+    SDfileName[3] = '/';
+    SDfileName[4] = '0';
+    SDfileName[5] = '0';
+    SDfileName[6] = '.';
+    SDfileName[7] = 't';
+    SDfileName[8] = 'x';
+    SDfileName[9] = 't';
+    SDfileName[10] = '\0';
+    
     pinMode(10, OUTPUT);
     pinMode(4, OUTPUT);
     
@@ -1247,11 +1261,20 @@ void ServerListen(void) {
         Serial.println(F("SD card initialized"));
       }
       
-      File datei = SD.open("Log.txt", FILE_WRITE);
+      if (SD.exists("log/")) {
+        //Todo: Check for existing files
+        SDfileName[4] = '0';
+        SDfileName[5] = '0';
+      }
+      else {
+        SD.mkdir("log");
+      }
       
-      if (datei) {
-        datei.println(F("### Restart of board ###"));
-        datei.close();
+      logfile = SD.open(SDfileName, FILE_WRITE);
+      
+      if (logfile) {
+        logfile.println(F("### Restart of board ###"));
+        logfile.close();
       }
       else {
         Serial.println(F("Can't write to SD card! No log will be stored!"));
@@ -1276,10 +1299,34 @@ void ServerListen(void) {
     }
     */
     
-    logfile = SD.open("Log.txt", FILE_WRITE);
+    logfile = SD.open(SDfileName, FILE_WRITE);
     
     if (logfile) {
       //Todo: Check max. number of lines, maybe start new log file
+      if (logfile.size() >= 500) {  //Todo: Increase to min. 500000
+        //next time new file -> set filename
+        int fileNr = (SDfileName[5] - '0');
+        if (fileNr == 9) {
+          fileNr = (SDfileName[4] - '0');
+          if (fileNr == 9) {
+            //99 files reached, start with 00
+            SDfileName[4] = '0';
+          }
+          else {
+            fileNr = fileNr + 49;
+            SDfileName[4] = char(fileNr);
+          }
+          SDfileName[5] = '0';
+        }
+        else {
+          fileNr = fileNr + 49;
+          SDfileName[5] = char(fileNr);
+        }
+        //delete the new file, if it exist
+        SD.remove(SDfileName);
+        Serial.print("New logfile will be created: ");
+        Serial.println(SDfileName);
+      }
     }
     else {
       Serial.println(F("Can't write to SD card! No log will be stored!"));
