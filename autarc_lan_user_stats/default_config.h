@@ -3,8 +3,8 @@
   
   //Prints the status of RAM
   #define SHOW_MEMORY  //Also comment the '#include' Tag in the main program because of arduino bug
-  #define LOG_TO_SD  //Also comment the '#include' Tag in the main program because of arduino bug; This will disable the Serial log
-  #define LOG_TO_SD_AND_SERIAL  //This will need a lot of flash memory (Sketch size)! Attention! This could cause a to high Sketch size!
+  //#define LOG_TO_SD  //Also comment the '#include' Tag in the main program because of arduino bug; This will disable the Serial log
+  //#define LOG_TO_SD_AND_SERIAL  //This will need a lot of flash memory (Sketch size)! Attention! This could cause a to high Sketch size!
   #define MAX_LOG_SIZE 500000
   
   void Load_Default_Config(void);
@@ -20,8 +20,8 @@
   byte dnsSrv[4];
   byte retryHost;
   
-  char AVRID[6];
-  char AVRpsw[7];
+  char NetworkName[6];
+  char NetworkPwd[7];
   
   
   void Load_Default_Config(void) {
@@ -54,35 +54,35 @@
     end_ip[1] = 168;
     end_ip[2] = 178;
     end_ip[3] = 254;
-    AVRID[0] = 'T';
-    AVRID[1] = 'i';
-    AVRID[2] = 'm';
-    AVRID[3] = '0';
-    AVRID[4] = '1';
-    AVRID[5] = '\0';
+    NetworkName[0] = 'T';
+    NetworkName[1] = 'i';
+    NetworkName[2] = 'm';
+    NetworkName[3] = '0';
+    NetworkName[4] = '1';
+    NetworkName[5] = '\0';
     dnsSrv[0] = 192;
     dnsSrv[1] = 168;
     dnsSrv[2] = 178;
     dnsSrv[3] = 1;
     retryHost = 2;
-    AVRpsw[0] = '1';
-    AVRpsw[1] = '2';
-    AVRpsw[2] = '3';
-    AVRpsw[3] = '4';
-    AVRpsw[4] = '5';
-    AVRpsw[5] = '6';
-    AVRpsw[6] = '\0';
+    NetworkPwd[0] = '1';
+    NetworkPwd[1] = '2';
+    NetworkPwd[2] = '3';
+    NetworkPwd[3] = '4';
+    NetworkPwd[4] = '5';
+    NetworkPwd[5] = '6';
+    NetworkPwd[6] = '\0';
   }
   
   // Simon
-  //static char AVRID[6]           = "Simon";
+  //static char NetworkName[6]           = "Simon";
   //static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F }; // 90:a2:da:00:46:8f
   //byte ip_shield[4]              = { 10, 0, 1, 13 };
   //byte gateway[4]                = { 10, 0, 1, 1 };
   //byte subnet[4]                 = { 255, 255, 0, 0 };
   
   //// Jonas
-  //static char AVRID[6]           = "Jonas";
+  //static char NetworkName[6]           = "Jonas";
   //static uint8_t mac_shield[6]   = { 0x90, 0xA2, 0xDA, 0x00, 0x46, 0x8F };
   //byte ip_shield[4]              = { 192, 168, 1, 30 };
   //byte gateway[4]                = { 192, 168, 1, 1 };

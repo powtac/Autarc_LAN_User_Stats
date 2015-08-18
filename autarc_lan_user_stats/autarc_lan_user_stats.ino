@@ -10,7 +10,7 @@
 #endif
 
 #ifdef LOG_TO_SD
-  #include <SD.h>
+  //#include <SD.h>
 #endif
 
 //________________________Prototypes of functions______________________________
@@ -19,9 +19,9 @@ void print_ip(byte* ip);
 void print_mac(byte* mac);
 void readSubnettingIP(void);
 char tryDHCP(void);
-void getAVRID(void);
+void getNetworkName(void);
 char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2);
-char connect_getAVRID(EthernetClient &client);
+char connect_getNetworkName(EthernetClient &client);
 void startConnection(void);
 char renewDHCP(void);
 void readConnectionValues(void);
@@ -79,7 +79,7 @@ void manualIPConfig(void);
 //________________________Global declarations______________________________
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
 byte tries = 0;
-byte tries_getAVRID = 0;
+byte tries_getNetworkName = 0;
 byte countOfflineDevices = 0;
 
 //char serverURL[] = "lan-user.danit.de";
@@ -159,10 +159,10 @@ void setup() {
     useSubnetting = read_EEPROM(21);
     read_EEPROM(22, start_ip , sizeof(start_ip));
     read_EEPROM(26, end_ip , sizeof(end_ip));
-    read_EEPROM(30, AVRID , sizeof(AVRID));
+    read_EEPROM(30, NetworkName , sizeof(NetworkName));
     read_EEPROM(40, dnsSrv , sizeof(dnsSrv));
     retryHost = read_EEPROM(44);
-    read_EEPROM(45, AVRpsw , sizeof(AVRpsw));
+    read_EEPROM(45, NetworkPwd , sizeof(NetworkPwd));
   }
 
 
@@ -191,7 +191,7 @@ void setup() {
   LOG_PRINT(serverURL);
   LOG_PRINT(serverPath);
   LOG_PRINT(F(SERVER_STATS_URI)); // GET /stats/network/[network_name][/range]
-  LOG_PRINT(AVRID);
+  LOG_PRINT(NetworkName);
   LOG_PRINT_LN(F(" to see your stats online!"));
   
   
@@ -340,10 +340,10 @@ void loop() {
 // 21          | useSubnetting | 1
 // 22 - 25     | start_ip      | 4
 // 26 - 29     | end_ip        | 4
-// 30 - 35     | AVRID         | 6
+// 30 - 35     | NetworkName   | 6
 // 40 - 43     | dnsSrv        | 4
 // 44          | retryHost     | 1
-// 45 - 51     | AVRpsw        | 7
+// 45 - 51     | NetworkPwd    | 7
 
 
 void write_EEPROM(int startstorage, byte *value, int valuesize) {
@@ -512,20 +512,20 @@ void startConfiguration(void) {
       retryHost = 2;
     }
 
-    LOG_PRINT_LN(F("Register AVR online? (0 = no): "));
+    LOG_PRINT_LN(F("Register Arduino online? (0 = no): "));
     if (GetNumber() == 0) {
-      LOG_PRINT_LN(F("AVR-ID (5 chars) (NEW: Network Name): "));
-      GetString(AVRID, sizeof(AVRID));
-      LOG_PRINT(AVRID);
+      LOG_PRINT_LN(F("Network Name (5 chars): "));
+      GetString(NetworkName, sizeof(NetworkName));
+      LOG_PRINT(NetworkName);
       LOG_PRINT_LN("\n");
 
-      LOG_PRINT_LN(F("AVR Password (6 chars): "));
-      GetString(AVRpsw, sizeof(AVRpsw));
-      LOG_PRINT(AVRpsw);
+      LOG_PRINT_LN(F("Network Password (6 chars): "));
+      GetString(NetworkPwd, sizeof(NetworkPwd));
+      LOG_PRINT(NetworkPwd);
       LOG_PRINT_LN("\n");
     }
     else {
-      getAVRID();
+      getNetworkName();
     }
 
     //Store settings and set configured = 1 in EEPROM
@@ -534,7 +534,7 @@ void startConfiguration(void) {
     write_EEPROM(15, subnet , sizeof(subnet));
     write_EEPROM(40, dnsSrv , sizeof(dnsSrv));
     write_EEPROM(1, mac_shield , sizeof(mac_shield));
-    write_EEPROM(30, AVRID , sizeof(AVRID));
+    write_EEPROM(30, NetworkName , sizeof(NetworkName));
     write_EEPROM(19, useDhcp);
     write_EEPROM(21, useSubnetting);
     write_EEPROM(22, start_ip , sizeof(start_ip));
@@ -542,7 +542,7 @@ void startConfiguration(void) {
     write_EEPROM(20, pingrequest);
     write_EEPROM(44, retryHost);
 
-    write_EEPROM(45, AVRpsw , sizeof(AVRpsw));
+    write_EEPROM(45, NetworkPwd , sizeof(NetworkPwd));
 
     write_EEPROM(0, 1);
 
@@ -712,11 +712,11 @@ char pingDevice(void) {
   }
 }
 
-void getAVRID(void) {
+void getNetworkName(void) {
   startConnection();
   EthernetClient client;
 
-  if (connect_getAVRID(client) == 1) {
+  if (connect_getNetworkName(client) == 1) {
     int i = 0;
     char tmpc;
     char startJSON = 0;
@@ -765,16 +765,16 @@ void getAVRID(void) {
               }
             }
             else {
-              if (compare_CharArray(varNameChar, "AVRID", sizeof(varNameChar), sizeof("AVRID")) == 1) {
-                if (i < (sizeof(AVRID) - 1)) {
-                  AVRID[i] = tmpc;
-                  AVRID[i + 1] = '\0';
+              if (compare_CharArray(varNameChar, "network_name", sizeof(varNameChar), sizeof("network_name")) == 1) {
+                if (i < (sizeof(NetworkName) - 1)) {
+                  NetworkName[i] = tmpc;
+                  NetworkName[i + 1] = '\0';
                 }
               }
-              else if (compare_CharArray(varNameChar, "AVRpsw", sizeof(varNameChar), sizeof("AVRpsw")) == 1) {
-                if (i < (sizeof(AVRpsw) - 1)) {
-                  AVRpsw[i] = tmpc;
-                  AVRpsw[i + 1] = '\0';
+              else if (compare_CharArray(varNameChar, "network_password", sizeof(varNameChar), sizeof("network_password")) == 1) {
+                if (i < (sizeof(NetworkPwd) - 1)) {
+                  NetworkPwd[i] = tmpc;
+                  NetworkPwd[i + 1] = '\0';
                 }
               }
               //Attention: If you add a var > 6 chars, you have to change the space of the char array!
@@ -790,8 +790,8 @@ void getAVRID(void) {
       LOG_PRINT_LN("\n");
       LOG_PRINT_LN(F("--------------"));
       LOG_PRINT_LN(F("Your account data: "));
-      LOG_PRINT_LN(AVRID);
-      LOG_PRINT_LN(AVRpsw);
+      LOG_PRINT_LN(NetworkName);
+      LOG_PRINT_LN(NetworkPwd);
       LOG_PRINT_LN(F("--------------"));
       LOG_PRINT_LN(F("disconnecting."));
       client.stop();
@@ -825,7 +825,7 @@ char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2)
   return 1;
 }
 
-char connect_getAVRID(EthernetClient &client) {
+char connect_getNetworkName(EthernetClient &client) {
   if (client.connect(serverURL, 80) == 1) {
     LOG_PRINT(F("Connected to HTTP Server"));
     LOG_PRINT_LN(serverURL);
@@ -852,10 +852,10 @@ char connect_getAVRID(EthernetClient &client) {
     LOG_PRINT_LN("\n");
     LOG_PRINT_LN(client.status());
     client.stop();
-    if (tries_getAVRID < 2) {
-      tries_getAVRID++;
+    if (tries_getNetworkName < 2) {
+      tries_getNetworkName++;
       LOG_PRINT_LN(F("Retry to connect..."));
-      connect_getAVRID(client);
+      connect_getNetworkName(client);
     }
     else {
       //Connection to server failed
@@ -995,7 +995,7 @@ char send_info_to_server(char *name) {
 
     client.print(F("\"network_name\":"));
     client.print("\"");
-    client.print(AVRID);
+    client.print(NetworkName);
     client.print("\",");
  
     client.print(F("\"online\":"));
@@ -1178,7 +1178,7 @@ void ServerListen(void) {
           serverClient.print(serverURL);
           serverClient.print(serverPath);
           serverClient.print(F(SERVER_STATS_URI));
-          serverClient.print(AVRID);
+          serverClient.print(NetworkName);
           serverClient.println(F("'>Go to the usage statistics</a><br /><br />"));
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
@@ -1191,11 +1191,11 @@ void ServerListen(void) {
           serverClient.print(serverURL);
           serverClient.println(F("/' method='POST' accept-charset='UTF-8'>"));
           serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
-          serverClient.print(F("			<p>AVR-ID:<br><input name='id' type='text' value='"));
-          serverClient.print(AVRID);
+          serverClient.print(F("			<p>Network Name:<br><input name='network_name' type='text' value='"));
+          serverClient.print(NetworkName);
           serverClient.println(F("' readonly></p>"));
-          serverClient.print(F("			<input name='psw' type='hidden' value='"));
-          serverClient.print(AVRpsw);
+          serverClient.print(F("			<input name='network_password' type='hidden' value='"));
+          serverClient.print(NetworkPwd);
           serverClient.println("'>");
           serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
           serverClient.print(MACClient[0], HEX);
