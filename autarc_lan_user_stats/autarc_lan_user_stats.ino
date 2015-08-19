@@ -89,6 +89,8 @@ char serverPath[] = "/autarc_lan_user_stats/03/\?";
 #define SERVER_ADD_URI "/ping_result/add"
 #define SERVER_STATS_URI "/stats/network/"
 #define SERVER_GET_ID_URI "/networks/list"
+#define SERVER_SET_NAME_URI "/device/name"
+
 char VersionNR[] = "1.3";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
@@ -1167,6 +1169,54 @@ void ServerListen(void) {
           serverClient.println(F("<head>"));
           serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter device name</title>"));
           serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
+
+          #if ARDUINO > 105
+            serverClient.print(F("  <script src='http:\/\/"));
+          #else
+            serverClient.print(F("  <script src='http://"));
+          #endif
+          serverClient.println(F("code.jquery.com/jquery-1.10.1.min.js'></script>"));
+          serverClient.println(F("<script type='text/javascript'>"));
+          serverClient.println(F("$(document).ready(function() {"));
+          serverClient.println(F("$('#go').on('click', function() {"));
+          serverClient.print(F("var formData = '{\"network_name\": \""));
+          serverClient.print(NetworkName);
+          serverClient.print(F("\",\"network_password\": \""));
+          serverClient.print(NetworkPwd);
+          serverClient.print(F("\",\"mac\": \""));
+          serverClient.print(MACClient[0], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[1], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[2], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[3], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[4], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[5], HEX);
+          serverClient.println(F("\",\"name\": ' + $('#name').val() + '}';"));
+          serverClient.println(F("$.ajax({"));
+          serverClient.println(F("  type: 'POST',"));
+          
+          #if ARDUINO > 105
+            serverClient.print(F("  url: 'http:\/\/"));
+          #else
+            serverClient.print(F("  url: 'http://"));
+          #endif
+          
+          serverClient.print(serverURL);
+          serverClient.print(serverPath);
+          serverClient.print(F(SERVER_SET_NAME_URI));
+          serverClient.println(F("',"));
+          serverClient.println(F("  data: formData,"));
+          serverClient.println(F("  success: function(){},"));
+          serverClient.println(F("  dataType: 'json',"));
+          serverClient.println(F("  contentType : 'application/json; charset=UTF-8'"));
+          serverClient.println(F("});"));
+          serverClient.println(F("});"));
+          serverClient.println(F("})"));
+          serverClient.println(F("</script>"));          
           serverClient.println(F("</head>"));
           serverClient.println(F("<body>"));
           serverClient.println(F("	<div>"));
@@ -1183,21 +1233,11 @@ void ServerListen(void) {
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
           serverClient.println(F("		<br /><br />"));
-          #if ARDUINO > 105
-            serverClient.print(F("		<form action='http:\/\/"));
-          #else
-            serverClient.print(F("		<form action='http://"));
-          #endif
-          serverClient.print(serverURL);
-          serverClient.println(F("/' method='POST' accept-charset='UTF-8'>"));
-          serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input name='user' type='text'></p>"));
-          serverClient.print(F("			<p>Network Name:<br><input name='network_name' type='text' value='"));
+          serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input id='name' type='text'></p>"));
+          serverClient.print(F("			<p>Network Name:<br><input type='text' value='"));
           serverClient.print(NetworkName);
           serverClient.println(F("' readonly></p>"));
-          serverClient.print(F("			<input name='network_password' type='hidden' value='"));
-          serverClient.print(NetworkPwd);
-          serverClient.println("'>");
-          serverClient.print(F("			<p>MAC of Device:<br><input name='mac' type='text' value='"));
+          serverClient.print(F("			<p>MAC of Device:<br><input type='text' value='"));
           serverClient.print(MACClient[0], HEX);
           serverClient.print(":");
           serverClient.print(MACClient[1], HEX);
@@ -1222,7 +1262,7 @@ void ServerListen(void) {
           serverClient.print(":");
           serverClient.print(MACClient[2], HEX);
           serverClient.println(F("' target='_blank'>Vendor?</a></p>"));
-          serverClient.println(F("			<input type='submit' name='cmdStore' value='Save device name'/>"));
+          serverClient.println(F("			<input type='button' id='go' value='Save device name'></input>"));
           serverClient.println(F("		</form>"));
           serverClient.println(F("	</div>"));
 
