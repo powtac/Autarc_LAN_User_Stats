@@ -1195,7 +1195,7 @@ void ServerListen(void) {
           serverClient.print(MACClient[4], HEX);
           serverClient.print(":");
           serverClient.print(MACClient[5], HEX);
-          serverClient.println(F("\",\"name\": ' + $('#name').val() + '}';"));
+          serverClient.println(F("\",\"name\": \"' + $('#name').val() + '\"}';"));
           serverClient.println(F("$.ajax({"));
           serverClient.println(F("  type: 'POST',"));
           
