@@ -10,7 +10,7 @@
 #endif
 
 #ifdef LOG_TO_SD
-  //#include <SD.h>
+  #include <SD.h>
 #endif
 
 //________________________Prototypes of functions______________________________
@@ -60,6 +60,7 @@ void manualIPConfig(void);
   void set_next_log_filename(void);
   File logfile;
   char SDfileName[11];
+  char tmpfileName[11];
   bool SDfailed;
 
   #ifdef LOG_TO_SD_AND_SERIAL
@@ -1154,6 +1155,38 @@ void ServerListen(void) {
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
+
+//Todo: Only if SD enabled
+        if (c == 'G') {
+          c = serverClient.read();
+          if (c == 'E') {
+            c = serverClient.read();
+            if (c == 'T') {
+              c = serverClient.read();
+              if (c == ' ') {
+                c = serverClient.read();
+               if (c == '/') {
+                 c = serverClient.read();
+                 if (c == ' ') {
+                   //no sub file -> show actual logfile
+                   tmpfileName[4] = SDfileName[4];
+                   tmpfileName[5] = SDfileName[5];
+                   Serial.print("abgerufene Datei: ");
+                   Serial.println(tmpfileName);
+                 }
+                 else {
+                  //now recieve the filename
+                  tmpfileName[4] = c;
+                  char c = serverClient.read();
+                  tmpfileName[5] = c;
+                  //log file NR stored in tmpfileName
+                 }
+                 c = serverClient.read();
+               }
+              }
+            }
+          }
+        }
         if (c == '\n' && currentLineIsBlank) {
           //Read the MAC of this device
           byte MACClient[6];
@@ -1270,14 +1303,20 @@ void ServerListen(void) {
             serverClient.println(F("  <br />"));
             serverClient.println(F("  <br />"));
             serverClient.println(F("  <div>"));
-            serverClient.print(F("    The current log file ("));
+            serverClient.print(F("    The current log file is <a href=\""));
+            serverClient.print(SDfileName[4]);
+            serverClient.print(SDfileName[5]);
+            serverClient.print(F("\">"));
             serverClient.print(SDfileName);
+            serverClient.println(F("</a>.<br />"));
+            serverClient.print(F("    The requested log file ("));
+            serverClient.print(tmpfileName);
             serverClient.println(F(") contains the following log:"));
             serverClient.println(F("    <br />"));
             serverClient.println(F("    <textarea rows='50' cols='100'>"));
   
             File fileToShow;
-            fileToShow = SD.open(SDfileName); //Load actual log file
+            fileToShow = SD.open(tmpfileName); //Load actual log file
             if (fileToShow)
             {
               while(fileToShow.available())
@@ -1287,6 +1326,34 @@ void ServerListen(void) {
               fileToShow.close();
             }
             serverClient.println(F("    </textarea>"));
+            serverClient.println(F("  </div><br />"));
+            
+            serverClient.println(F("  <div>"));
+            serverClient.println(F("Other log-files on SD:<br />"));
+//Todo: Maye enable SD
+            
+    if (SD.exists("log/")) {
+        //Print all existing log files
+        tmpfileName[4] = '0';
+        tmpfileName[5] = '0';
+        int i;
+        serverClient.println(F("    <ul>"));
+        for (i=0;i<=99;i++) {
+          if (SD.exists(tmpfileName)) {
+            serverClient.print(F("      <li><a href=\""));
+            serverClient.print(tmpfileName[4]);
+            serverClient.print(tmpfileName[5]);
+            serverClient.print(F("\">"));
+            serverClient.print(tmpfileName);
+            serverClient.println(F("</a></li>"));
+          }
+          set_next_log_tmpfilename();
+        }
+        serverClient.println(F("    </ul>"));
+      }
+
+      
+//Todo: Maybe disable SD      
             serverClient.println(F("  </div>"));
           #endif
           
@@ -1334,6 +1401,18 @@ void ServerListen(void) {
     SDfileName[9] = 't';
     SDfileName[10] = '\0';
 
+    tmpfileName[0] = 'l';
+    tmpfileName[1] = 'o';
+    tmpfileName[2] = 'g';
+    tmpfileName[3] = '/';
+    tmpfileName[4] = '0';
+    tmpfileName[5] = '0';
+    tmpfileName[6] = '.';
+    tmpfileName[7] = 't';
+    tmpfileName[8] = 'x';
+    tmpfileName[9] = 't';
+    tmpfileName[10] = '\0';
+        
     pinMode(10, OUTPUT);
     pinMode(4, OUTPUT);
     
@@ -1451,6 +1530,26 @@ void ServerListen(void) {
     else {
       fileNr = fileNr + 49;
       SDfileName[5] = char(fileNr);
+    }
+  }
+//TODO: Join both functions with param
+  void set_next_log_tmpfilename(void) {
+    int fileNr = (tmpfileName[5] - '0');
+    if (fileNr == 9) {
+      fileNr = (tmpfileName[4] - '0');
+      if (fileNr == 9) {
+        //99 files reached, start with 00
+        tmpfileName[4] = '0';
+      }
+      else {
+        fileNr = fileNr + 49;
+        tmpfileName[4] = char(fileNr);
+      }
+      tmpfileName[5] = '0';
+    }
+    else {
+      fileNr = fileNr + 49;
+      tmpfileName[5] = char(fileNr);
     }
   }
 #endif
