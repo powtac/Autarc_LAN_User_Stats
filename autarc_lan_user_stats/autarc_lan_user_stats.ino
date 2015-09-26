@@ -89,6 +89,9 @@ char serverURL[] = "kolchose.org";
 char serverPath[] = "/autarc_lan_user_stats/03/\?";
 #define SERVER_ADD_URI "/ping_result/add"
 #define SERVER_STATS_URI "/stats/network/"
+#define SERVER_DEVICE_STATS_URI1 "/network/"
+#define SERVER_DEVICE_STATS_URI2 "/device/"
+#define SERVER_DEVICE_STATS_URI3 "/info"
 #define SERVER_GET_ID_URI "/networks/list"
 #define SERVER_SET_NAME_URI "/device/name"
 
@@ -1277,7 +1280,31 @@ void ServerListen(void) {
           serverClient.print(serverPath);
           serverClient.print(F(SERVER_STATS_URI));
           serverClient.print(NetworkName);
-          serverClient.println(F("'>Go to the usage statistics</a><br /><br />"));
+          serverClient.println(F("'>Go to the network statistic</a><br /><br />"));
+          #if ARDUINO > 105
+            serverClient.print(F("    <a href='http:\/\/"));
+          #else
+            serverClient.print(F("    <a href='http://"));
+          #endif
+          serverClient.print(serverURL);
+          serverClient.print(serverPath);
+          serverClient.print(F(SERVER_DEVICE_STATS_URI1));
+          serverClient.print(NetworkName);
+          serverClient.print(F(SERVER_DEVICE_STATS_URI2));
+          serverClient.print(MACClient[0], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[1], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[2], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[3], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[4], HEX);
+          serverClient.print(":");
+          serverClient.print(MACClient[5], HEX);
+          serverClient.print(F(SERVER_DEVICE_STATS_URI3));
+          serverClient.println(F("'>Go to the device statistic</a><br /><br />"));
+          
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
           serverClient.println(F("		<br /><br />"));
