@@ -1197,8 +1197,8 @@ void ServerListen(void) {
                   tmpfileName[5] = c;
                   //log file NR stored in tmpfileName
                  }
-                 Serial.print("requested logfile: ");
-                 Serial.println(tmpfileName);
+                 LOG_PRINT("requested logfile: ");
+                 LOG_PRINT_LN(tmpfileName);
                  c = serverClient.read();
                }
               }
