@@ -121,6 +121,11 @@ void setup() {
       Serial.println(F("The complete log will be stored on SD, so you can't use the Serial monitor even not for configuration."));
     #endif
   #endif
+  #ifdef SEND_HARDWARE_TO_SERVER
+    LOG_PRINT_LN(F("Hardware devices like Gateway, DNS Server and Arduino will be send to the server"));
+  #else
+    LOG_PRINT_LN(F("Hardware devices like Gateway, DNS Server and Arduino won't be send to the server"));
+  #endif
   
   #ifdef SHOW_MEMORY
     LOG_PRINT(F("Free Arduino Memory in bytes (startup): "));
@@ -233,7 +238,9 @@ void loop() {
             LOG_PRINT(F("Arduino on IP "));
             print_ip(currIP);
             LOG_PRINT_LN();
-            send_info_to_server_troublehandler("Arduino");
+            #ifdef SEND_HARDWARE_TO_SERVER
+              send_info_to_server_troublehandler("Arduino");
+            #endif
           }
           else {
             //free, gateway or dnsSrv
@@ -255,7 +262,9 @@ void loop() {
                 LOG_PRINT(F(" MAC: "));
                 print_mac(currMAC);
                 LOG_PRINT_LN();
-                send_info_to_server_troublehandler("Gateway");
+                #ifdef SEND_HARDWARE_TO_SERVER
+                  send_info_to_server_troublehandler("Gateway");
+                #endif
               }
               else if (filterResult == 4) {
                 //IP of dnsSrv
@@ -264,7 +273,9 @@ void loop() {
                 LOG_PRINT(F(" MAC: "));
                 print_mac(currMAC);
                 LOG_PRINT_LN();
-                send_info_to_server_troublehandler("DNS-Server");
+                #ifdef SEND_HARDWARE_TO_SERVER
+                  send_info_to_server_troublehandler("DNS-Server");
+                #endif
               }
               else if (filterResult == 6) {
                 //IP of gateway & dnsSrv
@@ -273,14 +284,18 @@ void loop() {
                 LOG_PRINT(F(" MAC: "));
                 print_mac(currMAC);
                 LOG_PRINT_LN();
-                send_info_to_server_troublehandler("Gateway");
+                #ifdef SEND_HARDWARE_TO_SERVER
+                  send_info_to_server_troublehandler("Gateway");
+                #endif
                 ServerListenLoop(4);
                 LOG_PRINT(F("DNS-Server found on IP "));
                 print_ip(currIP);
                 LOG_PRINT(F(" MAC: "));
                 print_mac(currMAC);
                 LOG_PRINT_LN();
-                send_info_to_server_troublehandler("DNS-Server");
+                #ifdef SEND_HARDWARE_TO_SERVER
+                  send_info_to_server_troublehandler("DNS-Server");
+                #endif
               }
             }
             else {
