@@ -57,7 +57,7 @@ void manualIPConfig(void);
   void init_SD(bool reinit = 0);
   void start_SD_Log(void);
   void end_SD_Log(void);
-  void set_next_log_filename(void);
+  void set_next_log_filename(char *FileVar);
   File logfile;
   char SDfileName[11];
   char tmpfileName[11];
@@ -92,7 +92,7 @@ char serverPath[] = "/autarc_lan_user_stats/03/\?";
 #define SERVER_GET_ID_URI "/networks/list"
 #define SERVER_SET_NAME_URI "/device/name"
 
-char VersionNR[] = "1.3";  //TODO: Automatically?
+char VersionNR[] = "1.4";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
 byte offlineIP[MAX_DEVICES_INFO][4];
@@ -1152,11 +1152,7 @@ void ServerListen(void) {
         char c = serverClient.read();
         //Serial.write(c);  //prints the clients request
 
-        // if you've gotten to the end of the line (received a newline
-        // character) and the line is blank, the http request has ended,
-        // so you can send a reply
-
-//Todo: Only if SD enabled
+      #ifdef LOG_TO_SD
         if (c == 'G') {
           c = serverClient.read();
           if (c == 'E') {
@@ -1171,8 +1167,6 @@ void ServerListen(void) {
                    //no sub file -> show actual logfile
                    tmpfileName[4] = SDfileName[4];
                    tmpfileName[5] = SDfileName[5];
-                   Serial.print("abgerufene Datei: ");
-                   Serial.println(tmpfileName);
                  }
                  else {
                   //now recieve the filename
@@ -1181,12 +1175,18 @@ void ServerListen(void) {
                   tmpfileName[5] = c;
                   //log file NR stored in tmpfileName
                  }
+                 Serial.print("requested logfile: ");
+                 Serial.println(tmpfileName);
                  c = serverClient.read();
                }
               }
             }
           }
         }
+      #endif
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           //Read the MAC of this device
           byte MACClient[6];
@@ -1309,50 +1309,57 @@ void ServerListen(void) {
             serverClient.print(F("\">"));
             serverClient.print(SDfileName);
             serverClient.println(F("</a>.<br />"));
-            serverClient.print(F("    The requested log file ("));
-            serverClient.print(tmpfileName);
-            serverClient.println(F(") contains the following log:"));
-            serverClient.println(F("    <br />"));
-            serverClient.println(F("    <textarea rows='50' cols='100'>"));
-  
+            
+//Todo: Maye enable SD  
             File fileToShow;
             fileToShow = SD.open(tmpfileName); //Load actual log file
-            if (fileToShow)
-            {
+            if (fileToShow) {
+              serverClient.print(F("    The requested log file ("));
+              serverClient.print(tmpfileName);
+              serverClient.println(F(") contains the following log:"));
+              serverClient.println(F("    <br />"));
+              serverClient.println(F("    <textarea rows='50' cols='100'>"));
               while(fileToShow.available())
               {
                 serverClient.write(fileToShow.read());  //send log file to client
               }
               fileToShow.close();
+              serverClient.println(F("    </textarea>"));
             }
-            serverClient.println(F("    </textarea>"));
+            else {
+              serverClient.print(F("    The requested log file ("));
+              serverClient.print(tmpfileName);
+              serverClient.println(F(") doesn't exist!"));
+            }
+            
             serverClient.println(F("  </div><br />"));
             
             serverClient.println(F("  <div>"));
             serverClient.println(F("Other log-files on SD:<br />"));
-//Todo: Maye enable SD
-            
-    if (SD.exists("log/")) {
-        //Print all existing log files
-        tmpfileName[4] = '0';
-        tmpfileName[5] = '0';
-        int i;
-        serverClient.println(F("    <ul>"));
-        for (i=0;i<=99;i++) {
-          if (SD.exists(tmpfileName)) {
-            serverClient.print(F("      <li><a href=\""));
-            serverClient.print(tmpfileName[4]);
-            serverClient.print(tmpfileName[5]);
-            serverClient.print(F("\">"));
-            serverClient.print(tmpfileName);
-            serverClient.println(F("</a></li>"));
-          }
-          set_next_log_tmpfilename();
-        }
-        serverClient.println(F("    </ul>"));
-      }
 
-      
+            if (SD.exists("log/")) {
+                //Print all existing log files
+                tmpfileName[4] = '0';
+                tmpfileName[5] = '0';
+                int i;
+                serverClient.println(F("    <ul>"));
+                for (i=0;i<=99;i++) {
+                  if (SD.exists(tmpfileName)) {
+                    serverClient.print(F("      <li><a href=\""));
+                    serverClient.print(tmpfileName[4]);
+                    serverClient.print(tmpfileName[5]);
+                    serverClient.print(F("\">"));
+                    serverClient.print(tmpfileName);
+                    serverClient.println(F("</a></li>"));
+                  }
+                  set_next_log_filename(tmpfileName);
+                }
+                serverClient.println(F("    </ul>"));
+              }
+              else {
+                //no log directory
+                serverClient.println(F("No logfiles found"));
+              }
 //Todo: Maybe disable SD      
             serverClient.println(F("  </div>"));
           #endif
@@ -1401,17 +1408,17 @@ void ServerListen(void) {
     SDfileName[9] = 't';
     SDfileName[10] = '\0';
 
-    tmpfileName[0] = 'l';
-    tmpfileName[1] = 'o';
-    tmpfileName[2] = 'g';
-    tmpfileName[3] = '/';
-    tmpfileName[4] = '0';
-    tmpfileName[5] = '0';
-    tmpfileName[6] = '.';
-    tmpfileName[7] = 't';
-    tmpfileName[8] = 'x';
-    tmpfileName[9] = 't';
-    tmpfileName[10] = '\0';
+    tmpfileName[0] = SDfileName[0];
+    tmpfileName[1] = SDfileName[1];
+    tmpfileName[2] = SDfileName[2];
+    tmpfileName[3] = SDfileName[3];
+    tmpfileName[4] = SDfileName[4];
+    tmpfileName[5] = SDfileName[5];
+    tmpfileName[6] = SDfileName[6];
+    tmpfileName[7] = SDfileName[7];
+    tmpfileName[8] = SDfileName[8];
+    tmpfileName[9] = SDfileName[9];
+    tmpfileName[10] = SDfileName[10];
         
     pinMode(10, OUTPUT);
     pinMode(4, OUTPUT);
@@ -1434,7 +1441,7 @@ void ServerListen(void) {
         int i;
         for (i=0;i<=99;i++) {
           if (SD.exists(SDfileName)) {
-            set_next_log_filename();
+            set_next_log_filename(SDfileName);
           }
           else {
             break;
@@ -1488,7 +1495,7 @@ void ServerListen(void) {
         SDfailed = 0;
         if (logfile.size() >= MAX_LOG_SIZE) {
           //next time new file -> set filename
-          set_next_log_filename();
+          set_next_log_filename(SDfileName);
           
           //delete the new file, if it exist
           SD.remove(SDfileName);
@@ -1513,43 +1520,23 @@ void ServerListen(void) {
     digitalWrite(10, LOW);  
   }
 
-  void set_next_log_filename(void) {
-    int fileNr = (SDfileName[5] - '0');
+  void set_next_log_filename(char *FileVar) {
+    int fileNr = (FileVar[5] - '0');
     if (fileNr == 9) {
-      fileNr = (SDfileName[4] - '0');
+      fileNr = (FileVar[4] - '0');
       if (fileNr == 9) {
         //99 files reached, start with 00
-        SDfileName[4] = '0';
+        FileVar[4] = '0';
       }
       else {
         fileNr = fileNr + 49;
-        SDfileName[4] = char(fileNr);
+        FileVar[4] = char(fileNr);
       }
-      SDfileName[5] = '0';
+      FileVar[5] = '0';
     }
     else {
       fileNr = fileNr + 49;
-      SDfileName[5] = char(fileNr);
-    }
-  }
-//TODO: Join both functions with param
-  void set_next_log_tmpfilename(void) {
-    int fileNr = (tmpfileName[5] - '0');
-    if (fileNr == 9) {
-      fileNr = (tmpfileName[4] - '0');
-      if (fileNr == 9) {
-        //99 files reached, start with 00
-        tmpfileName[4] = '0';
-      }
-      else {
-        fileNr = fileNr + 49;
-        tmpfileName[4] = char(fileNr);
-      }
-      tmpfileName[5] = '0';
-    }
-    else {
-      fileNr = fileNr + 49;
-      tmpfileName[5] = char(fileNr);
+      FileVar[5] = char(fileNr);
     }
   }
 #endif
