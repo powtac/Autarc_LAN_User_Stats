@@ -242,6 +242,10 @@ void loop() {
             print_ip(currIP);
             LOG_PRINT_LN();
             #ifdef SEND_HARDWARE_TO_SERVER
+              //Set currMAC = MAC of Arduino so that it will be send to the statistic server
+              for (int copymac = 0; copymac < 6; copymac++) {
+                currMAC[copymac] = mac_shield[copymac];
+              }
               send_info_to_server_troublehandler("Arduino");
             #endif
           }
@@ -319,6 +323,10 @@ void loop() {
                 countOfflineDevices = 0;
               }
             }
+          }
+          //Device send to Server, so reset the Mac Adress that it can not appear twice
+          for (int macreset = 0; macreset < 6; macreset++) {
+            currMAC[macreset] = 0x00;
           }
           ServerListenLoop(4);
           currIP[3]++;
@@ -1061,11 +1069,7 @@ char send_info_to_server(char *name) {
       client.print(":");
       client.print(currMAC[5], HEX);
       client.print("\"");
-      
-      for (int macreset = 0; macreset < 6; macreset++) {
-        currMAC[macreset] = 0x00;
-      }
-      
+            
       client.print("}");
     }
     client.print("],");
