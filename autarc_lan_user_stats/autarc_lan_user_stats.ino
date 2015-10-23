@@ -1266,8 +1266,10 @@ void ServerListen(void) {
           serverClient.println(F("',"));
           serverClient.println(F("  data: formData,"));
           serverClient.println(F("  success: function(){},"));
-          serverClient.println(F("  dataType: 'json',"));
-          serverClient.println(F("  contentType : 'application/json; charset=UTF-8'"));
+          serverClient.println(F("  dataType: 'json'"));
+          //Todo: Check, if Accept Header was changed at Stat-Server
+          //serverClient.println(F("  dataType: 'json',"));
+          //serverClient.println(F("  contentType: 'application/json; charset=UTF-8'"));
           serverClient.println(F("});"));
           serverClient.println(F("});"));
           serverClient.println(F("})"));
