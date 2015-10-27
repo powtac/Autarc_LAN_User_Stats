@@ -80,6 +80,7 @@ void manualIPConfig(void);
 
 //________________________Global declarations______________________________
 const char string_format_ip[] = ", format \"000.111.222.333\": ";
+const String newline = String("\n");
 byte tries = 0;
 byte tries_getNetworkName = 0;
 byte countOfflineDevices = 0;
@@ -207,7 +208,7 @@ void setup() {
 
   readSubnettingIP();
 
-  print_message(String(F("\nStarting loop trough IP range ")) + ip_to_string(start_ip) + String(F(" - ")) + ip_to_string(end_ip));
+  print_message(newline + String(F("Starting loop trough IP range ")) + ip_to_string(start_ip) + String(F(" - ")) + ip_to_string(end_ip));
   
 }
 
@@ -387,7 +388,7 @@ void GetString(char *buf, int bufsize) {
     LOG_PRINT(ch);
     if (ch == '\r') {
       //Todo: Change to print_message() function
-      LOG_PRINT_LN("\n");
+      LOG_PRINT_LN(newline);
       break;
     }
     else if (ch == '\n') {
@@ -449,7 +450,7 @@ void startConfiguration(void) {
 
     print_message(F("MAC Board, format \"00:00:00:00:00:00\": "));
     GetMAC(mac_shield);
-    print_message(String("\n") + mac_to_string(mac_shield) + String("\n"));
+    print_message(newline + mac_to_string(mac_shield) + newline);
 
     if (easyConfig == 0) {
       print_message(F("Use DHCP (0 = no): "));
@@ -470,11 +471,11 @@ void startConfiguration(void) {
 
         print_message(String(F("Start IP for scan")) + string_format_ip);
         GetIP(start_ip);
-        print_message(String("\n") + ip_to_string(start_ip) + String("\n"));
+        print_message(newline + ip_to_string(start_ip) + newline);
 
         print_message(String(F("End IP for scan")) + string_format_ip);
         GetIP(end_ip);
-        print_message(String("\n") + ip_to_string(end_ip) + String("\n"));
+        print_message(newline + ip_to_string(end_ip) + newline);
       }
       else {
         print_message(F("Use Subnetting\n"));
@@ -543,19 +544,19 @@ void startConfiguration(void) {
 void manualIPConfig(void) {
   print_message(String(F("IP Board")) + string_format_ip);
   GetIP(ip_shield);
-  print_message(String("\n") + ip_to_string(ip_shield) + String("\n"));
+  print_message(newline + ip_to_string(ip_shield) + newline);
 
   print_message(String(F("IP Gateway")) + string_format_ip);
   GetIP(gateway);
-  print_message(String("\n") + ip_to_string(gateway) + String("\n"));
+  print_message(newline + ip_to_string(gateway) + newline);
 
   print_message(String(F("Subnetmask")) + string_format_ip);
   GetIP(subnet);
-  print_message(String("\n") + ip_to_string(subnet) + String("\n"));
+  print_message(newline + ip_to_string(subnet) + newline);
 
   print_message(String(F("IP DNS-Server")) + string_format_ip);
   GetIP(dnsSrv);
-  print_message(String("\n") + ip_to_string(dnsSrv) + String("\n"));
+  print_message(newline + ip_to_string(dnsSrv) + newline);
 }
 
 
@@ -744,7 +745,7 @@ void getNetworkName(void) {
 
     // if the server is disconnected, stop the client:
     if (!client.connected()) {
-      print_message(String(F("\n\n--------------\nYour account data:\n")) + NetworkName + String("\n") + NetworkPwd + String(F("\n--------------\ndisconnecting.")));
+      print_message(String(F("\n\n--------------\nYour account data:\n")) + NetworkName + newline + NetworkPwd + String(F("\n--------------\ndisconnecting.")));
       client.stop();
     }
   }
