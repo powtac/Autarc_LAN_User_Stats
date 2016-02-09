@@ -27,9 +27,9 @@ void startConnection(void);
 char renewDHCP(void);
 void readConnectionValues(void);
 void printConnectionDetails(void);
-void send_info_to_server_troublehandler(char *name);
-byte send_info_to_server_check_troubles(char *name);
-char send_info_to_server(char *name);
+void send_info_to_server_troublehandler(void);
+byte send_info_to_server_check_troubles(void);
+char send_info_to_server(void);
 void ServerListenLoop(int count);
 void ServerListen(void);
 char filterDevice(void);
@@ -237,7 +237,8 @@ void loop() {
               for (int copymac = 0; copymac < 6; copymac++) {
                 currMAC[copymac] = mac_shield[copymac];
               }
-              send_info_to_server_troublehandler("Arduino");
+              //Device is Arduino
+              send_info_to_server_troublehandler();
             #endif
           }
           else {
@@ -247,33 +248,37 @@ void loop() {
               if (filterResult == 0) {
                 //free IP
                 print_message(String(F("Device found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
-                
-                send_info_to_server_troublehandler("");
+                //"Normal"Device
+                send_info_to_server_troublehandler();
               }
               else if (filterResult == 2) {
                 //IP of gateway
                 print_message(String(F("Gateway found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
                 #ifdef SEND_HARDWARE_TO_SERVER
-                  send_info_to_server_troublehandler("Gateway");
+                  //Device is Gateway
+                  send_info_to_server_troublehandler();
                 #endif
               }
               else if (filterResult == 4) {
                 //IP of dnsSrv
                 print_message(String(F("DNS-Server found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
                 #ifdef SEND_HARDWARE_TO_SERVER
-                  send_info_to_server_troublehandler("DNS-Server");
+                  //Device is DNS-Server
+                  send_info_to_server_troublehandler();
                 #endif
               }
               else if (filterResult == 6) {
                 //IP of gateway & dnsSrv
                 print_message(String(F("Gateway found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
                 #ifdef SEND_HARDWARE_TO_SERVER
-                  send_info_to_server_troublehandler("Gateway");
+                  //Device is Gateway
+                  send_info_to_server_troublehandler();
                 #endif
                 ServerListenLoop(4);
                 print_message(String(F("DNS-Server found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
                 #ifdef SEND_HARDWARE_TO_SERVER
-                  send_info_to_server_troublehandler("DNS-Server");
+                  //Device is DNS-Server
+                  send_info_to_server_troublehandler();
                 #endif
               }
             }
@@ -289,7 +294,8 @@ void loop() {
               if (countOfflineDevices == MAX_DEVICES_INFO) {
                 //number of max offline devices reached -> send info to server
                 print_message(F("Max offline devices reached. Sending devices to server."));
-                send_info_to_server_troublehandler("");
+                //"Normal" Device
+                send_info_to_server_troublehandler();
                 countOfflineDevices = 0;
               }
             }
@@ -868,12 +874,12 @@ void printConnectionDetails(void) {
   #endif
 }
 
-void send_info_to_server_troublehandler(char *name) { 
-  while (send_info_to_server_check_troubles(name) == 0) {}
+void send_info_to_server_troublehandler(void) { 
+  while (send_info_to_server_check_troubles() == 0) {}
 }
 
-byte send_info_to_server_check_troubles(char *name) {
-  if (send_info_to_server(name) == 0) {
+byte send_info_to_server_check_troubles(void) {
+  if (send_info_to_server() == 0) {
     //Connection to HTTP-Server failed -> ping gateway
     print_message(F("Connection to HTTP-Server failed"));
     ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest);
@@ -899,7 +905,7 @@ byte send_info_to_server_check_troubles(char *name) {
 }
 
 
-char send_info_to_server(char *name) {
+char send_info_to_server(void) {
   renewDHCP();
 
   EthernetClient client;
@@ -1048,7 +1054,7 @@ char send_info_to_server(char *name) {
       tries++;
       print_message(F("Retry to connect..."));
       ServerListenLoop(4);
-      send_info_to_server(name);  //Todo: Maybe change this to save memory. Also we could get problems with the recursive function!
+      send_info_to_server();  //Todo: Maybe change this to save memory. Also we could get problems with the recursive function!
     }
     else {
       //Connection to server failed
