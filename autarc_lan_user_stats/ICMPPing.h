@@ -24,7 +24,8 @@ typedef unsigned long time_t;
 class ICMPHeader;
 class ICMPPing;
 
-typedef enum Status
+//typedef enum Status   //TODO: Check this in new version
+enum Status
 {
     /*
     Indicates whether a ping succeeded or failed due to one of various error
