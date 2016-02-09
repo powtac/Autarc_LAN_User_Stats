@@ -4,9 +4,11 @@
   //Prints the status of RAM
   #define SHOW_MEMORY  //Also comment the '#include' Tag in the main program because of arduino bug
   //#define LOG_TO_SD  //Also comment the '#include' Tag in the main program because of arduino bug; This will disable the Serial log
-  #define LOG_TO_SD_AND_SERIAL  //This will need a lot of flash memory (Sketch size)! Attention! This could cause a to high Sketch size!
+  //#define LOG_TO_SD_AND_SERIAL  //This will need a lot of flash memory (Sketch size)! Attention! This could cause a to high Sketch size!
   #define MAX_LOG_SIZE 500000
   #define SEND_HARDWARE_TO_SERVER //Will send Hardware devices like Gateway, DNS Server and Arduino to the server; If comment, NO stats about the IP will be send
+
+  //#define WITH_ESCAPE_SEQUENCE //Neccessary for some Arduino versions newer 105 older 167 (?). [ARDUINO > 105]; Causes a lot of warnings with "unknown escape sequence"
   
   void Load_Default_Config(void);
   byte mac_shield[6];

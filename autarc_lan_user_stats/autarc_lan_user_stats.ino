@@ -10,7 +10,7 @@
 #endif
 
 #ifdef LOG_TO_SD
-  #include <SD.h>
+  //#include <SD.h>
 #endif
 
 //________________________Prototypes of functions______________________________
@@ -190,16 +190,16 @@ void setup() {
   printConnectionDetails();
 
 
-  #if ARDUINO > 105
+  #ifdef WITH_ESCAPE_SEQUENCE
     print_message(String(F("Visit http:\/\/")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your device. Tell all users to do the same.")));
   #else
     print_message(String(F("Visit http://")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your device. Tell all users to do the same.")));
   #endif
 
-  #if ARDUINO > 105
+  #ifdef WITH_ESCAPE_SEQUENCE
     print_message(String(F("Also check out http:\/\/")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats online!")));
   #else
-    print_message(F("Also check out http://") + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + F(" to see your stats online!"));
+    print_message(String(F("Also check out http://")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats online!")));
   #endif
   
   print_message(F("Starting server"));
@@ -1131,7 +1131,7 @@ void ServerListen(void) {
           serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter device name</title>"));
           serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
 
-          #if ARDUINO > 105
+          #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("  <script src='http:\/\/"));
           #else
             serverClient.print(F("  <script src='http://"));
@@ -1160,7 +1160,7 @@ void ServerListen(void) {
           serverClient.println(F("$.ajax({"));
           serverClient.println(F("  type: 'POST',"));
           
-          #if ARDUINO > 105
+          #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("  url: 'http:\/\/"));
           #else
             serverClient.print(F("  url: 'http://"));
@@ -1183,7 +1183,7 @@ void ServerListen(void) {
           serverClient.println(F("</head>"));
           serverClient.println(F("<body>"));
           serverClient.println(F("	<div>"));
-          #if ARDUINO > 105
+          #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("		<a href='http:\/\/"));
           #else
             serverClient.print(F("		<a href='http://"));
@@ -1193,7 +1193,7 @@ void ServerListen(void) {
           serverClient.print(F(SERVER_STATS_URI));
           serverClient.print(NetworkName);
           serverClient.println(F("'>Go to the network statistic</a><br /><br />"));
-          #if ARDUINO > 105
+          #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("    <a href='http:\/\/"));
           #else
             serverClient.print(F("    <a href='http://"));
@@ -1237,7 +1237,7 @@ void ServerListen(void) {
           serverClient.print(":");
           serverClient.print(MACClient[5], HEX);
           serverClient.println(F("' readonly>"));
-          #if ARDUINO > 105
+          #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F(" <a href='http:\/\/"));
           #else
             serverClient.print(F(" <a href='http://"));
