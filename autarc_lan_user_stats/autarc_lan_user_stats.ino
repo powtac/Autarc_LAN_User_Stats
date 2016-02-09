@@ -15,10 +15,19 @@
 
 //________________________Prototypes of functions______________________________
 //Prototypes IP-functions
-void print_message_(String message);
-void print_message_ln(String message);
-String ip_to_string(byte ip[4]);
-String mac_to_string(byte mac[6]);
+#ifdef INCREASE_LOG_SPEED
+  void print_message_(String message);
+  void print_message_ln(String message);
+  String ip_to_string(byte ip[4]);
+  String mac_to_string(byte mac[6]);
+#else
+  //TODO: Check how this can be solved without strings
+  void print_message_(String message);
+  void print_message_ln(String message);
+  void print_ip(byte* ip);
+  void print_mac(byte* mac);
+#endif
+
 void readSubnettingIP(void);
 char tryDHCP(void);
 void getNetworkName(void);
@@ -120,24 +129,36 @@ void setup() {
   #ifdef LOG_TO_SD
     init_SD();
     #ifdef LOG_TO_SD_AND_SERIAL
-      print_message_ln(F("The complete log output will also be stored on SD"));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("The complete log output will also be stored on SD"));
+      #else
+        LOG_PRINT_LN(F("The complete log output will also be stored on SD"));
+      #endif
     #else
       //TODO! Check, why?!
       Serial.println(F("The complete log will be stored on SD, so you can't use the Serial monitor even not for configuration."));
     #endif
   #endif
   #ifdef SEND_HARDWARE_TO_SERVER
-    print_message_ln(F("Hardware devices will be send to the server"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Hardware devices will be send to the server"));
+    #else
+      LOG_PRINT_LN(F("Hardware devices will be send to the server"));
+    #endif
   #else
-    print_message_ln(F("Hardware devices won't be send to the server"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Hardware devices won't be send to the server"));
+    #else
+      LOG_PRINT_LN(F("Hardware devices won't be send to the server"));
+    #endif
   #endif
   
   #ifdef SHOW_MEMORY
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Free Arduino Memory in bytes (startup): ")) + freeRam());
     #else
-      print_message(F("Free Arduino Memory in bytes (startup): "));
-      print_message_ln(freeRam());
+      LOG_PRINT(F("Free Arduino Memory in bytes (startup): "));
+      LOG_PRINT_LN(freeRam());
     #endif
   #endif
 
@@ -153,23 +174,39 @@ void setup() {
 
   configuration = Serial.read();
   if (configuration >= 0) {
-    print_message_ln(F("Starting configuration"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Starting configuration"));
+    #else
+      LOG_PRINT_LN(F("Starting configuration"));
+    #endif
     startConfiguration();
 
   }
   else {
-    print_message_ln(F("no configuration"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("no configuration"));
+    #else
+      LOG_PRINT_LN(F("no configuration"));
+    #endif
   }
 
   //_____________________Loading the values for the board__________________________
   if (read_EEPROM(0) != 1) {
     //use default values:
-    print_message_ln(F("No configuration found. Using default values"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("No configuration found. Using default values"));
+    #else
+      LOG_PRINT_LN(F("No configuration found. Using default values"));
+    #endif
     Load_Default_Config();
   }
   else {
     //Read values from EEPROM:
-    print_message_ln(F("Load configuration from EEPROM."));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Load configuration from EEPROM."));
+    #else
+      LOG_PRINT_LN(F("Load configuration from EEPROM."));
+    #endif
     read_EEPROM(1, mac_shield , sizeof(mac_shield));
     read_EEPROM(7, ip_shield , sizeof(ip_shield));
     read_EEPROM(11, gateway , sizeof(gateway));
@@ -187,12 +224,14 @@ void setup() {
 
 
   //________________________Initialising of the board______________________________
-  print_message_ln(F("Try to get IP address..."));
   #ifdef INCREASE_LOG_SPEED
+    print_message_ln(F("Try to get IP address..."));
     print_message_ln(String(F(" MAC address of shield: ")) + mac_to_string(mac_shield));
   #else
-    print_message(F(" MAC address of shield: "));
-    print_message_ln(mac_to_string(mac_shield));
+    LOG_PRINT_LN(F("Try to get IP address..."));
+    LOG_PRINT(F(" MAC address of shield: "));
+    print_mac(mac_shield);
+    LOG_PRINT_LN("");
   #endif
   
   startConnection();
@@ -203,17 +242,17 @@ void setup() {
     #ifdef INCREASE_LOG_SPEED
        print_message_ln(String(F("Visit http:\/\/")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
     #else
-      print_message(F("Visit http:\/\/"));
-      print_message(ip_to_string(ip_shield));
-      print_message_ln(F("/ with your browser to add a name to your devices."));
+      LOG_PRINT(F("Visit http:\/\/"));
+      LOG_PRINT(print_ip(ip_shield));
+      LOG_PRINT_LN(F("/ with your browser to add a name to your devices."));
     #endif
   #else
      #ifdef INCREASE_LOG_SPEED
         print_message_ln(String(F("Visit http://")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
      #else
-        print_message(F("Visit http://"));
-        print_message(ip_to_string(ip_shield));
-        print_message_ln(F("/ with your browser to add a name to your devices."));
+        LOG_PRINT(F("Visit http://"));
+        print_ip(ip_shield);
+        LOG_PRINT_LN(F("/ with your browser to add a name to your devices."));
      #endif
   #endif
 
@@ -221,27 +260,31 @@ void setup() {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Check out http:\/\/")) + SERVER_URL + SERVER_PATH + SERVER_STATS_URI + NetworkName + String(F(" to see your stats!")));
     #else
-      print_message(F("Check out http:\/\/"));
-      print_message(SERVER_URL);
-      print_message(SERVER_PATH);
-      print_message(SERVER_STATS_URI);
-      print_message(NetworkName);
-      print_message_ln(F(" to see your stats!"));
+      LOG_PRINT(F("Check out http:\/\/"));
+      LOG_PRINT(SERVER_URL);
+      LOG_PRINT(SERVER_PATH);
+      LOG_PRINT(SERVER_STATS_URI);
+      LOG_PRINT(NetworkName);
+      LOG_PRINT_LN(F(" to see your stats!"));
     #endif
   #else
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Check out http://")) + SERVER_URL + SERVER_PATH + SERVER_STATS_URI + NetworkName + String(F(" to see your stats!")));
     #else
-      print_message(F("Check out http://"));
-      print_message(SERVER_URL);
-      print_message(SERVER_PATH);
-      print_message(SERVER_STATS_URI);
-      print_message(NetworkName);
-      print_message_ln(F(" to see your stats!"));
+      LOG_PRINT(F("Check out http://"));
+      LOG_PRINT(SERVER_URL);
+      LOG_PRINT(SERVER_PATH);
+      LOG_PRINT(SERVER_STATS_URI);
+      LOG_PRINT(NetworkName);
+      LOG_PRINT_LN(F(" to see your stats!"));
     #endif
   #endif
   
-  print_message_ln(F("Starting server"));
+  #ifdef INCREASE_LOG_SPEED
+    print_message_ln(F("Starting server"));
+  #else
+    LOG_PRINT_LN(F("Starting server"));
+  #endif
   server.begin();
 
 
@@ -250,11 +293,12 @@ void setup() {
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(newline + String(F("Starting loop trough IP range ")) + ip_to_string(start_ip) + String(F(" - ")) + ip_to_string(end_ip));
   #else
-    print_message(newline);
-    print_message(F("Starting loop trough IP range "));
-    print_message(ip_to_string(start_ip));
-    print_message(F(" - "));
-    print_message_ln(ip_to_string(end_ip));
+    LOG_PRINT(newline);
+    LOG_PRINT(F("Starting loop trough IP range "));
+    print_ip(start_ip);
+    LOG_PRINT(F(" - "));
+    print_ip(end_ip);
+    LOG_PRINT_LN("");
   #endif
 }
 
@@ -266,8 +310,8 @@ void loop() {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Free Arduino Memory in bytes (start loop): ")) + freeRam());
     #else
-      print_message(F("Free Arduino Memory in bytes (start loop): "));
-      print_message_ln(freeRam());
+      LOG_PRINT(F("Free Arduino Memory in bytes (start loop): "));
+      LOG_PRINT_LN(freeRam());
     #endif
   #endif
   for (int b = 0; b < 4; b++) {
@@ -284,8 +328,9 @@ void loop() {
             #ifdef INCREASE_LOG_SPEED
               print_message_ln(String(F("Arduino on IP ")) + ip_to_string(currIP));
             #else
-              print_message(F("Arduino on IP "));
-              print_message_ln(ip_to_string(currIP));
+              LOG_PRINT(F("Arduino on IP "));
+              print_ip(currIP);
+              LOG_PRINT_LN("");
             #endif
             
             #ifdef SEND_HARDWARE_TO_SERVER
@@ -302,30 +347,47 @@ void loop() {
               timeDeviceFound = millis();
               if (filterResult == 0) {
                 //"Normal" Device
-                print_message(F("Device")); 
+                #ifdef INCREASE_LOG_SPEED
+                  print_message(F("Device"));
+                #else
+                  LOG_PRINT(F("Device"));
+                #endif
               }
               else {
                 if (filterResult == 2) {
                   //Device is Gateway
-                  print_message(F("Gateway"));
+                  #ifdef INCREASE_LOG_SPEED
+                    print_message(F("Gateway"));
+                  #else
+                    LOG_PRINT(F("Gateway"));
+                  #endif
                 }
                 else if (filterResult == 4) {
                   //Device is DNS-Server
-                  print_message(F("DNS-Server"));
+                  #ifdef INCREASE_LOG_SPEED
+                    print_message(F("DNS-Server"));
+                  #else
+                    LOG_PRINT(F("DNS-Server"));
+                  #endif
                 }
                 else if (filterResult == 6) {
                   //Device is Gateway and also DNS-Server
-                  print_message(F("Gateway and DNS-Server"));
+                  #ifdef INCREASE_LOG_SPEED
+                    print_message(F("Gateway and DNS-Server"));
+                  #else
+                    LOG_PRINT(F("Gateway and DNS-Server"));
+                  #endif
                 }
               }
               //Device name is printed above with print_message()
               #ifdef INCREASE_LOG_SPEED
                 print_message_ln(String(F(" found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
               #else
-                print_message(F(" found on IP "));
-                print_message(ip_to_string(currIP));
-                print_message(F(" MAC: "));
-                print_message_ln(mac_to_string(currMAC));
+                LOG_PRINT(F(" found on IP "));
+                print_ip(currIP);
+                LOG_PRINT(F(" MAC: "));
+                print_mac(currMAC);
+                LOG_PRINT_LN("");
               #endif
               
               if (filterResult == 0) {
@@ -341,8 +403,9 @@ void loop() {
               #ifdef INCREASE_LOG_SPEED
                 print_message_ln(String(F("No (pingable) device on IP ")) + ip_to_string(currIP));
               #else
-                print_message(F("No (pingable) device on IP "));
-                print_message_ln(ip_to_string(currIP));
+                LOG_PRINT(F("No (pingable) device on IP "));
+                print_ip(currIP);
+                LOG_PRINT_LN("");
               #endif
               
               offlineIP[countOfflineDevices][0] = currIP[0];
@@ -353,7 +416,11 @@ void loop() {
               countOfflineDevices++;
               if (countOfflineDevices == MAX_DEVICES_INFO) {
                 //number of max offline devices reached -> send info to server
-                print_message_ln(F("Max offline devices reached. Sending devices to server."));
+                #ifdef INCREASE_LOG_SPEED
+                  print_message_ln(F("Max offline devices reached. Sending devices to server."));
+                #else
+                  LOG_PRINT_LN(F("Max offline devices reached. Sending devices to server."));
+                #endif
                 //"Normal" Device
                 send_info_to_server_troublehandler();
                 countOfflineDevices = 0;
@@ -385,11 +452,15 @@ void loop() {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Free Arduino Memory in bytes (end loop): ")) + freeRam());
     #else
-      print_message(F("Free Arduino Memory in bytes (end loop): "));
-      print_message_ln(freeRam());
+      LOG_PRINT(F("Free Arduino Memory in bytes (end loop): "));
+      LOG_PRINT_LN(freeRam());
     #endif
   #endif
-  print_message_ln(F("Restart loop"));
+  #ifdef INCREASE_LOG_SPEED
+    print_message_ln(F("Restart loop"));
+  #else
+    LOG_PRINT_LN(F("Restart loop"));
+  #endif
   readSubnettingIP();  //Important if Subnet of the board has changed
 }
 
@@ -458,7 +529,11 @@ void GetString(char *buf, int bufsize) {
     //TODO: Change to print_message function
     LOG_PRINT(ch);
     if (ch == '\r') {
-      print_message_ln(newline);
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(newline);
+      #else
+        LOG_PRINT_LN(newline);
+      #endif
       break;
     }
     else if (ch == '\n') {
@@ -512,43 +587,69 @@ void GetMAC(byte *MAC) {
 
 void startConfiguration(void) {
   byte easyConfig;
-
-  print_message_ln(F("Load default configuration (0 = no): "));
+  #ifdef INCREASE_LOG_SPEED
+    print_message_ln(F("Load default configuration (0 = no): "));
+  #else
+    LOG_PRINT_LN(F("Load default configuration (0 = no): "));
+  #endif
   if (GetNumber() == 0) {
-    print_message_ln(F("Easy configuration? (0 = no): "));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Easy configuration? (0 = no): "));
+    #else
+      LOG_PRINT_LN(F("Easy configuration? (0 = no): "));
+    #endif
     easyConfig = GetNumber();
-
-    print_message_ln(F("MAC Board, format \"00:00:00:00:00:00\": "));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("MAC Board, format \"00:00:00:00:00:00\": "));
+    #else
+      LOG_PRINT_LN(F("MAC Board, format \"00:00:00:00:00:00\": "));
+    #endif
     GetMAC(mac_shield);
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(newline + mac_to_string(mac_shield) + newline);
     #else
-      print_message(newline);
-      print_message(mac_to_string(mac_shield));
-      print_message_ln(newline);
+      LOG_PRINT(newline);
+      print_mac(mac_shield);
+      LOG_PRINT_LN(newline);
     #endif
 
     if (easyConfig == 0) {
-      print_message_ln(F("Use DHCP (0 = no): "));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Use DHCP (0 = no): "));
+      #else
+        LOG_PRINT_LN(F("Use DHCP (0 = no): "));
+      #endif
       useDhcp = GetNumber();
       if (useDhcp == 0) {
-        print_message_ln(F("Don't use DHCP"));
+        #ifdef INCREASE_LOG_SPEED
+          print_message_ln(F("Don't use DHCP"));
+        #else
+          LOG_PRINT_LN(F("Don't use DHCP"));
+        #endif
         manualIPConfig();
       }
       else {
-        print_message_ln(F("Use DHCP"));
+        #ifdef INCREASE_LOG_SPEED
+          print_message_ln(F("Use DHCP"));
+        #else
+          LOG_PRINT_LN(F("Use DHCP"));
+        #endif
         tryDHCP();
       }
-
-      print_message_ln(F("Use Subnetting (0 = no): "));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Use Subnetting (0 = no): "));
+      #else
+        LOG_PRINT_LN(F("Use Subnetting (0 = no): "));
+      #endif
       useSubnetting = GetNumber();
       if (useSubnetting == 0) {
-        print_message_ln(F("Don't use Subnetting\n"));
         #ifdef INCREASE_LOG_SPEED
+          print_message_ln(F("Don't use Subnetting\n"));
           print_message_ln(String(F("Start IP for scan")) + string_format_ip);
         #else
-          print_message(F("Start IP for scan"));
-          print_message_ln(string_format_ip);
+          LOG_PRINT_LN(F("Don't use Subnetting\n"));
+          LOG_PRINT(F("Start IP for scan"));
+          LOG_PRINT_LN(string_format_ip);
         #endif
         GetIP(start_ip);
         #ifdef INCREASE_LOG_SPEED
@@ -556,44 +657,51 @@ void startConfiguration(void) {
           
           print_message_ln(String(F("End IP for scan")) + string_format_ip);
         #else
-          print_message(newline);
-          print_message(ip_to_string(start_ip));
-          print_message_ln(newline);
+          LOG_PRINT(newline);
+          print_ip(start_ip);
+          LOG_PRINT_LN(newline);
           
-          print_message(F("End IP for scan"));
-          print_message_ln(string_format_ip);
+          LOG_PRINT(F("End IP for scan"));
+          LOG_PRINT_LN(string_format_ip);
         #endif
 
         GetIP(end_ip);
         #ifdef INCREASE_LOG_SPEED
           print_message_ln(newline + ip_to_string(end_ip) + newline);
         #else
-          print_message(newline);
-          print_message(ip_to_string(end_ip));
-          print_message_ln(newline);
+          LOG_PRINT(newline);
+          print_ip(end_ip);
+          LOG_PRINT_LN(newline);
         #endif
       }
       else {
-        print_message_ln(F("Use Subnetting\n"));
+        #ifdef INCREASE_LOG_SPEED
+          print_message_ln(F("Use Subnetting\n"));
+        #else
+          LOG_PRINT_LN(F("Use Subnetting\n"));
+        #endif
       }
-
-      print_message_ln(F("Number of ping-requests: "));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Number of ping-requests: "));
+      #else
+        LOG_PRINT_LN(F("Number of ping-requests: "));
+      #endif
       pingrequest = GetNumber();
       #ifdef INCREASE_LOG_SPEED
         print_message_ln(String(F("Number of ping-requests: ")) + pingrequest);
+        print_message_ln(F("Number of server retries: "));
       #else
-        print_message(F("Number of ping-requests: "));
-        LOG_PRINT_LN(pingrequest);  //TODO: Change to print_message function
+        LOG_PRINT(F("Number of ping-requests: "));
+        LOG_PRINT_LN(pingrequest);
+        LOG_PRINT_LN(F("Number of server retries: "));
       #endif
 
-
-      print_message_ln(F("Number of server retries: "));
       retryHost = GetNumber();
       #ifdef INCREASE_LOG_SPEED
         print_message_ln(String(F("Number of server retries: ")) + retryHost);
       #else
-        print_message(F("Number of server retries: "));
-        LOG_PRINT_LN(retryHost);  //TODO: Change to print_message function
+        LOG_PRINT(F("Number of server retries: "));
+        LOG_PRINT_LN(retryHost);
       #endif
       
     }
@@ -603,16 +711,31 @@ void startConfiguration(void) {
       pingrequest = 1;
       retryHost = 2;
     }
-
-    print_message_ln(F("Register Arduino online? (0 = no): "));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Register Arduino online? (0 = no): "));
+    #else
+      LOG_PRINT_LN(F("Register Arduino online? (0 = no): "));
+    #endif
     if (GetNumber() == 0) {
-      print_message_ln(F("Network Name (5 chars): "));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Network Name (5 chars): "));
+      #else
+        LOG_PRINT_LN(F("Network Name (5 chars): "));
+      #endif
       GetString(NetworkName, sizeof(NetworkName));
-      print_message_ln(NetworkName);
-
-      print_message_ln(F("Network Password (6 chars): "));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(NetworkName);
+        print_message_ln(F("Network Password (6 chars): "));
+      #else
+        LOG_PRINT_LN(NetworkName);
+        LOG_PRINT_LN(F("Network Password (6 chars): "));
+      #endif
       GetString(NetworkPwd, sizeof(NetworkPwd));
-      print_message_ln(NetworkPwd);
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(NetworkPwd);
+      #else
+        LOG_PRINT_LN(NetworkPwd);
+      #endif
     }
     else {
       getNetworkName();
@@ -635,15 +758,23 @@ void startConfiguration(void) {
     write_EEPROM(45, NetworkPwd , sizeof(NetworkPwd));
 
     write_EEPROM(0, 1);
-
-    print_message_ln(F("\nAll values have been stored!"));
-    print_message_ln(F("Configuration finished\n"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("\nAll values have been stored!"));
+      print_message_ln(F("Configuration finished\n"));
+    #else
+      LOG_PRINT_LN(F("\nAll values have been stored!"));
+      LOG_PRINT_LN(F("Configuration finished\n"));
+    #endif
 
   }
   else {
     //Delete settings and set configured = 0 in EEPROM
     write_EEPROM(0, 0);
-    print_message_ln(F("Default configuration loaded\n"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Default configuration loaded\n"));
+    #else
+      LOG_PRINT_LN(F("Default configuration loaded\n"));
+    #endif
   }
 }
 
@@ -651,84 +782,109 @@ void manualIPConfig(void) {
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(String(F("IP Board")) + string_format_ip);
   #else
-    print_message(F("IP Board"));
-    print_message_ln(string_format_ip);
+    LOG_PRINT(F("IP Board"));
+    LOG_PRINT_LN(string_format_ip);
   #endif
   GetIP(ip_shield);
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(newline + ip_to_string(ip_shield) + newline);
   #else
-    print_message(newline);
-    print_message(ip_to_string(ip_shield));
-    print_message_ln(newline);
+    LOG_PRINT(newline);
+    print_ip(ip_shield);
+    LOG_PRINT_LN(newline);
   #endif
 
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(String(F("IP Gateway")) + string_format_ip);
   #else
-     print_message(F("IP Gateway"));
-     print_message_ln(string_format_ip);
+     LOG_PRINT(F("IP Gateway"));
+     LOG_PRINT_LN(string_format_ip);
   #endif
   GetIP(gateway);
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(newline + ip_to_string(gateway) + newline);
   #else
-    print_message(newline);
-    print_message(ip_to_string(gateway));
-    print_message_ln(newline);
+    LOG_PRINT(newline);
+    print_ip(gateway);
+    LOG_PRINT_LN(newline);
   #endif
 
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(String(F("Subnetmask")) + string_format_ip);
   #else
-    print_message(F("Subnetmask"));
-    print_message_ln(string_format_ip);
+    LOG_PRINT(F("Subnetmask"));
+    LOG_PRINT_LN(string_format_ip);
   #endif
   GetIP(subnet);
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(newline + ip_to_string(subnet) + newline);
   #else
-    print_message(newline);
-    print_message(ip_to_string(subnet));
-    print_message_ln(newline);
+    LOG_PRINT(newline);
+    print_ip(subnet);
+    LOG_PRINT_LN(newline);
   #endif
 
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(String(F("IP DNS-Server")) + string_format_ip);
   #else
-    print_message(F("IP DNS-Server"));
-    print_message_ln(string_format_ip);
+    LOG_PRINT(F("IP DNS-Server"));
+    LOG_PRINT_LN(string_format_ip);
   #endif
   GetIP(dnsSrv);
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(newline + ip_to_string(dnsSrv) + newline);
   #else
-    print_message(newline);
-    print_message(ip_to_string(dnsSrv));
-    print_message_ln(newline);
+    LOG_PRINT(newline);
+    print_ip(dnsSrv);
+    LOG_PRINT_LN(newline);
   #endif
 }
 
 
 //_________________________________IP functions______________________________________
-String ip_to_string(byte ip[4]) {
-    return (ip[0] + String(".") + ip[1] + String(".") + ip[2] + String(".") + ip[3]);
-}
+#ifdef INCREASE_LOG_SPEED
+  String ip_to_string(byte ip[4]) {
+      return (ip[0] + String(".") + ip[1] + String(".") + ip[2] + String(".") + ip[3]);
+  }
+  
+  String mac_to_string(byte mac[6]) {
+    return (String(mac[0], HEX) + String(":") + String(mac[1], HEX) + String(":") + String(mac[2], HEX) + String(":") + String(mac[3], HEX) + String(":") + String(mac[4], HEX) + String(":") + String(mac[5], HEX));
+  }
 
-String mac_to_string(byte mac[6]) {
-  return (String(mac[0], HEX) + String(":") + String(mac[1], HEX) + String(":") + String(mac[2], HEX) + String(":") + String(mac[3], HEX) + String(":") + String(mac[4], HEX) + String(":") + String(mac[5], HEX));
-}
+  void print_message(String message) {
+    LOG_PRINT(message);
+        //Serial.println(message);
+  }
 
-void print_message(String message) {
-  LOG_PRINT(message);
-      //Serial.println(message);
-}
+  void print_message_ln(String message) {
+    LOG_PRINT_LN(message);
+        //Serial.println(message);
+  }
+#else
+  void print_ip(byte* ip) {
+    LOG_PRINT(ip[0]);
+    LOG_PRINT(".");
+    LOG_PRINT(ip[1]);
+    LOG_PRINT(".");
+    LOG_PRINT(ip[2]);
+    LOG_PRINT(".");
+    LOG_PRINT(ip[3]);
+  }
 
-void print_message_ln(String message) {
-  LOG_PRINT_LN(message);
-      //Serial.println(message);
-}
-
+  void print_mac(byte* mac) {
+    LOG_PRINT(mac[0], HEX);
+    LOG_PRINT(":");
+    LOG_PRINT(mac[1], HEX);
+    LOG_PRINT(":");
+    LOG_PRINT(mac[2], HEX);
+    LOG_PRINT(":");
+    LOG_PRINT(mac[3], HEX);
+    LOG_PRINT(":");
+    LOG_PRINT(mac[4], HEX);
+    LOG_PRINT(":");
+    LOG_PRINT(mac[5], HEX);
+  }
+#endif
 
 
 void readSubnettingIP(void) {
@@ -748,16 +904,29 @@ void readSubnettingIP(void) {
 }
 
 char tryDHCP(void) {
-  print_message_ln(F("Testing DHCP..."));
+  #ifdef INCREASE_LOG_SPEED
+    print_message_ln(F("Testing DHCP..."));
+  #else
+    LOG_PRINT_LN(F("Testing DHCP..."));
+  #endif
   if (Ethernet.begin(mac_shield) == 0) {
-    print_message_ln(F("  DHCP failed!"));
-    print_message_ln(F("You have to configurate the connection settings manual:"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("  DHCP failed!"));
+      print_message_ln(F("You have to configurate the connection settings manual:"));
+    #else
+      LOG_PRINT_LN(F("  DHCP failed!"));
+      LOG_PRINT_LN(F("You have to configurate the connection settings manual:"));
+    #endif
     useDhcp = 0;
     manualIPConfig();
   }
   else {
     //DHCP possible
-    print_message_ln(F("DHCP successful"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("DHCP successful"));
+    #else
+      LOG_PRINT_LN(F("DHCP successful"));
+    #endif
     useDhcp = 1;
     readConnectionValues();
   }
@@ -816,8 +985,8 @@ char pingDevice(void) {
       #ifdef INCREASE_LOG_SPEED
         print_message_ln(String(F("Free Arduino Memory in bytes (device found): ")) + freeRam());
       #else
-        print_message(F("Free Arduino Memory in bytes (device found): "));
-        print_message_ln(freeRam());
+        LOG_PRINT(F("Free Arduino Memory in bytes (device found): "));
+        LOG_PRINT_LN(freeRam());
       #endif
     #endif
     for (int mac = 0; mac < 6; mac++) {
@@ -911,18 +1080,22 @@ void getNetworkName(void) {
       #ifdef INCREASE_LOG_SPEED
         print_message_ln(String(F("\n\n---\nYour account data:\n")) + NetworkName + newline + NetworkPwd + String(F("\n---\ndisconnecting.")));
       #else
-        print_message(F("\n\n---\nYour account data:\n"));
-        print_message(NetworkName);
-        print_message(newline);
-        print_message(NetworkPwd);
-        print_message_ln(F("\n---\ndisconnecting."));
+        LOG_PRINT(F("\n\n---\nYour account data:\n"));
+        LOG_PRINT(NetworkName);
+        LOG_PRINT(newline);
+        LOG_PRINT(NetworkPwd);
+        LOG_PRINT_LN(F("\n---\ndisconnecting."));
       #endif
       client.stop();
     }
   }
   else {
     //Connection to HTTP-Server failed
-    print_message_ln(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
+    #else
+      LOG_PRINT_LN(F("Can't connect to HTTP-Server. Please try it later or restart the board."));
+    #endif
     while (1) {
     }
   }
@@ -954,8 +1127,8 @@ char connect_getNetworkName(EthernetClient &client) {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Connected to HTTP Server")) + SERVER_URL);
     #else
-      print_message(F("Connected to HTTP Server"));
-      print_message_ln(SERVER_URL);
+      LOG_PRINT(F("Connected to HTTP Server"));
+      LOG_PRINT_LN(SERVER_URL);
     #endif
 
     // Make a HTTP request:
@@ -969,19 +1142,32 @@ char connect_getNetworkName(EthernetClient &client) {
     client.println(VersionNR);
     client.println(F("Connection: close"));
     client.println(); // Important!
-
-    print_message_ln(String(client.status()));    //Todo: String neccessary?
+    
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(String(client.status()));    //Todo: String neccessary?
+    #else
+      LOG_PRINT_LN(client.status());
+    #endif
     //client.stop();
     return 1;
 
   }
   else {
-    print_message_ln(F("NOT connected to HTTP Server\n"));
-    print_message_ln(String(client.status()));    //Todo: String neccessary?
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("NOT connected to HTTP Server\n"));
+      print_message_ln(String(client.status()));    //Todo: String neccessary?
+    #else
+      LOG_PRINT_LN(F("NOT connected to HTTP Server\n"));
+      LOG_PRINT_LN(client.status());    //Todo: String neccessary?
+    #endif
     client.stop();
     if (tries_getNetworkName < 2) {
       tries_getNetworkName++;
-      print_message_ln(F("Retry to connect..."));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Retry to connect..."));
+      #else
+        LOG_PRINT_LN(F("Retry to connect..."));
+      #endif
       connect_getNetworkName(client);
     }
     else {
@@ -999,8 +1185,13 @@ void startConnection(void) {
   else {
     if (Ethernet.begin(mac_shield) == 0) {
       if (renewDHCP() == 0) {
-        print_message_ln(F("DHCP failed!"));
-        print_message_ln(F("Trying to reconnect in 20 seconds..."));
+        #ifdef INCREASE_LOG_SPEED
+          print_message_ln(F("DHCP failed!"));
+          print_message_ln(F("Trying to reconnect in 20 seconds..."));
+        #else
+          LOG_PRINT_LN(F("DHCP failed!"));
+          LOG_PRINT_LN(F("Trying to reconnect in 20 seconds..."));
+        #endif
         delay(20000);
         startConnection();
       }
@@ -1016,12 +1207,20 @@ char renewDHCP(void) {
   int result = Ethernet.maintain();
   delay(150);
   if (result == 2) {
-    print_message_ln(F("DHCP renewed"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("DHCP renewed"));
+    #else
+      LOG_PRINT_LN(F("DHCP renewed"));
+    #endif
     readConnectionValues();
     return 1;
   }
   else if (result == 4) {
-    print_message_ln(F("DHCP rebind"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("DHCP rebind"));
+    #else
+      LOG_PRINT_LN(F("DHCP rebind"));
+    #endif
     return 1;
   }
   else {
@@ -1042,20 +1241,20 @@ void printConnectionDetails(void) {
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(String(F(" Address assigned?\n ")) + ip_to_string(ip_shield) + String("\n ") + ip_to_string(subnet) + String("\n ") + ip_to_string(gateway) + String(F("\nSetup complete\n")));
   #else
-    print_message(F(" Address assigned?\n "));
-    print_message(ip_to_string(ip_shield));
-    print_message("\n ");
-    print_message(ip_to_string(subnet));
-    print_message("\n ");
-    print_message(ip_to_string(gateway));
-    print_message_ln(F("\nSetup complete\n"));
+    LOG_PRINT(F(" Address assigned?\n "));
+    print_ip(ip_shield);
+    LOG_PRINT("\n ");
+    print_ip(subnet);
+    LOG_PRINT("\n ");
+    print_ip(gateway);
+    LOG_PRINT_LN(F("\nSetup complete\n"));
   #endif
   #ifdef SHOW_MEMORY
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Free Arduino Memory in bytes (setup complete): ")) + freeRam());
     #else
-      print_message(F("Free Arduino Memory in bytes (setup complete): "));
-      print_message_ln(freeRam());
+      LOG_PRINT(F("Free Arduino Memory in bytes (setup complete): "));
+      LOG_PRINT_LN(freeRam());
     #endif
   #endif
 }
@@ -1067,17 +1266,29 @@ void send_info_to_server_troublehandler(void) {
 byte send_info_to_server_check_troubles(void) {
   if (send_info_to_server() == 0) {
     //Connection to HTTP-Server failed -> ping gateway
-    print_message_ln(F("Connection to HTTP-Server failed"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("Connection to HTTP-Server failed"));
+    #else
+      LOG_PRINT_LN(F("Connection to HTTP-Server failed"));
+    #endif
     ICMPEchoReply echoReplyGateway = ping(gateway, pingrequest);
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
-      print_message_ln(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+      #else
+        LOG_PRINT_LN(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+      #endif
       ServerListenLoop(1); //30seconds
       return 0;
     }
     else {
       // Gateway also not available -> Connection problem -> Try to reconnect
-      print_message_ln(F("Connection error! Trying to start new connection..."));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Connection error! Trying to start new connection..."));
+      #else
+        LOG_PRINT_LN(F("Connection error! Trying to start new connection..."));
+      #endif
       startConnection();
       printConnectionDetails();
       //Reconnected. Try again to send info
@@ -1099,8 +1310,8 @@ char send_info_to_server(void) {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Free Arduino Memory in bytes (send info): ")) + freeRam());
     #else
-      print_message(F("Free Arduino Memory in bytes (send info): "));
-      print_message_ln(freeRam());
+      LOG_PRINT(F("Free Arduino Memory in bytes (send info): "));
+      LOG_PRINT_LN(freeRam());
     #endif
   #endif
   if (client.connect(SERVER_URL, 80) == 1) {
@@ -1110,10 +1321,10 @@ char send_info_to_server(void) {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Connected to HTTP Server ")) + SERVER_URL + SERVER_PATH + SERVER_ADD_URI);
     #else
-      print_message(F("Connected to HTTP Server "));
-      print_message(SERVER_URL);
-      print_message(SERVER_PATH);
-      print_message_ln(SERVER_ADD_URI);
+      LOG_PRINT(F("Connected to HTTP Server "));
+      LOG_PRINT(SERVER_URL);
+      LOG_PRINT(SERVER_PATH);
+      LOG_PRINT_LN(SERVER_ADD_URI);
     #endif
     
     // Make a HTTP request:
@@ -1138,7 +1349,17 @@ char send_info_to_server(void) {
     client.print(F("\",\"online\":["));
     if (countOfflineDevices != MAX_DEVICES_INFO) {
       client.print(F("{\"ip\":\""));
-      client.print(ip_to_string(currIP));
+      #ifdef INCREASE_LOG_SPEED
+        client.print(ip_to_string(currIP));
+      #else
+        client.print(currIP[0]);
+        client.print(".");
+        client.print(currIP[1]);
+        client.print(".");
+        client.print(currIP[2]);
+        client.print(".");
+        client.print(currIP[3]);
+      #endif
       client.print(F("\",\"t\":"));
       
       if ((millis() - timeDeviceFound) < 0) {
@@ -1151,7 +1372,21 @@ char send_info_to_server(void) {
       client.print(timeDifference);
       
       client.print(F(",\"mac\":\""));
-      client.print(mac_to_string(currMAC)); //TODO: Check TF 2016-02-09
+      #ifdef INCREASE_LOG_SPEED
+        client.print(mac_to_string(currMAC)); //TODO: Check TF 2016-02-09
+      #else
+        client.print(currMAC[0], HEX);
+        client.print(":");
+        client.print(currMAC[1], HEX);
+        client.print(":");
+        client.print(currMAC[2], HEX);
+        client.print(":");
+        client.print(currMAC[3], HEX);
+        client.print(":");
+        client.print(currMAC[4], HEX);
+        client.print(":");
+        client.print(currMAC[5], HEX);
+      #endif
       client.print("\"}");
     }
     client.print("],");
@@ -1163,7 +1398,17 @@ char send_info_to_server(void) {
         client.print(",");
       }
       client.print(F("{\"ip\":\""));
-      client.print(ip_to_string(offlineIP[tmpSendOffline]));
+      #ifdef INCREASE_LOG_SPEED
+        client.print(ip_to_string(offlineIP[tmpSendOffline]));
+      #else
+        client.print(offlineIP[tmpSendOffline][0]);
+        client.print(".");
+        client.print(offlineIP[tmpSendOffline][1]);
+        client.print(".");
+        client.print(offlineIP[tmpSendOffline][2]);
+        client.print(".");
+        client.print(offlineIP[tmpSendOffline][3]);
+      #endif
       client.print(F("\",\"t\":"));
       
       if ((millis() - timeScanned[tmpSendOffline]) < 0) {
@@ -1184,7 +1429,7 @@ char send_info_to_server(void) {
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Ethernet Client status: ")) + client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
     #else
-      print_message(F("Ethernet Client status: "));
+      LOG_PRINT(F("Ethernet Client status: "));
       LOG_PRINT_LN(client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!    //TODO: Change to print_message function
     #endif    
     
@@ -1210,12 +1455,21 @@ char send_info_to_server(void) {
     return 1;
   }
   else {
-    print_message_ln(F("NOT connected to HTTP Server\n\n"));
-    print_message_ln(String(client.status()));    //TODO: String neccessary?
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("NOT connected to HTTP Server\n\n"));
+      print_message_ln(String(client.status()));    //TODO: String neccessary?
+    #else
+      LOG_PRINT_LN(F("NOT connected to HTTP Server\n\n"));
+      LOG_PRINT_LN(client.status());
+    #endif
     client.stop();
     if (tries < retryHost) {
       tries++;
-      print_message_ln(F("Retry to connect..."));
+      #ifdef INCREASE_LOG_SPEED
+        print_message_ln(F("Retry to connect..."));
+      #else
+        LOG_PRINT_LN(F("Retry to connect..."));
+      #endif
       ServerListenLoop(4);
       send_info_to_server();  //Todo: Maybe change this to save memory. Also we could get problems with the recursive function!
     }
@@ -1241,7 +1495,11 @@ void ServerListen(void) {
   // listen for incoming clients
   EthernetClient serverClient = server.available();
   if (serverClient) {
-    print_message_ln(F("new client"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("new client"));
+    #else
+      LOG_PRINT_LN(F("new client"));
+    #endif
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (serverClient.connected()) {
@@ -1276,8 +1534,8 @@ void ServerListen(void) {
                  #ifdef INCREASE_LOG_SPEED
                    print_message_ln(String(F("requested logfile: ")) + tmpfileName);
                  #else
-                   print_message(F("requested logfile: "));
-                   print_message_ln(tmpfileName);
+                   LOG_PRINT(F("requested logfile: "));
+                   LOG_PRINT_LN(tmpfileName);
                  #endif
                  c = serverClient.read();
                }
@@ -1311,7 +1569,21 @@ void ServerListen(void) {
           serverClient.print(F("\",\"network_password\": \""));
           serverClient.print(NetworkPwd);
           serverClient.print(F("\",\"mac\": \""));
-          serverClient.print(mac_to_string(MACClient));
+          #ifdef INCREASE_LOG_SPEED
+            serverClient.print(mac_to_string(MACClient));
+          #else
+            serverClient.print(MACClient[0], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[1], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[2], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[3], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[4], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[5], HEX);
+          #endif
           serverClient.println(F("\",\"name\": \"' + $('#name').val() + '\"}';"));
           serverClient.println(F("$.ajax({type: 'POST',"));
           
@@ -1349,14 +1621,42 @@ void ServerListen(void) {
           serverClient.print(F(SERVER_DEVICE_STATS_URI1));
           serverClient.print(NetworkName);
           serverClient.print(F(SERVER_DEVICE_STATS_URI2));
-          serverClient.print(mac_to_string(MACClient));
+          #ifdef INCREASE_LOG_SPEED
+            serverClient.print(mac_to_string(MACClient));
+          #else
+            serverClient.print(MACClient[0], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[1], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[2], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[3], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[4], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[5], HEX);
+          #endif
           serverClient.print(F(SERVER_DEVICE_STATS_URI3));
           serverClient.println(F("'>Go to the device statistic</a><br><br>"));
           
           serverClient.print(F("</div><div><br><br><p>Enter a name for the device that is vistiting this page:<br><input id='name' type='text'></p><p>Network Name:<br><input type='text' value='"));
           serverClient.print(NetworkName);
           serverClient.print(F("' readonly></p><p>MAC of Device:<br><input type='text' value='"));
-          serverClient.print(mac_to_string(MACClient));
+          #ifdef INCREASE_LOG_SPEED
+            serverClient.print(mac_to_string(MACClient));
+          #else
+            serverClient.print(MACClient[0], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[1], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[2], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[3], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[4], HEX);
+            serverClient.print(":");
+            serverClient.print(MACClient[5], HEX);
+          #endif
           serverClient.println(F("' readonly>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F(" <a href='http:\/\/"));
@@ -1446,7 +1746,11 @@ void ServerListen(void) {
     delay(20);
     // close the connection:
     serverClient.stop();
-    print_message_ln(F("client disconnected"));
+    #ifdef INCREASE_LOG_SPEED
+      print_message_ln(F("client disconnected"));
+    #else
+      LOG_PRINT_LN(F("client disconnected"));
+    #endif
   }
 }
 
