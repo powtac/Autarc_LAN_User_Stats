@@ -85,10 +85,8 @@ byte tries = 0;
 byte tries_getNetworkName = 0;
 byte countOfflineDevices = 0;
 
-//char serverURL[] = "lan-user.danit.de";
-char serverURL[] = "kolchose.org";
-//char serverPath[] = "";
-char serverPath[] = "/autarc_lan_user_stats/03/\?";
+#define SERVER_URL "kolchose.org"
+#define SERVER_PATH "/autarc_lan_user_stats/03/\?"
 #define SERVER_ADD_URI "/ping_result/add"
 #define SERVER_STATS_URI "/stats/network/"
 #define SERVER_DEVICE_STATS_URI1 "/network/"
@@ -197,9 +195,9 @@ void setup() {
   #endif
 
   #ifdef WITH_ESCAPE_SEQUENCE
-    print_message(String(F("Check out http:\/\/")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats!")));
+    print_message(String(F("Check out http:\/\/")) + SERVER_URL + SERVER_PATH + SERVER_STATS_URI + NetworkName + String(F(" to see your stats!")));
   #else
-    print_message(String(F("Check out http://")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats!")));
+    print_message(String(F("Check out http://")) + SERVER_URL + SERVER_PATH + SERVER_STATS_URI + NetworkName + String(F(" to see your stats!")));
   #endif
   
   print_message(F("Starting server"));
@@ -778,16 +776,16 @@ char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2)
 }
 
 char connect_getNetworkName(EthernetClient &client) {
-  if (client.connect(serverURL, 80) == 1) {
-    print_message(String(F("Connected to HTTP Server")) + serverURL);
+  if (client.connect(SERVER_URL, 80) == 1) {
+    print_message(String(F("Connected to HTTP Server")) + SERVER_URL);
 
     // Make a HTTP request:
     client.print(F("GET "));
-    client.print(serverPath);
+    client.print(SERVER_PATH);
     client.print(F(SERVER_GET_ID_URI)); // Just a dummy call?
     client.println(F(" HTTP/1.1"));
     client.print(F("Host: "));
-    client.println(serverURL);
+    client.println(SERVER_URL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
     client.println(F("Connection: close"));
@@ -906,20 +904,20 @@ char send_info_to_server(void) {
   #ifdef SHOW_MEMORY
     print_message(String(F("Free Arduino Memory in bytes (send info): ")) + freeRam());
   #endif
-  if (client.connect(serverURL, 80) == 1) {
+  if (client.connect(SERVER_URL, 80) == 1) {
     tries = 0;
     unsigned long timeDifference;
     
-    print_message(String(F("Connected to HTTP Server ")) + serverURL + serverPath + SERVER_ADD_URI);
+    print_message(String(F("Connected to HTTP Server ")) + SERVER_URL + SERVER_PATH + SERVER_ADD_URI);
     
     // Make a HTTP request:
     client.print(F("POST "));
-    client.print(serverPath);
-    client.print(F(SERVER_ADD_URI));
+    client.print(SERVER_PATH);
+    client.print(SERVER_ADD_URI);
     client.println(F(" HTTP/1.1"));
     //client.println("/ HTTP/1.1");
     client.print(F("Host: "));
-    client.println(serverURL);
+    client.println(SERVER_URL);
     client.print(F("User-Agent: Autarc_LAN_User_Stats "));
     client.println(VersionNR);
     client.println(F("Connection: close"));
@@ -929,29 +927,13 @@ char send_info_to_server(void) {
     client.println("300"); //TODO: Maybe calculate this later..?
     client.println(); // Important!
 
-    client.print("{");
-
-    client.print(F("\"network_name\":"));
-    client.print("\"");
+    client.print(F("{\"network_name\":\""));
     client.print(NetworkName);
-    client.print("\",");
- 
-    client.print(F("\"online\":"));
-    client.print("[");
+    client.print(F("\",\"online\":["));
     if (countOfflineDevices != MAX_DEVICES_INFO) {
-      client.print("{");
-      client.print(F("\"ip\":"));
-      client.print("\"");
-      client.print(currIP[0]);
-      client.print(".");
-      client.print(currIP[1]);
-      client.print(".");
-      client.print(currIP[2]);
-      client.print(".");
-      client.print(currIP[3]);
-      client.print("\",");
-      
-      client.print(F("\"t\":"));
+      client.print(F("{\"ip\":\""));
+      client.print(ip_to_string(currIP));
+      client.print(F("\",\"t\":"));
       
       if ((millis() - timeDeviceFound) < 0) {
         //consider overflow of time since arduino runs (afer ~50 days)
@@ -962,46 +944,21 @@ char send_info_to_server(void) {
       }
       client.print(timeDifference);
       
-      client.print(",");
-      
-      client.print(F("\"mac\":"));
-      client.print("\"");
-      client.print(currMAC[0], HEX);
-      client.print(":");
-      client.print(currMAC[1], HEX);
-      client.print(":");
-      client.print(currMAC[2], HEX);
-      client.print(":");
-      client.print(currMAC[3], HEX);
-      client.print(":");
-      client.print(currMAC[4], HEX);
-      client.print(":");
-      client.print(currMAC[5], HEX);
-      client.print("\"");
-            
-      client.print("}");
+      client.print(F(",\"mac\":\""));
+      client.print(mac_to_string(currMAC)); //TODO: Check TF 2016-02-09
+      client.print("\"}");
     }
     client.print("],");
     
-    client.print(F("\"offline\":"));
-    client.print("[");
+    client.print(F("\"offline\":["));
     byte tmpSendOffline;
     for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
       if (tmpSendOffline != 0) {
         client.print(",");
       }
-      client.print("{");
-      client.print(F("\"ip\":"));
-      client.print("\"");
-      client.print(offlineIP[tmpSendOffline][0]);
-      client.print(".");
-      client.print(offlineIP[tmpSendOffline][1]);
-      client.print(".");
-      client.print(offlineIP[tmpSendOffline][2]);
-      client.print(".");
-      client.print(offlineIP[tmpSendOffline][3]);
-      client.print("\",");
-      client.print(F("\"t\":"));
+      client.print(F("{\"ip\":\""));
+      client.print(ip_to_string(offlineIP[tmpSendOffline]));
+      client.print(F("\",\"t\":"));
       
       if ((millis() - timeScanned[tmpSendOffline]) < 0) {
         //consider overflow of time since arduino runs (afer ~50 days)
@@ -1125,71 +1082,43 @@ void ServerListen(void) {
           serverClient.println(F("Content-Type: text/html"));
           serverClient.println(F("Connection: close"));  // the connection will be closed after completion of the response
           serverClient.println(); // Important!
-          serverClient.println(F("<!DOCTYPE HTML>"));
-          serverClient.println(F("<html>"));
-          serverClient.println(F("<head>"));
-          serverClient.println(F("	<title>Autarc-Lan-User-Stat - Enter device name</title>"));
-          serverClient.println(F("	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
+          serverClient.println(F("<!DOCTYPE HTML><html><head><title>Autarc-Lan-User-Stat - Enter device name</title><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />"));
 
           #ifdef WITH_ESCAPE_SEQUENCE
-            serverClient.print(F("  <script src='http:\/\/"));
+            serverClient.println(F("  <script src='http:\/\/code.jquery.com/jquery-1.10.1.min.js'></script>"));
           #else
-            serverClient.print(F("  <script src='http://"));
+            serverClient.println(F("  <script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>"));
           #endif
-          serverClient.println(F("code.jquery.com/jquery-1.10.1.min.js'></script>"));
-          serverClient.println(F("<script type='text/javascript'>"));
-          serverClient.println(F("$(document).ready(function() {"));
-          serverClient.println(F("$('#go').on('click', function() {"));
-          serverClient.print(F("var formData = '{\"network_name\": \""));
+          serverClient.print(F("<script type='text/javascript'>$(document).ready(function() {$('#go').on('click', function() {var formData = '{\"network_name\": \""));
           serverClient.print(NetworkName);
           serverClient.print(F("\",\"network_password\": \""));
           serverClient.print(NetworkPwd);
           serverClient.print(F("\",\"mac\": \""));
-          serverClient.print(MACClient[0], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[1], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[2], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[3], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[4], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[5], HEX);
+          serverClient.print(mac_to_string(MACClient));
           serverClient.println(F("\",\"name\": \"' + $('#name').val() + '\"}';"));
-          serverClient.println(F("$.ajax({"));
-          serverClient.println(F("  type: 'POST',"));
+          serverClient.println(F("$.ajax({type: 'POST',"));
           
           #ifdef WITH_ESCAPE_SEQUENCE
-            serverClient.print(F("  url: 'http:\/\/"));
+            serverClient.print(F("url: 'http:\/\/"));
           #else
-            serverClient.print(F("  url: 'http://"));
+            serverClient.print(F("url: 'http://"));
           #endif
           
-          serverClient.print(serverURL);
-          serverClient.print(serverPath);
+          serverClient.print(SERVER_URL);
+          serverClient.print(SERVER_PATH);
           serverClient.print(F(SERVER_SET_NAME_URI));
-          serverClient.println(F("',"));
-          serverClient.println(F("  data: formData,"));
-          serverClient.println(F("  success: function(){},"));
-          serverClient.println(F("  dataType: 'json'"));
+          serverClient.println(F("', data: formData, success: function(){}, dataType: 'json'"));
           //Todo: Check, if Accept Header was changed at Stat-Server
           //serverClient.println(F("  dataType: 'json',"));
           //serverClient.println(F("  contentType: 'application/json; charset=UTF-8'"));
-          serverClient.println(F("});"));
-          serverClient.println(F("});"));
-          serverClient.println(F("})"));
-          serverClient.println(F("</script>"));          
-          serverClient.println(F("</head>"));
-          serverClient.println(F("<body>"));
-          serverClient.println(F("	<div>"));
+          serverClient.println(F("});});})</script></head><body><div>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("		<a href='http:\/\/"));
           #else
             serverClient.print(F("		<a href='http://"));
           #endif
-          serverClient.print(serverURL);
-          serverClient.print(serverPath);
+          serverClient.print(SERVER_URL);
+          serverClient.print(SERVER_PATH);
           serverClient.print(F(SERVER_STATS_URI));
           serverClient.print(NetworkName);
           serverClient.println(F("'>Go to the network statistic</a><br><br>"));
@@ -1198,44 +1127,19 @@ void ServerListen(void) {
           #else
             serverClient.print(F("    <a href='http://"));
           #endif
-          serverClient.print(serverURL);
-          serverClient.print(serverPath);
+          serverClient.print(SERVER_URL);
+          serverClient.print(SERVER_PATH);
           serverClient.print(F(SERVER_DEVICE_STATS_URI1));
           serverClient.print(NetworkName);
           serverClient.print(F(SERVER_DEVICE_STATS_URI2));
-          serverClient.print(MACClient[0], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[1], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[2], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[3], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[4], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[5], HEX);
+          serverClient.print(mac_to_string(MACClient));
           serverClient.print(F(SERVER_DEVICE_STATS_URI3));
           serverClient.println(F("'>Go to the device statistic</a><br><br>"));
           
-          serverClient.println(F("	</div>"));
-          serverClient.println(F("	<div>"));
-          serverClient.println(F("		<br /><br />"));
-          serverClient.println(F("			<p>Enter a name for the device that is vistiting this page:<br><input id='name' type='text'></p>"));
-          serverClient.print(F("			<p>Network Name:<br><input type='text' value='"));
+          serverClient.print(F("</div><div><br><br><p>Enter a name for the device that is vistiting this page:<br><input id='name' type='text'></p><p>Network Name:<br><input type='text' value='"));
           serverClient.print(NetworkName);
-          serverClient.println(F("' readonly></p>"));
-          serverClient.print(F("			<p>MAC of Device:<br><input type='text' value='"));
-          serverClient.print(MACClient[0], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[1], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[2], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[3], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[4], HEX);
-          serverClient.print(":");
-          serverClient.print(MACClient[5], HEX);
+          serverClient.print(F("' readonly></p><p>MAC of Device:<br><input type='text' value='"));
+          serverClient.print(mac_to_string(MACClient));
           serverClient.println(F("' readonly>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F(" <a href='http:\/\/"));
@@ -1248,16 +1152,11 @@ void ServerListen(void) {
           serverClient.print(MACClient[1], HEX);
           serverClient.print(":");
           serverClient.print(MACClient[2], HEX);
-          serverClient.println(F("' target='_blank'>Vendor?</a></p>"));
-          serverClient.println(F("			<input type='button' id='go' value='Save device name'></input>"));
-          serverClient.println(F("		</form>"));
-          serverClient.println(F("	</div>"));
+          serverClient.println(F("' target='_blank'>Vendor?</a></p><input type='button' id='go' value='Save device name'></input></form></div>"));
 
           #ifdef LOG_TO_SD
-            serverClient.println(F("  <br>"));
-            serverClient.println(F("  <br>"));
-            serverClient.println(F("  <div>"));
-            serverClient.print(F("    The current log file is <a href=\""));
+            serverClient.println(F("<br><br><div>"));
+            serverClient.print(F("The current log file is <a href=\""));
             serverClient.print(SDfileName[4]);
             serverClient.print(SDfileName[5]);
             serverClient.print(F("\">"));
@@ -1268,38 +1167,33 @@ void ServerListen(void) {
             File fileToShow;
             fileToShow = SD.open(tmpfileName); //Load actual log file
             if (fileToShow) {
-              serverClient.print(F("    The requested log file ("));
+              serverClient.print(F("The requested log file ("));
               serverClient.print(tmpfileName);
-              serverClient.println(F(") contains the following log:"));
-              serverClient.println(F("    <br>"));
-              serverClient.println(F("    <textarea rows='50' cols='100'>"));
+              serverClient.println(F(") contains the following log:<br><textarea rows='50' cols='100'>"));
               while(fileToShow.available())
               {
                 serverClient.write(fileToShow.read());  //send log file to client
               }
               fileToShow.close();
-              serverClient.println(F("    </textarea>"));
+              serverClient.println(F("</textarea>"));
             }
             else {
-              serverClient.print(F("    The requested log file ("));
+              serverClient.print(F("The requested log file ("));
               serverClient.print(tmpfileName);
               serverClient.println(F(") doesn't exist!"));
             }
             
-            serverClient.println(F("  </div><br>"));
-            
-            serverClient.println(F("  <div>"));
-            serverClient.println(F("Other log-files on SD:<br>"));
+            serverClient.println(F("</div><br><div>Other log-files on SD:<br>"));
 
             if (SD.exists("log/")) {
                 //Print all existing log files
                 tmpfileName[4] = '0';
                 tmpfileName[5] = '0';
                 int i;
-                serverClient.println(F("    <ul>"));
+                serverClient.println(F("<ul>"));
                 for (i=0;i<=99;i++) {
                   if (SD.exists(tmpfileName)) {
-                    serverClient.print(F("      <li><a href=\""));
+                    serverClient.print(F("<li><a href=\""));
                     serverClient.print(tmpfileName[4]);
                     serverClient.print(tmpfileName[5]);
                     serverClient.print(F("\">"));
@@ -1308,18 +1202,17 @@ void ServerListen(void) {
                   }
                   set_next_log_filename(tmpfileName);
                 }
-                serverClient.println(F("    </ul>"));
+                serverClient.println(F("</ul>"));
               }
               else {
                 //no log directory
                 serverClient.println(F("No logfiles found"));
               }
 //Todo: Maybe disable SD      
-            serverClient.println(F("  </div>"));
+            serverClient.println(F("</div>"));
           #endif
           
-          serverClient.println(F("</body>"));
-          serverClient.println(F("</html>"));
+          serverClient.println(F("</body></html>"));
           break;
         }
         if (c == '\n') {
