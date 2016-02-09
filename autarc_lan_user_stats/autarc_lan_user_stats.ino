@@ -685,6 +685,8 @@ void getNetworkName(void) {
     char tmpc;
     char startJSON = 0;
     char varNameChar[7];
+    char network_name[13] = "network_name";
+    char network_password[17] = "network_password";
     char startName = 0;
     char startVarValue = 0;
 
@@ -729,13 +731,13 @@ void getNetworkName(void) {
               }
             }
             else {
-              if (compare_CharArray(varNameChar, "network_name", sizeof(varNameChar), sizeof("network_name")) == 1) {
+              if (compare_CharArray(varNameChar, network_name, sizeof(varNameChar), sizeof(network_name)) == 1) {
                 if (i < (sizeof(NetworkName) - 1)) {
                   NetworkName[i] = tmpc;
                   NetworkName[i + 1] = '\0';
                 }
               }
-              else if (compare_CharArray(varNameChar, "network_password", sizeof(varNameChar), sizeof("network_password")) == 1) {
+              else if (compare_CharArray(varNameChar, network_password, sizeof(varNameChar), sizeof(network_password)) == 1) {
                 if (i < (sizeof(NetworkPwd) - 1)) {
                   NetworkPwd[i] = tmpc;
                   NetworkPwd[i + 1] = '\0';
@@ -763,6 +765,7 @@ void getNetworkName(void) {
   }
 }
 
+//TODO: Change function to save memory
 char compare_CharArray(char *char1, char *char2, char sizechar1, char sizechar2) {
   for (byte i = 0; ; i++) {
     if (i >= sizechar1 || i >= sizechar2) {
