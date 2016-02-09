@@ -164,9 +164,12 @@ void setup() {
 
   
   //________________________Configuration of the board______________________________
-  //Todo: Change to print_message_ln() function
-  LOG_PRINT(F("Press any key start configuration"));
-  for (char i = 0; i < 1 and Serial.available() <= 0; i++) {
+  #ifdef INCREASE_LOG_SPEED
+    print_message(F("Press any key start configuration"));
+  #else
+    LOG_PRINT(F("Press any key start configuration"));
+  #endif
+  for (char i = 0; i < 3 and Serial.available() <= 0; i++) {
     delay(1000);
     //Todo: Change to print_message_ln() function
     LOG_PRINT(".");
@@ -1158,7 +1161,7 @@ char connect_getNetworkName(EthernetClient &client) {
       print_message_ln(String(client.status()));    //Todo: String neccessary?
     #else
       LOG_PRINT_LN(F("NOT connected to HTTP Server\n"));
-      LOG_PRINT_LN(client.status());    //Todo: String neccessary?
+      LOG_PRINT_LN(client.status());
     #endif
     client.stop();
     if (tries_getNetworkName < 2) {
@@ -1430,7 +1433,7 @@ char send_info_to_server(void) {
       print_message_ln(String(F("Ethernet Client status: ")) + client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
     #else
       LOG_PRINT(F("Ethernet Client status: "));
-      LOG_PRINT_LN(client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!    //TODO: Change to print_message function
+      LOG_PRINT_LN(client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
     #endif    
     
     char tmpc;
