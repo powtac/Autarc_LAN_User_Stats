@@ -128,9 +128,9 @@ void setup() {
     #endif
   #endif
   #ifdef SEND_HARDWARE_TO_SERVER
-    print_message(F("Hardware devices like Gateway, DNS Server and Arduino will be send to the server"));
+    print_message(F("Hardware devices will be send to the server"));
   #else
-    print_message(F("Hardware devices like Gateway, DNS Server and Arduino won't be send to the server"));
+    print_message(F("Hardware devices won't be send to the server"));
   #endif
   
   #ifdef SHOW_MEMORY
@@ -160,12 +160,12 @@ void setup() {
   //_____________________Loading the values for the board__________________________
   if (read_EEPROM(0) != 1) {
     //use default values:
-    print_message(F("No configuration stored yet. Using default values..."));
+    print_message(F("No configuration found. Using default values"));
     Load_Default_Config();
   }
   else {
     //Read values from EEPROM:
-    print_message(F("Using configuration from EEPROM."));
+    print_message(F("Load configuration from EEPROM."));
     read_EEPROM(1, mac_shield , sizeof(mac_shield));
     read_EEPROM(7, ip_shield , sizeof(ip_shield));
     read_EEPROM(11, gateway , sizeof(gateway));
@@ -183,7 +183,7 @@ void setup() {
 
 
   //________________________Initialising of the board______________________________
-  print_message(F("Try to get IP address from network..."));
+  print_message(F("Try to get IP address..."));
   print_message(String(F(" MAC address of shield: ")) + mac_to_string(mac_shield));
 
   startConnection();
@@ -191,15 +191,15 @@ void setup() {
 
 
   #ifdef WITH_ESCAPE_SEQUENCE
-    print_message(String(F("Visit http:\/\/")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your device. Tell all users to do the same.")));
+    print_message(String(F("Visit http:\/\/")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
   #else
-    print_message(String(F("Visit http://")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your device. Tell all users to do the same.")));
+    print_message(String(F("Visit http://")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
   #endif
 
   #ifdef WITH_ESCAPE_SEQUENCE
-    print_message(String(F("Also check out http:\/\/")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats online!")));
+    print_message(String(F("Check out http:\/\/")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats!")));
   #else
-    print_message(String(F("Also check out http://")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats online!")));
+    print_message(String(F("Check out http://")) + serverURL + serverPath + F(SERVER_STATS_URI) + NetworkName + String(F(" to see your stats!")));
   #endif
   
   print_message(F("Starting server"));
@@ -229,7 +229,7 @@ void loop() {
         if (currIP[3] <= end_ip[3]) {
           filterResult = filterDevice();
           if (filterResult == 1) {
-            //IP of shield
+            //Device is Arduino
             print_message(String(F("Arduino on IP ")) + ip_to_string(currIP));
             
             #ifdef SEND_HARDWARE_TO_SERVER
@@ -237,7 +237,6 @@ void loop() {
               for (int copymac = 0; copymac < 6; copymac++) {
                 currMAC[copymac] = mac_shield[copymac];
               }
-              //Device is Arduino
               send_info_to_server_troublehandler();
             #endif
           }
@@ -246,39 +245,31 @@ void loop() {
             if (pingDevice() == 1) {
               timeDeviceFound = millis();
               if (filterResult == 0) {
-                //free IP
-                print_message(String(F("Device found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
-                //"Normal"Device
+                //"Normal" Device
+                LOG_PRINT(F("Device"));
+              }
+              else {
+                if (filterResult == 2) {
+                  //Device is Gateway
+                  LOG_PRINT(F("Gateway"));
+                }
+                else if (filterResult == 4) {
+                  //Device is DNS-Server
+                  LOG_PRINT(F("DNS-Server"));
+                }
+                else if (filterResult == 6) {
+                  //Device is Gateway and also DNS-Server
+                  LOG_PRINT(F("Gateway and DNS-Server"));
+                }
+              }
+              //Device name is printed above with LOG_PRINT()
+              LOG_PRINT_LN(String(F(" found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
+              if (filterResult == 0) {
                 send_info_to_server_troublehandler();
               }
-              else if (filterResult == 2) {
-                //IP of gateway
-                print_message(String(F("Gateway found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
+              else {
                 #ifdef SEND_HARDWARE_TO_SERVER
-                  //Device is Gateway
-                  send_info_to_server_troublehandler();
-                #endif
-              }
-              else if (filterResult == 4) {
-                //IP of dnsSrv
-                print_message(String(F("DNS-Server found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
-                #ifdef SEND_HARDWARE_TO_SERVER
-                  //Device is DNS-Server
-                  send_info_to_server_troublehandler();
-                #endif
-              }
-              else if (filterResult == 6) {
-                //IP of gateway & dnsSrv
-                print_message(String(F("Gateway found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
-                #ifdef SEND_HARDWARE_TO_SERVER
-                  //Device is Gateway
-                  send_info_to_server_troublehandler();
-                #endif
-                ServerListenLoop(4);
-                print_message(String(F("DNS-Server found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
-                #ifdef SEND_HARDWARE_TO_SERVER
-                  //Device is DNS-Server
-                  send_info_to_server_troublehandler();
+                    send_info_to_server_troublehandler();
                 #endif
               }
             }
@@ -600,7 +591,7 @@ void readSubnettingIP(void) {
 char tryDHCP(void) {
   print_message(F("Testing DHCP..."));
   if (Ethernet.begin(mac_shield) == 0) {
-    print_message(F("  DHCP failed, no automatic IP address assigned!"));
+    print_message(F("  DHCP failed!"));
     print_message(F("You have to configurate the connection settings manual:"));
     useDhcp = 0;
     manualIPConfig();
@@ -753,7 +744,7 @@ void getNetworkName(void) {
 
     // if the server is disconnected, stop the client:
     if (!client.connected()) {
-      print_message(String(F("\n\n--------------\nYour account data:\n")) + NetworkName + newline + NetworkPwd + String(F("\n--------------\ndisconnecting.")));
+      print_message(String(F("\n\n---\nYour account data:\n")) + NetworkName + newline + NetworkPwd + String(F("\n---\ndisconnecting.")));
       client.stop();
     }
   }
@@ -831,7 +822,7 @@ void startConnection(void) {
   else {
     if (Ethernet.begin(mac_shield) == 0) {
       if (renewDHCP() == 0) {
-        print_message(F("DHCP failed, no automatic IP address assigned!"));
+        print_message(F("DHCP failed!"));
         print_message(F("Trying to reconnect in 20 seconds..."));
         delay(20000);
         startConnection();
@@ -894,7 +885,7 @@ byte send_info_to_server_check_troubles(void) {
     }
     else {
       // Gateway also not available -> Connection problem -> Try to reconnect
-      print_message(F("There is a connection error. Trying to start new connection..."));
+      print_message(F("Connection error! Trying to start new connection..."));
       startConnection();
       printConnectionDetails();
       //Reconnected. Try again to send info
@@ -1201,7 +1192,7 @@ void ServerListen(void) {
           serverClient.print(serverPath);
           serverClient.print(F(SERVER_STATS_URI));
           serverClient.print(NetworkName);
-          serverClient.println(F("'>Go to the network statistic</a><br /><br />"));
+          serverClient.println(F("'>Go to the network statistic</a><br><br>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("    <a href='http:\/\/"));
           #else
@@ -1224,7 +1215,7 @@ void ServerListen(void) {
           serverClient.print(":");
           serverClient.print(MACClient[5], HEX);
           serverClient.print(F(SERVER_DEVICE_STATS_URI3));
-          serverClient.println(F("'>Go to the device statistic</a><br /><br />"));
+          serverClient.println(F("'>Go to the device statistic</a><br><br>"));
           
           serverClient.println(F("	</div>"));
           serverClient.println(F("	<div>"));
@@ -1263,15 +1254,15 @@ void ServerListen(void) {
           serverClient.println(F("	</div>"));
 
           #ifdef LOG_TO_SD
-            serverClient.println(F("  <br />"));
-            serverClient.println(F("  <br />"));
+            serverClient.println(F("  <br>"));
+            serverClient.println(F("  <br>"));
             serverClient.println(F("  <div>"));
             serverClient.print(F("    The current log file is <a href=\""));
             serverClient.print(SDfileName[4]);
             serverClient.print(SDfileName[5]);
             serverClient.print(F("\">"));
             serverClient.print(SDfileName);
-            serverClient.println(F("</a>.<br />"));
+            serverClient.println(F("</a>.<br>"));
             
 //Todo: Maye enable SD  
             File fileToShow;
@@ -1280,7 +1271,7 @@ void ServerListen(void) {
               serverClient.print(F("    The requested log file ("));
               serverClient.print(tmpfileName);
               serverClient.println(F(") contains the following log:"));
-              serverClient.println(F("    <br />"));
+              serverClient.println(F("    <br>"));
               serverClient.println(F("    <textarea rows='50' cols='100'>"));
               while(fileToShow.available())
               {
@@ -1295,10 +1286,10 @@ void ServerListen(void) {
               serverClient.println(F(") doesn't exist!"));
             }
             
-            serverClient.println(F("  </div><br />"));
+            serverClient.println(F("  </div><br>"));
             
             serverClient.println(F("  <div>"));
-            serverClient.println(F("Other log-files on SD:<br />"));
+            serverClient.println(F("Other log-files on SD:<br>"));
 
             if (SD.exists("log/")) {
                 //Print all existing log files
