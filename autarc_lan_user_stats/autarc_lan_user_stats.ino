@@ -1599,11 +1599,7 @@ void ServerListen(void) {
           serverClient.print(SERVER_URL);
           serverClient.print(SERVER_PATH);
           serverClient.print(F(SERVER_SET_NAME_URI));
-          serverClient.println(F("', data: formData, success: function(){}, dataType: 'json'"));
-          //Todo: Check, if Accept Header was changed at Stat-Server
-          //serverClient.println(F("  dataType: 'json',"));
-          //serverClient.println(F("  contentType: 'application/json; charset=UTF-8'"));
-          serverClient.println(F("});});})</script></head><body><div>"));
+          serverClient.println(F("', data: formData, success: function(){}, dataType: 'json', contentType: 'application/json; charset=UTF-8' });});})</script></head><body><div>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F("		<a href='http:\/\/"));
           #else
