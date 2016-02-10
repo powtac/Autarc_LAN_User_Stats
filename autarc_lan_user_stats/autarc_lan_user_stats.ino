@@ -19,15 +19,15 @@
   void print_message_(String message);
   void print_message_ln(String message);
   String ip_to_string(byte ip[4]);
-  String mac_to_string(byte mac[6]);
 #else
   //TODO: Check how this can be solved without strings
   void print_message_(String message);
   void print_message_ln(String message);
   void print_ip(byte* ip);
-  void print_mac(byte* mac);
 #endif
 
+char* mac_to_char(byte mac[6]);
+char return_mac_to_char[18];
 void readSubnettingIP(void);
 char tryDHCP(void);
 void getNetworkName(void);
@@ -229,11 +229,12 @@ void setup() {
   //________________________Initialising of the board______________________________
   #ifdef INCREASE_LOG_SPEED
     print_message_ln(F("Try to get IP address..."));
-    print_message_ln(String(F(" MAC address of shield: ")) + mac_to_string(mac_shield));
+    print_message_ln(String(F(" MAC address of shield: ")) + mac_to_char(mac_shield));
   #else
     LOG_PRINT_LN(F("Try to get IP address..."));
     LOG_PRINT(F(" MAC address of shield: "));
-    print_mac(mac_shield);
+
+    LOG_PRINT(mac_to_char(mac_shield));
     LOG_PRINT_LN("");
   #endif
   
@@ -384,12 +385,12 @@ void loop() {
               }
               //Device name is printed above with print_message()
               #ifdef INCREASE_LOG_SPEED
-                print_message_ln(String(F(" found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_string(currMAC));
+                print_message_ln(String(F(" found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_char(currMAC));
               #else
                 LOG_PRINT(F(" found on IP "));
                 print_ip(currIP);
                 LOG_PRINT(F(" MAC: "));
-                print_mac(currMAC);
+                LOG_PRINT(mac_to_char(currMAC));
                 LOG_PRINT_LN("");
               #endif
               
@@ -609,10 +610,10 @@ void startConfiguration(void) {
     #endif
     GetMAC(mac_shield);
     #ifdef INCREASE_LOG_SPEED
-      print_message_ln(newline + mac_to_string(mac_shield) + newline);
+      print_message_ln(newline + mac_to_char(mac_shield) + newline);
     #else
       LOG_PRINT(newline);
-      print_mac(mac_shield);
+      LOG_PRINT(mac_to_char(mac_shield));
       LOG_PRINT_LN(newline);
     #endif
 
@@ -849,11 +850,7 @@ void manualIPConfig(void) {
   String ip_to_string(byte ip[4]) {
       return (ip[0] + String(".") + ip[1] + String(".") + ip[2] + String(".") + ip[3]);
   }
-  
-  String mac_to_string(byte mac[6]) {
-    return (String(mac[0], HEX) + String(":") + String(mac[1], HEX) + String(":") + String(mac[2], HEX) + String(":") + String(mac[3], HEX) + String(":") + String(mac[4], HEX) + String(":") + String(mac[5], HEX));
-  }
-
+ 
   void print_message(String message) {
     LOG_PRINT(message);
         //Serial.println(message);
@@ -873,22 +870,29 @@ void manualIPConfig(void) {
     LOG_PRINT(".");
     LOG_PRINT(ip[3]);
   }
-
-  void print_mac(byte* mac) {
-    LOG_PRINT(mac[0], HEX);
-    LOG_PRINT(":");
-    LOG_PRINT(mac[1], HEX);
-    LOG_PRINT(":");
-    LOG_PRINT(mac[2], HEX);
-    LOG_PRINT(":");
-    LOG_PRINT(mac[3], HEX);
-    LOG_PRINT(":");
-    LOG_PRINT(mac[4], HEX);
-    LOG_PRINT(":");
-    LOG_PRINT(mac[5], HEX);
-  }
 #endif
 
+char* mac_to_char(byte mac[6]) {
+  //TODO: All changed mac to string have to be checked!!
+  int n = 0;
+  int m = 0;
+  char hexchars[] = "0123456789ABCDEF"; // Hexcharset
+  char point[] = ":";
+  char estr[] = "\0";
+
+  for (n=0; n<=5; n++) {
+    return_mac_to_char[m] = hexchars[mac[n] >> 4 & 0xF];
+    return_mac_to_char[m + 1] = hexchars[mac[n] & 0xF];
+    if (m < 15) {
+      return_mac_to_char[m + 2] = point[0];
+      m = m + 3;
+    }
+  }
+  return_mac_to_char[17] = estr[0];
+  return return_mac_to_char;
+
+  //sprintf(return_mac, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]); 
+}
 
 void readSubnettingIP(void) {
   //Set start_ip and end_ip if subnetting is choosed
@@ -1375,21 +1379,7 @@ char send_info_to_server(void) {
       client.print(timeDifference);
       
       client.print(F(",\"mac\":\""));
-      #ifdef INCREASE_LOG_SPEED
-        client.print(mac_to_string(currMAC)); //TODO: Check TF 2016-02-09
-      #else
-        client.print(currMAC[0], HEX);
-        client.print(":");
-        client.print(currMAC[1], HEX);
-        client.print(":");
-        client.print(currMAC[2], HEX);
-        client.print(":");
-        client.print(currMAC[3], HEX);
-        client.print(":");
-        client.print(currMAC[4], HEX);
-        client.print(":");
-        client.print(currMAC[5], HEX);
-      #endif
+      client.print(mac_to_char(currMAC)); //TODO: Check TF 2016-02-09
       client.print("\"}");
     }
     client.print("],");
@@ -1572,21 +1562,7 @@ void ServerListen(void) {
           serverClient.print(F("\",\"network_password\": \""));
           serverClient.print(NetworkPwd);
           serverClient.print(F("\",\"mac\": \""));
-          #ifdef INCREASE_LOG_SPEED
-            serverClient.print(mac_to_string(MACClient));
-          #else
-            serverClient.print(MACClient[0], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[1], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[2], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[3], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[4], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[5], HEX);
-          #endif
+          serverClient.print(mac_to_char(MACClient));
           serverClient.println(F("\",\"name\": \"' + $('#name').val() + '\"}';"));
           serverClient.println(F("$.ajax({type: 'POST',"));
           
@@ -1620,42 +1596,14 @@ void ServerListen(void) {
           serverClient.print(F(SERVER_DEVICE_STATS_URI1));
           serverClient.print(NetworkName);
           serverClient.print(F(SERVER_DEVICE_STATS_URI2));
-          #ifdef INCREASE_LOG_SPEED
-            serverClient.print(mac_to_string(MACClient));
-          #else
-            serverClient.print(MACClient[0], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[1], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[2], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[3], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[4], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[5], HEX);
-          #endif
+          serverClient.print(mac_to_char(MACClient));
           serverClient.print(F(SERVER_DEVICE_STATS_URI3));
           serverClient.println(F("'>Go to the device statistic</a><br><br>"));
           
           serverClient.print(F("</div><div><br><br><p>Enter a name for the device that is vistiting this page:<br><input id='name' type='text'></p><p>Network Name:<br><input type='text' value='"));
           serverClient.print(NetworkName);
           serverClient.print(F("' readonly></p><p>MAC of Device:<br><input type='text' value='"));
-          #ifdef INCREASE_LOG_SPEED
-            serverClient.print(mac_to_string(MACClient));
-          #else
-            serverClient.print(MACClient[0], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[1], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[2], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[3], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[4], HEX);
-            serverClient.print(":");
-            serverClient.print(MACClient[5], HEX);
-          #endif
+          serverClient.print(mac_to_char(MACClient));
           serverClient.println(F("' readonly>"));
           #ifdef WITH_ESCAPE_SEQUENCE
             serverClient.print(F(" <a href='http:\/\/"));
