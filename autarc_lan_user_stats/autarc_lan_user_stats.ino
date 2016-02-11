@@ -23,11 +23,12 @@
   //TODO: Check how this can be solved without strings
   void print_message_(String message);
   void print_message_ln(String message);
-  void print_ip(byte* ip);
 #endif
 
 char* mac_to_char(byte mac[6]);
 char return_mac_to_char[18];
+char* ip_to_char(byte ip[4]);
+char return_ip_to_char[16];
 void readSubnettingIP(void);
 char tryDHCP(void);
 void getNetworkName(void);
@@ -247,7 +248,7 @@ void setup() {
        print_message_ln(String(F("Visit http:\/\/")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
     #else
       LOG_PRINT(F("Visit http:\/\/"));
-      LOG_PRINT(print_ip(ip_shield));
+      LOG_PRINT(ip_to_char(ip_shield));
       LOG_PRINT_LN(F("/ with your browser to add a name to your devices."));
     #endif
   #else
@@ -255,11 +256,11 @@ void setup() {
         print_message_ln(String(F("Visit http://")) + ip_to_string(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
      #else
         LOG_PRINT(F("Visit http://"));
-        print_ip(ip_shield);
+        LOG_PRINT(ip_to_char(ip_shield));
         LOG_PRINT_LN(F("/ with your browser to add a name to your devices."));
      #endif
   #endif
-
+  
   #ifdef WITH_ESCAPE_SEQUENCE
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Check out http:\/\/")) + SERVER_URL + SERVER_PATH + SERVER_STATS_URI + NetworkName + String(F(" to see your stats!")));
@@ -299,10 +300,9 @@ void setup() {
   #else
     LOG_PRINT(newline);
     LOG_PRINT(F("Starting loop trough IP range "));
-    print_ip(start_ip);
+    LOG_PRINT(ip_to_char(start_ip));
     LOG_PRINT(F(" - "));
-    print_ip(end_ip);
-    LOG_PRINT_LN("");
+    LOG_PRINT_LN(ip_to_char(end_ip));
   #endif
 }
 
@@ -333,8 +333,7 @@ void loop() {
               print_message_ln(String(F("Arduino on IP ")) + ip_to_string(currIP));
             #else
               LOG_PRINT(F("Arduino on IP "));
-              print_ip(currIP);
-              LOG_PRINT_LN("");
+              LOG_PRINT_LN(ip_to_char(currIP));
             #endif
             
             #ifdef SEND_HARDWARE_TO_SERVER
@@ -388,7 +387,7 @@ void loop() {
                 print_message_ln(String(F(" found on IP ")) + ip_to_string(currIP) + String(F(" MAC: ")) + mac_to_char(currMAC));
               #else
                 LOG_PRINT(F(" found on IP "));
-                print_ip(currIP);
+                LOG_PRINT(ip_to_char(currIP));
                 LOG_PRINT(F(" MAC: "));
                 LOG_PRINT(mac_to_char(currMAC));
                 LOG_PRINT_LN("");
@@ -408,8 +407,7 @@ void loop() {
                 print_message_ln(String(F("No (pingable) device on IP ")) + ip_to_string(currIP));
               #else
                 LOG_PRINT(F("No (pingable) device on IP "));
-                print_ip(currIP);
-                LOG_PRINT_LN("");
+                LOG_PRINT_LN(ip_to_char(currIP));
               #endif
               
               offlineIP[countOfflineDevices][0] = currIP[0];
@@ -662,8 +660,8 @@ void startConfiguration(void) {
           print_message_ln(String(F("End IP for scan")) + string_format_ip);
         #else
           LOG_PRINT(newline);
-          print_ip(start_ip);
-          LOG_PRINT_LN(newline);
+          LOG_PRINT_LN(ip_to_char(start_ip));
+          LOG_PRINT_LN("");
           
           LOG_PRINT(F("End IP for scan"));
           LOG_PRINT_LN(string_format_ip);
@@ -674,8 +672,8 @@ void startConfiguration(void) {
           print_message_ln(newline + ip_to_string(end_ip) + newline);
         #else
           LOG_PRINT(newline);
-          print_ip(end_ip);
-          LOG_PRINT_LN(newline);
+          LOG_PRINT_LN(ip_to_char(end_ip));
+          LOG_PRINT_LN("");
         #endif
       }
       else {
@@ -794,8 +792,8 @@ void manualIPConfig(void) {
     print_message_ln(newline + ip_to_string(ip_shield) + newline);
   #else
     LOG_PRINT(newline);
-    print_ip(ip_shield);
-    LOG_PRINT_LN(newline);
+    LOG_PRINT_LN(ip_to_char(ip_shield));
+    LOG_PRINT_LN("");
   #endif
 
   #ifdef INCREASE_LOG_SPEED
@@ -809,8 +807,8 @@ void manualIPConfig(void) {
     print_message_ln(newline + ip_to_string(gateway) + newline);
   #else
     LOG_PRINT(newline);
-    print_ip(gateway);
-    LOG_PRINT_LN(newline);
+    LOG_PRINT_LN(ip_to_char(gateway));
+    LOG_PRINT_LN("");
   #endif
 
   #ifdef INCREASE_LOG_SPEED
@@ -824,8 +822,8 @@ void manualIPConfig(void) {
     print_message_ln(newline + ip_to_string(subnet) + newline);
   #else
     LOG_PRINT(newline);
-    print_ip(subnet);
-    LOG_PRINT_LN(newline);
+    LOG_PRINT_LN(ip_to_char(subnet));
+    LOG_PRINT_LN("");
   #endif
 
   #ifdef INCREASE_LOG_SPEED
@@ -839,8 +837,8 @@ void manualIPConfig(void) {
     print_message_ln(newline + ip_to_string(dnsSrv) + newline);
   #else
     LOG_PRINT(newline);
-    print_ip(dnsSrv);
-    LOG_PRINT_LN(newline);
+    LOG_PRINT_LN(ip_to_char(dnsSrv));
+    LOG_PRINT_LN("");
   #endif
 }
 
@@ -861,37 +859,60 @@ void manualIPConfig(void) {
         //Serial.println(message);
   }
 #else
-  void print_ip(byte* ip) {
-    LOG_PRINT(ip[0]);
-    LOG_PRINT(".");
-    LOG_PRINT(ip[1]);
-    LOG_PRINT(".");
-    LOG_PRINT(ip[2]);
-    LOG_PRINT(".");
-    LOG_PRINT(ip[3]);
-  }
+  
 #endif
 
+//TODO: Check how to solve without itoa
+//TODO: All changed ip to string have to be checked!!
+char* ip_to_char(byte ip[4]) {
+  //Convert ip address byte to chararray
+  int n = 0;
+  int m = 0;
+  char buf[4];
+
+  for (n=0; n<=3; n++) {
+    itoa(ip[n], buf, 10);
+    if (ip[n] > 99) {
+      return_ip_to_char[m] = buf[0];
+      return_ip_to_char[m + 1] = buf[1];
+      return_ip_to_char[m + 2] = buf[2];
+      m = m + 4;
+    }
+    else if (ip[n] > 9) {
+      return_ip_to_char[m] = buf[0];
+      return_ip_to_char[m + 1] = buf[1];
+      m = m + 3;
+    }
+    else {
+      return_ip_to_char[m] = buf[0];
+      m = m + 2;
+    }
+    return_ip_to_char[m - 1] = '.';
+  }
+  return_ip_to_char[m - 1] = '\0';
+  return return_ip_to_char;
+}
+
+
 char* mac_to_char(byte mac[6]) {
+  //Convert mac address byte to chararray
+  //Same as sprintf(return_mac, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  
   //TODO: All changed mac to string have to be checked!!
   int n = 0;
   int m = 0;
   char hexchars[] = "0123456789ABCDEF"; // Hexcharset
-  char point[] = ":";
-  char estr[] = "\0";
 
   for (n=0; n<=5; n++) {
     return_mac_to_char[m] = hexchars[mac[n] >> 4 & 0xF];
     return_mac_to_char[m + 1] = hexchars[mac[n] & 0xF];
     if (m < 15) {
-      return_mac_to_char[m + 2] = point[0];
+      return_mac_to_char[m + 2] = ':';
       m = m + 3;
     }
   }
-  return_mac_to_char[17] = estr[0];
+  return_mac_to_char[17] = '\0';
   return return_mac_to_char;
-
-  //sprintf(return_mac, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]); 
 }
 
 void readSubnettingIP(void) {
@@ -1249,12 +1270,12 @@ void printConnectionDetails(void) {
     print_message_ln(String(F(" Address assigned?\n ")) + ip_to_string(ip_shield) + String("\n ") + ip_to_string(subnet) + String("\n ") + ip_to_string(gateway) + String(F("\nSetup complete\n")));
   #else
     LOG_PRINT(F(" Address assigned?\n "));
-    print_ip(ip_shield);
-    LOG_PRINT("\n ");
-    print_ip(subnet);
-    LOG_PRINT("\n ");
-    print_ip(gateway);
-    LOG_PRINT_LN(F("\nSetup complete\n"));
+    LOG_PRINT_LN(ip_to_char(ip_shield));
+    LOG_PRINT(" ");
+    LOG_PRINT_LN(ip_to_char(subnet));
+    LOG_PRINT(" ");
+    LOG_PRINT_LN(ip_to_char(gateway));
+    LOG_PRINT_LN(F("Setup complete\n"));
   #endif
   #ifdef SHOW_MEMORY
     #ifdef INCREASE_LOG_SPEED
@@ -1359,13 +1380,7 @@ char send_info_to_server(void) {
       #ifdef INCREASE_LOG_SPEED
         client.print(ip_to_string(currIP));
       #else
-        client.print(currIP[0]);
-        client.print(".");
-        client.print(currIP[1]);
-        client.print(".");
-        client.print(currIP[2]);
-        client.print(".");
-        client.print(currIP[3]);
+        client.print(ip_to_char(currIP)); //TODO: Together?
       #endif
       client.print(F("\",\"t\":"));
       
@@ -1394,13 +1409,7 @@ char send_info_to_server(void) {
       #ifdef INCREASE_LOG_SPEED
         client.print(ip_to_string(offlineIP[tmpSendOffline]));
       #else
-        client.print(offlineIP[tmpSendOffline][0]);
-        client.print(".");
-        client.print(offlineIP[tmpSendOffline][1]);
-        client.print(".");
-        client.print(offlineIP[tmpSendOffline][2]);
-        client.print(".");
-        client.print(offlineIP[tmpSendOffline][3]);
+        client.print(ip_to_char(offlineIP[tmpSendOffline]));
       #endif
       client.print(F("\",\"t\":"));
       
