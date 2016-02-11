@@ -844,10 +844,6 @@ void manualIPConfig(void) {
 
 //_________________________________IP functions______________________________________
 #ifdef INCREASE_LOG_SPEED
-  String ip_to_string(byte ip[4]) {
-      return (ip[0] + String(".") + ip[1] + String(".") + ip[2] + String(".") + ip[3]);
-  }
- 
   void print_message(String message) {
     LOG_PRINT(message);
         //Serial.print(message);
@@ -1371,11 +1367,7 @@ char send_info_to_server(void) {
     client.print(F("\",\"online\":["));
     if (countOfflineDevices != MAX_DEVICES_INFO) {
       client.print(F("{\"ip\":\""));
-      #ifdef INCREASE_LOG_SPEED
-        client.print(ip_to_char(currIP));
-      #else
-        client.print(ip_to_char(currIP)); //TODO: Together?
-      #endif
+      client.print(ip_to_char(currIP));
       client.print(F("\",\"t\":"));
       
       if ((millis() - timeDeviceFound) < 0) {
@@ -1388,7 +1380,7 @@ char send_info_to_server(void) {
       client.print(timeDifference);
       
       client.print(F(",\"mac\":\""));
-      client.print(mac_to_char(currMAC)); //TODO: Check TF 2016-02-09
+      client.print(mac_to_char(currMAC));
       client.print("\"}");
     }
     client.print("],");
@@ -1452,8 +1444,7 @@ char send_info_to_server(void) {
   }
   else {
     #ifdef INCREASE_LOG_SPEED
-      print_message_ln(F("NOT connected to HTTP Server\n\n"));
-      print_message_ln(String(client.status()));    //TODO: String neccessary?
+      print_message_ln(String(F("NOT connected to HTTP Server\n\n\n")) + String(client.status()));    //TODO: String neccessary?
     #else
       LOG_PRINT_LN(F("NOT connected to HTTP Server\n\n"));
       LOG_PRINT_LN(client.status());
