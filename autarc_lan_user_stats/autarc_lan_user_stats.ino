@@ -241,7 +241,6 @@ void setup() {
   startConnection();
   printConnectionDetails();
 
-
   #ifdef WITH_ESCAPE_SEQUENCE
     #ifdef INCREASE_LOG_SPEED
        print_message_ln(String(F("Visit http:\/\/")) + ip_to_char(ip_shield) + String(F("/ with your browser to add a name to your devices.")));
@@ -854,7 +853,7 @@ void manualIPConfig(void) {
         //Serial.println(message);
   }  
 #endif
-
+/*
 //TODO: Check how to solve without itoa
 char* ip_to_char(byte ip[4]) {
   //Convert ip address byte to chararray
@@ -864,6 +863,7 @@ char* ip_to_char(byte ip[4]) {
 
   for (n=0; n<=3; n++) {
     itoa(ip[n], buf, 10);
+    //iptoa(ip[n], buf, 10); //TODO
     if (ip[n] > 99) {
       return_ip_to_char[m] = buf[0];
       return_ip_to_char[m + 1] = buf[1];
@@ -884,14 +884,49 @@ char* ip_to_char(byte ip[4]) {
   return_ip_to_char[m - 1] = '\0';
   return return_ip_to_char;
 }
+*/
 
+
+char* ip_to_char(byte ip[4]) {
+  //Convert ip address byte to chararray
+  int n;
+  int m;
+  int p = 0;
+  int add;
+  
+  int val;
+  const char numchars[] = "0123456789ABCDEF"; // Numcharset
+
+  for (n=0; n<=3; n++) {
+    val = ip[n];
+    if (ip[n] > 99) {
+      add = 2;
+    }
+    else if (ip[n] > 9) {
+      add = 1;
+    }
+    else {
+      add = 0;
+    }
+
+    for (m = add;m>=0;m--) {
+      return_ip_to_char[p + m] = numchars[val % 10];
+      val /= 10;
+    }
+    p = p + 2 + add;
+
+    return_ip_to_char[p - 1] = '.';
+  }
+  return_ip_to_char[p - 1] = '\0';
+  return return_ip_to_char;
+}
 
 char* mac_to_char(byte mac[6]) {
   //Convert mac address byte to chararray
   //Same as sprintf(return_mac, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   int n = 0;
   int m = 0;
-  char hexchars[] = "0123456789ABCDEF"; // Hexcharset
+  const char hexchars[] = "0123456789ABCDEF"; // Hexcharset
 
   for (n=0; n<=5; n++) {
     return_mac_to_char[m] = hexchars[mac[n] >> 4 & 0xF];
