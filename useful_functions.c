@@ -64,26 +64,25 @@ char* ip_to_char(byte ip[4]) {
 
 char* ip_to_char(byte ip[4]) {
   //Convert ip address byte to chararray wihtout itoa function
-  int n;
-  int m;
-  int p = 0;
-  int add;
-  
-  int val;
+  unsigned char n;
+  char m;
+  unsigned char p = 0;
+  unsigned char add;
+  unsigned char val;
   const char numchars[] = "0123456789ABCDEF"; // Numcharset
 
   for (n=0; n<=3; n++) {
     val = ip[n];
-    if (ip[n] > 99) {
+    if (val > 99) {
       add = 2;
     }
-    else if (ip[n] > 9) {
+    else if (val > 9) {
       add = 1;
     }
     else {
       add = 0;
     }
-
+    
     for (m = add;m>=0;m--) {
       return_ip_to_char[p + m] = numchars[val % 10];
       val /= 10;

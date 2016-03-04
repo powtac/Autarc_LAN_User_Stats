@@ -853,62 +853,28 @@ void manualIPConfig(void) {
         //Serial.println(message);
   }  
 #endif
-/*
-//TODO: Check how to solve without itoa
-char* ip_to_char(byte ip[4]) {
-  //Convert ip address byte to chararray
-  int n = 0;
-  int m = 0;
-  char buf[4];
-
-  for (n=0; n<=3; n++) {
-    itoa(ip[n], buf, 10);
-    //iptoa(ip[n], buf, 10); //TODO
-    if (ip[n] > 99) {
-      return_ip_to_char[m] = buf[0];
-      return_ip_to_char[m + 1] = buf[1];
-      return_ip_to_char[m + 2] = buf[2];
-      m = m + 4;
-    }
-    else if (ip[n] > 9) {
-      return_ip_to_char[m] = buf[0];
-      return_ip_to_char[m + 1] = buf[1];
-      m = m + 3;
-    }
-    else {
-      return_ip_to_char[m] = buf[0];
-      m = m + 2;
-    }
-    return_ip_to_char[m - 1] = '.';
-  }
-  return_ip_to_char[m - 1] = '\0';
-  return return_ip_to_char;
-}
-*/
-
 
 char* ip_to_char(byte ip[4]) {
   //Convert ip address byte to chararray
-  int n;
-  int m;
-  int p = 0;
-  int add;
-  
-  int val;
+  unsigned char n;
+  char m;
+  unsigned char p = 0;
+  unsigned char add;
+  unsigned char val;
   const char numchars[] = "0123456789ABCDEF"; // Numcharset
 
   for (n=0; n<=3; n++) {
     val = ip[n];
-    if (ip[n] > 99) {
+    if (val > 99) {
       add = 2;
     }
-    else if (ip[n] > 9) {
+    else if (val > 9) {
       add = 1;
     }
     else {
       add = 0;
     }
-
+    
     for (m = add;m>=0;m--) {
       return_ip_to_char[p + m] = numchars[val % 10];
       val /= 10;
