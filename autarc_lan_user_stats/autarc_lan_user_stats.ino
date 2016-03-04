@@ -484,6 +484,7 @@ void loop() {
 // 40 - 43     | dnsSrv        | 4
 // 44          | retryHost     | 1
 // 45 - 51     | NetworkPwd    | 7
+// 52 - 53     | actualLogNr   | 2
 
 
 void write_EEPROM(int startstorage, byte *value, int valuesize) {
@@ -1747,7 +1748,7 @@ void ServerListen(void) {
 
       if (SD.exists("log/")) {
         //Check for existing files and set the actual log file to the continued one
-        // if all 99 files exist, not important which was the actual file always start with 00)
+        // if all 99 files exist, read actual log file from EEPROM
         int i;
         for (i=0;i<=99;i++) {
           if (SD.exists(SDfileName)) {
@@ -1757,10 +1758,18 @@ void ServerListen(void) {
             break;
           }
         }
-        //delete the new file, if it exist (only case if all 99 files exist; so delete 00)
-        SD.remove(SDfileName);
+        if (i == 99) {
+          //read actual log file from EEPROM and set SDfileName to the next in row
+          SDfileName[4] = read_EEPROM(52);
+          SDfileName[5] = read_EEPROM(53);
+          set_next_log_filename(SDfileName); 
+          //delete the new file
+          SD.remove(SDfileName);
+        }
         Serial.print(F("New logfile will be created: "));
         Serial.println(SDfileName);
+        write_EEPROM(52, SDfileName[4]);
+        write_EEPROM(53, SDfileName[5]);
       }
       else {
         SD.mkdir("log");
@@ -1806,6 +1815,8 @@ void ServerListen(void) {
         if (logfile.size() >= MAX_LOG_SIZE) {
           //next time new file -> set filename
           set_next_log_filename(SDfileName);
+          write_EEPROM(52, SDfileName[4]);
+          write_EEPROM(53, SDfileName[5]);
           
           //delete the new file, if it exist
           SD.remove(SDfileName);
@@ -1850,4 +1861,5 @@ void ServerListen(void) {
     }
   }
 #endif
+
     
