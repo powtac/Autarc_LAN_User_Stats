@@ -1758,7 +1758,7 @@ void ServerListen(void) {
             break;
           }
         }
-        if (i == 99) {
+        if (i == 100) {
           //read actual log file from EEPROM and set SDfileName to the next in row
           SDfileName[4] = read_EEPROM(52);
           SDfileName[5] = read_EEPROM(53);
