@@ -118,6 +118,9 @@ unsigned long timeDeviceFound;
 // Ping library configuration
 SOCKET pingSocket              = 0;
 ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
+#ifndef ICMPPING_ASYNCH_ENABLE
+#error "Asynchronous functions only available if ICMPPING_ASYNCH_ENABLE is defined -- see ICMPPing.h"
+#endif
 
 EthernetServer server(80);
 
@@ -431,7 +434,7 @@ void loop() {
           for (int macreset = 0; macreset < 6; macreset++) {
             currMAC[macreset] = 0x00;
           }
-          ServerListenLoop(4);
+          ServerListenLoop(4);  //TODO: Check Value: maybe * 1000 //Attention! Also neccessary although we call in ping-waiting-loop! Loop is only reached from online devices!
           currIP[3]++;
         }
         else {
@@ -998,8 +1001,21 @@ char filterDevice(void) {
 }
 
 char pingDevice(void) {
-  ICMPEchoReply echoReply = ping(currIP, pingrequest);
-  if (echoReply.status == SUCCESS) {
+  ICMPEchoReply echoResult;
+
+  if (! ping.asyncStart(currIP, pingrequest, echoResult)) {
+    //Can't send ping - so the device is not available
+    return 0;
+  }
+  
+  while (! ping.asyncComplete(echoResult))
+  {
+    //handle stuff during we wait for the ping result
+    //Attention! Only when we wait for the ping reply! If the device is offline we won't get into this loop!
+    ServerListenLoop(1);  //TODO: Check if we get in troubles because the Ethernet-Controller have to handle the ping and the Server thing... 
+  }
+
+  if (echoResult.status == SUCCESS) {
     // We found a device!
     #ifdef SHOW_MEMORY
       #ifdef INCREASE_LOG_SPEED
@@ -1010,14 +1026,14 @@ char pingDevice(void) {
       #endif
     #endif
     for (int mac = 0; mac < 6; mac++) {
-      currMAC[mac] = echoReply.MACAddressSocket[mac];
+      currMAC[mac] = echoResult.MACAddressSocket[mac];
     }
     return 1;
   }
   else {
-    // It's not responding
+    // It's not responding / We have an other problem with this device
     return 0;
-  }
+  }  
 }
 
 void getNetworkName(void) {
@@ -1299,7 +1315,7 @@ byte send_info_to_server_check_troubles(void) {
       #else
         LOG_PRINT_LN(F("HTTP-Server may be broken. Trying again in 30 seconds."));
       #endif
-      ServerListenLoop(1); //30seconds
+      ServerListenLoop(1000);
       return 0;
     }
     else {
@@ -1459,7 +1475,7 @@ char send_info_to_server(void) {
       #else
         LOG_PRINT_LN(F("Retry to connect..."));
       #endif
-      ServerListenLoop(4);
+      ServerListenLoop(4000);
       send_info_to_server();  //Todo: Maybe change this to save memory. Also we could get problems with the recursive function!
     }
     else {
@@ -1473,10 +1489,8 @@ char send_info_to_server(void) {
 void ServerListenLoop(int count) {
   //Not really nice, but it works...
   for (int i = 0; i < count; i++) {
-    for (int x = 0; x < 1000; x++) {
       ServerListen();
       delay(1);
-    }
   }
 }
 

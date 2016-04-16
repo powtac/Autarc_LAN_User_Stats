@@ -20,7 +20,7 @@
 
 
 // ICMPPING_ASYNCH_ENABLE -- define this to enable asynch operations
-// #define ICMPPING_ASYNCH_ENABLE
+#define ICMPPING_ASYNCH_ENABLE
 
 // ICMPPING_INSERT_YIELDS -- some platforms, such as ESP8266, like
 // (read: need) to do background work so control must be yielded
