@@ -1607,7 +1607,7 @@ void ServerListen(void) {
             serverClient.print(F(" <a href='http://"));
           #endif
           serverClient.print(F("hwaddress.com?q="));
-          serverClient.print(MACClient[0], HEX);
+          serverClient.print(MACClient[0], HEX);    //TODO: Set leading Zero!
           serverClient.print(":");
           serverClient.print(MACClient[1], HEX);
           serverClient.print(":");
