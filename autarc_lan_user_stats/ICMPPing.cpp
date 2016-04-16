@@ -148,9 +148,6 @@ void ICMPPing::operator()(const IPAddress& addr, int nRetries, ICMPEchoReply& re
             byte replyAddr [4];
           ICMPPING_DOYIELD();
             receiveEchoReply(echoReq, addr, result);
-            
-            //For getting the MAC address of the pinged device
-            W5100.readSnDHAR(_socket, result.MACAddressSocket);
         }
         if (result.status == SUCCESS)
         {
@@ -237,7 +234,10 @@ void ICMPPing::receiveEchoReply(const ICMPEcho& echoReq, const IPAddress& addr, 
     W5100.execCmdSn(_socket, Sock_RECV);
 
     echoReply.ttl = W5100.readSnTTL(_socket);
-
+    
+    //For getting the MAC address of the pinged device
+    W5100.readSnDHAR(_socket, echoReply.MACAddressSocket);
+    
     // Since there aren't any ports in ICMP, we need to manually inspect the response
     // to see if it originated from the request we sent out.
     switch (echoReply.data.icmpHeader.type) {
@@ -297,7 +297,7 @@ bool ICMPPing::asyncSend(ICMPEchoReply& result)
       sendOpResult = sendEchoRequest(_addr, echoReq);
       if (sendOpResult == SUCCESS)
       {
-        sendSuccess = true; // it worked
+        sendSuccess = true; // it worked   
         sendOpResult = ASYNC_SENT; // we're doing this async-style, force the status
         _asyncstart = millis(); // not the start time, for timeouts
         break; // break out of this loop, 'cause we're done.
