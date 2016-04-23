@@ -105,7 +105,7 @@ byte countOfflineDevices = 0;
 #define SERVER_GET_ID_URI "/networks/list"
 #define SERVER_SET_NAME_URI "/device/name"
 
-char VersionNR[] = "1.5";  //TODO: Automatically?
+char VersionNR[] = "1.6";  //TODO: Automatically?
 #define MAX_DEVICES_INFO 5
 
 byte offlineIP[MAX_DEVICES_INFO][4];
