@@ -1311,11 +1311,11 @@ byte send_info_to_server_check_troubles(void) {
     if (echoReplyGateway.status == SUCCESS) {
       // Gateway response -> HTTP-Server offline?
       #ifdef INCREASE_LOG_SPEED
-        print_message_ln(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+        print_message_ln(F("HTTP-Server may be broken. Trying again in 5 seconds."));
       #else
-        LOG_PRINT_LN(F("HTTP-Server may be broken. Trying again in 30 seconds."));
+        LOG_PRINT_LN(F("HTTP-Server may be broken. Trying again in 5 seconds."));
       #endif
-      ServerListenLoop(1000);
+      ServerListenLoop(5000);
       return 0;
     }
     else {
