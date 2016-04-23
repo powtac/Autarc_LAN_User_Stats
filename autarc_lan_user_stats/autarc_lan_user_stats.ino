@@ -1362,6 +1362,58 @@ char send_info_to_server(void) {
       LOG_PRINT(SERVER_PATH);
       LOG_PRINT_LN(SERVER_ADD_URI);
     #endif
+
+//Prepare client_content_data to calculate length
+String content_buffer; //TODO: Check if strings are neccessary. Maybe useful at other parts?
+
+    content_buffer += ("{\"network_name\":\"");
+    content_buffer += (NetworkName);
+    content_buffer += ("\",\"online\":[");
+    if (countOfflineDevices != MAX_DEVICES_INFO) {
+      content_buffer += ("{\"ip\":\"");
+      content_buffer += (ip_to_char(currIP));
+      content_buffer += ("\",\"t\":");
+      
+      if ((millis() - timeDeviceFound) < 0) {
+        //consider overflow of time since arduino runs (afer ~50 days)
+        timeDifference = (millis() - timeDeviceFound + 4294967295 + 1) / 1000;
+      }
+      else {
+        timeDifference = (millis() - timeDeviceFound) / 1000;
+      }
+      content_buffer += (timeDifference);
+      
+      content_buffer += (",\"mac\":\"");
+      content_buffer += (mac_to_char(currMAC));
+      content_buffer += ("\"}");
+    }
+    content_buffer += ("],");
+    
+    content_buffer += ("\"offline\":[");
+    byte tmpSendOffline;
+    for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
+      if (tmpSendOffline != 0) {
+        content_buffer += (",");
+      }
+      content_buffer += ("{\"ip\":\"");
+      content_buffer += (ip_to_char(offlineIP[tmpSendOffline]));
+      content_buffer += ("\",\"t\":");
+      
+      if ((millis() - timeScanned[tmpSendOffline]) < 0) {
+        //consider overflow of time since arduino runs (afer ~50 days)
+        timeDifference = (millis() - timeScanned[tmpSendOffline] + 4294967295 + 1) / 1000;
+      }
+      else {
+        timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
+      }
+      content_buffer += (timeDifference);
+      content_buffer += ("}");
+    }
+    content_buffer += ("]");
+    countOfflineDevices = 0;
+    
+    content_buffer += ("}");
+//END prepare client_content_data
     
     // Make a HTTP request:
     client.print(F("POST "));
@@ -1377,60 +1429,11 @@ char send_info_to_server(void) {
     // client.println(F("Content-Type: application/x-www-form-urlencoded;"));
     client.println(F("Content-Type: application/json; charset=UTF-8"));
     client.print(F("Content-Length: "));
-    client.println("300"); //TODO: Maybe calculate this later..?
+    client.println(content_buffer.length());
     client.println(); // Important!
-
-    client.print(F("{\"network_name\":\""));
-    client.print(NetworkName);
-    client.print(F("\",\"online\":["));
-    if (countOfflineDevices != MAX_DEVICES_INFO) {
-      client.print(F("{\"ip\":\""));
-      client.print(ip_to_char(currIP));
-      client.print(F("\",\"t\":"));
-      
-      if ((millis() - timeDeviceFound) < 0) {
-        //consider overflow of time since arduino runs (afer ~50 days)
-        timeDifference = (millis() - timeDeviceFound + 4294967295 + 1) / 1000;
-      }
-      else {
-        timeDifference = (millis() - timeDeviceFound) / 1000;
-      }
-      client.print(timeDifference);
-      
-      client.print(F(",\"mac\":\""));
-      client.print(mac_to_char(currMAC));
-      client.print("\"}");
-    }
-    client.print("],");
+    client.println(content_buffer);
+    delay(20);  //TODO:CHECK if it's neccessary
     
-    client.print(F("\"offline\":["));
-    byte tmpSendOffline;
-    for (tmpSendOffline = 0; tmpSendOffline < countOfflineDevices; tmpSendOffline++) {
-      if (tmpSendOffline != 0) {
-        client.print(",");
-      }
-      client.print(F("{\"ip\":\""));
-      #ifdef INCREASE_LOG_SPEED
-        client.print(ip_to_char(offlineIP[tmpSendOffline]));
-      #else
-        client.print(ip_to_char(offlineIP[tmpSendOffline]));
-      #endif
-      client.print(F("\",\"t\":"));
-      
-      if ((millis() - timeScanned[tmpSendOffline]) < 0) {
-        //consider overflow of time since arduino runs (afer ~50 days)
-        timeDifference = (millis() - timeScanned[tmpSendOffline] + 4294967295 + 1) / 1000;
-      }
-      else {
-        timeDifference = (millis() - timeScanned[tmpSendOffline]) / 1000;
-      }
-      client.print(timeDifference);
-      client.print("}");
-    }
-    client.print("]");
-    countOfflineDevices = 0;
-    
-    client.println("}");
 
     #ifdef INCREASE_LOG_SPEED
       print_message_ln(String(F("Ethernet Client status: ")) + client.status()); // 23 Code together with HTTP Timeout: could mean no/wrong MAC for Shield is set!
@@ -1442,7 +1445,7 @@ char send_info_to_server(void) {
     char tmpc;
     // if there are incoming bytes available
     // from the server, read them and print them:
-    #ifdef PRINT_SERVER_ANSWER
+    #ifdef PRINT_SERVER_ANSWER    //TODO: Check if it works well without printing the answer
       while (client.connected())
       {
         if (client.available()) {
