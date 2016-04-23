@@ -117,7 +117,7 @@ unsigned long timeDeviceFound;
 
 // Ping library configuration
 SOCKET pingSocket              = 0;
-ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
+ICMPPing ping(pingSocket, 0);
 #ifndef ICMPPING_ASYNCH_ENABLE
 #error "Asynchronous functions only available if ICMPPING_ASYNCH_ENABLE is defined -- see ICMPPing.h"
 #endif
@@ -1553,7 +1553,7 @@ void ServerListen(void) {
         if (c == '\n' && currentLineIsBlank) {
           //Read the MAC of this device
           byte MACClient[6];
-          W5100.readSnDHAR(0, MACClient);
+          W5100.readSnDHAR(1, MACClient);
           
           // send a standard http response header
           serverClient.println(F("HTTP/1.1 200 OK"));
