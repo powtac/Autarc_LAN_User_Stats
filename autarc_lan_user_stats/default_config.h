@@ -11,6 +11,7 @@
 
   //#define WITH_ESCAPE_SEQUENCE //Neccessary for some Arduino versions newer 105 older 167 (?). [ARDUINO > 105]; Causes a lot of warnings with "unknown escape sequence"
   //#define INCREASE_LOG_SPEED //Need more memory, but increases the speed of the log (especially SD log)  //TODO: Not implemented complete (connects all mesages in one string)
+  //#define PRINT_SERVER_ANSWER //Prints the answer of the stat server after each send-devices-request
   
   void Load_Default_Config(void);
   byte mac_shield[6];

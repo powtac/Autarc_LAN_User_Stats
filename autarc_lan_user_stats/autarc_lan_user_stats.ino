@@ -1442,17 +1442,19 @@ char send_info_to_server(void) {
     char tmpc;
     // if there are incoming bytes available
     // from the server, read them and print them:
-    while (client.connected())
-    {
-      if (client.available()) {
-        tmpc = client.read();
-        //Todo: Change to print_message_ln() function
-        LOG_PRINT(tmpc);  //prints the servers answer //TODO Check if it's empty
-        if (tmpc == -1) {
-          break;
+    #ifdef PRINT_SERVER_ANSWER
+      while (client.connected())
+      {
+        if (client.available()) {
+          tmpc = client.read();
+          //Todo: Change to print_message_ln() function
+          LOG_PRINT(tmpc);  //prints the servers answer //TODO Check if it's empty
+          if (tmpc == -1) {
+            break;
+          }
         }
       }
-    }
+    #endif
     // if the server disconnects, stop the client:
     if (!client.connected()) {
       client.stop();
