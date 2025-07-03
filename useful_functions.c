@@ -2,13 +2,13 @@
 //It's only a file to collect useful functions which have been used in this project
 //Maybe those functions are helpful for other projects
 
-String ip_to_string(byte ip[4]) {
-  return (ip[0] + String(".") + ip[1] + String(".") + ip[2] + String(".") + ip[3]);
+void ip_to_string(byte ip[4], char *out) {
+  sprintf(out, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 }
-  
-  
-String mac_to_string(byte mac[6]) {
-  return (String(mac[0], HEX) + String(":") + String(mac[1], HEX) + String(":") + String(mac[2], HEX) + String(":") + String(mac[3], HEX) + String(":") + String(mac[4], HEX) + String(":") + String(mac[5], HEX));
+
+
+void mac_to_string(byte mac[6], char *out) {
+  sprintf(out, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
 
