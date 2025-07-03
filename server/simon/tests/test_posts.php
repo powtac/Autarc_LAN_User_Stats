@@ -39,7 +39,7 @@
 </head>
 <body style="height:100%">
 	<div id="left" style="float: left; width:50%; display:inline-block;">
-		<form action="test_posts.php" method="post" id="tests" arget="_blank">
+		<form action="test_posts.php" method="post" id="tests" target="_blank">
 			<input type="text" id="url" value="./../api/store/mac"/><br />
 			<textarea id="body" rows="10" cols="50" wrap="off">{}</textarea><br />
 			<input type="submit" name="submit"/>
