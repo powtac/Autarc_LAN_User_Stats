@@ -63,7 +63,7 @@ char* ip_to_char(byte ip[4]) {
 
 
 char* ip_to_char(byte ip[4]) {
-  //Convert ip address byte to chararray wihtout itoa function
+  //Convert ip address byte to chararray without itoa function
   unsigned char n;
   char m;
   unsigned char p = 0;
