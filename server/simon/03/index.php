@@ -55,7 +55,7 @@ if (IS_GET AND preg_match('~/network/.+/device/.+/info~', URI)) {
 	$result['mac_formated'] 			= mac_format($mac);
 	if (!empty($data1)) {
 		$result['status'] 				= $data1['status'];
-		$result['vendor'] 				= @file_get_contents('http://api.macvendors.com/'+urlencode($mac));
+		$result['vendor'] 				= @file_get_contents('http://api.macvendors.com/' . urlencode($mac));
 		$result['last_seen_seconds'] 	= time() - strtotime($data1['datetime']);
 		$result['last_seen_timestamp']	= strtotime($data1['datetime']);
 		$result['last_seen_datetime'] 	= $data1['datetime'];
