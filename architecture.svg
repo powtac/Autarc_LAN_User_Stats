@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300">
+  <style>
+    rect { fill:#f0f0f0; stroke:#333; stroke-width:1.5; }
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+    line { stroke:#333; stroke-width:1.5; marker-end:url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+  <!-- Arduino box -->
+  <rect x="20" y="120" width="130" height="60" rx="5" />
+  <text x="85" y="145" text-anchor="middle">Arduino</text>
+  <text x="85" y="165" text-anchor="middle">Ethernet/WLAN</text>
+
+  <!-- PHP server box -->
+  <rect x="220" y="40" width="160" height="60" rx="5" />
+  <text x="300" y="65" text-anchor="middle">PHP Server</text>
+
+  <!-- MySQL box -->
+  <rect x="220" y="200" width="160" height="60" rx="5" />
+  <text x="300" y="225" text-anchor="middle">MySQL DB</text>
+
+  <!-- Web Client box -->
+  <rect x="440" y="120" width="130" height="60" rx="5" />
+  <text x="505" y="145" text-anchor="middle">Web Client</text>
+  <text x="505" y="165" text-anchor="middle">HTML/JS</text>
+
+  <!-- Connections -->
+  <line x1="150" y1="150" x2="220" y2="70" />
+  <line x1="300" y1="100" x2="300" y2="200" />
+  <line x1="380" y1="70" x2="440" y2="150" />
+  <line x1="440" y1="150" x2="380" y2="70" />
+</svg>
