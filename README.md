@@ -25,6 +25,14 @@ Dienste.
 - PHP‑Server mit MySQL‑Datenbank
 - Optional: SD‑Karte für Logfiles, PHP‑Microframework "klein"
 
+### Architektur
+
+Die folgenden Komponenten arbeiten zusammen, um die Nutzungsstatistiken im LAN
+zu erfassen. Die Skizze zeigt die wichtigsten Module und verwendeten
+Technologien.
+
+![Architekturübersicht](architecture.svg)
+
 ### Struktur
 
 - `autarc_lan_user_stats/` – eigentlicher Arduino‑Code samt Default‑Konfig
